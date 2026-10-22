@@ -9,10 +9,11 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 ## ✨ Funcionalidades
 
 ### Fase 1 — Núcleo
-- [ ] **Panel general**: saldo total consolidado y saldo por cuenta.
-- [ ] **Cuentas**: bancos, efectivo, billeteras digitales y tarjetas.
-- [ ] **Categorías** de ingresos y gastos, personalizables.
-- [ ] **Movimientos**: ingresos, gastos y transferencias entre cuentas.
+- [x] **Autenticación**: registro e inicio de sesión con correo y contraseña.
+- [x] **Panel general**: saldo total consolidado y saldo por cuenta.
+- [x] **Cuentas**: bancos, efectivo, billeteras digitales y tarjetas.
+- [x] **Categorías** de ingresos y gastos, personalizables: crear, renombrar y archivar (cada usuario empieza con 13 por defecto).
+- [x] **Movimientos**: ingresos, gastos y transferencias entre cuentas.
 
 ### Fase 2 — Análisis y deudas
 - [ ] **Resumen mensual**: ingresos vs. gastos y distribución por categoría con gráficos.
@@ -47,15 +48,16 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 ## 📁 Estructura del repositorio
 
 ```
-cuentas-claras/
+mi-plata/
 ├── app/                # Proyecto Flutter
 │   └── lib/
 │       ├── core/       # Configuración, tema, utilidades compartidas
 │       └── features/   # Un módulo por funcionalidad
-│           ├── cuentas/
-│           ├── categorias/
-│           ├── movimientos/
-│           └── panel/
+│           ├── auth/
+│           ├── accounts/
+│           ├── categories/
+│           ├── transactions/
+│           └── dashboard/
 ├── supabase/           # Migraciones SQL, vistas y políticas de seguridad
 │   └── migrations/
 └── README.md
@@ -73,17 +75,18 @@ Cada módulo dentro de `features/` se organiza en capas:
 
 | Tabla | Descripción |
 |---|---|
-| `cuentas` | Dónde está el dinero: nombre, tipo, saldo inicial, moneda (`COP` por defecto) |
-| `categorias` | Clasificación de movimientos, de tipo ingreso o gasto |
-| `movimientos` | Ingresos, gastos y transferencias asociados a una cuenta |
-| `v_saldos_cuentas` | Vista que calcula el saldo actual de cada cuenta |
+| `accounts` | Dónde está el dinero: nombre, tipo, saldo inicial, moneda (`COP` por defecto) |
+| `categories` | Clasificación de movimientos, de tipo ingreso (`income`) o gasto (`expense`) |
+| `transactions` | Ingresos, gastos y transferencias (`income`, `expense`, `transfer`) asociados a una cuenta |
+| `v_account_balances` | Vista que calcula el saldo actual de cada cuenta |
 
 **Principios de diseño:**
 
 - Los montos se guardan como `numeric(14,2)`, nunca como `float`.
 - Los saldos **se calculan** a partir de los movimientos; no se almacenan.
-- Las transferencias entre cuentas no cuentan como gasto ni ingreso.
-- Las cuentas se archivan en lugar de eliminarse, para conservar el historial.
+- Un saldo puede ser negativo (sobregiro, tarjetas), así que la base de datos no lo impide; en cambio la app **avisa antes de guardar** un movimiento que deje una cuenta en negativo. Las tarjetas quedan exentas.
+- Las transferencias entre cuentas son una sola fila (`account_id` → `destination_account_id`) y no cuentan como gasto ni ingreso.
+- Las cuentas y categorías se archivan en lugar de eliminarse, para conservar el historial.
 - Todas las tablas incluyen `user_id` y están protegidas con Row Level Security (RLS).
 
 ---
@@ -100,8 +103,8 @@ Cada módulo dentro de `features/` se organiza en capas:
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/<tu-usuario>/cuentas-claras.git
-cd cuentas-claras
+git clone https://github.com/<tu-usuario>/mi-plata.git
+cd mi-plata
 ```
 
 ### 2. Configurar la base de datos
@@ -114,22 +117,42 @@ supabase db push
 
 ### 3. Configurar variables de entorno
 
-Crear el archivo `app/.env` con:
+Copiar `app/.env.example` a `app/.env` y completar los valores:
 
 ```env
 SUPABASE_URL=https://<id-del-proyecto>.supabase.co
-SUPABASE_ANON_KEY=<tu-anon-key>
+SUPABASE_PUBLISHABLE_KEY=<tu-publishable-key>
 ```
 
-> ⚠️ El archivo `.env` está en `.gitignore`. Nunca subas tus llaves al repositorio y jamás uses la `service_role key` dentro de la app.
+Para desarrollo local, `supabase status` muestra la URL y la publishable key. En Android (emulador o celular por USB) hay que ejecutar antes `adb reverse tcp:54321 tcp:54321` para que `127.0.0.1` llegue a tu equipo.
+
+> ⚠️ El archivo `.env` está en `.gitignore`. Nunca subas tus llaves al repositorio y jamás uses la `secret key` (antes `service_role`) dentro de la app.
 
 ### 4. Ejecutar la app
 
 ```bash
+supabase start          # base de datos local (desde la raíz del repositorio)
 cd app
 flutter pub get
+flutter run -d linux    # escritorio: liviano, ideal para desarrollar la interfaz
+```
+
+Para probar en Android (emulador o celular por USB):
+
+```bash
+adb reverse tcp:54321 tcp:54321
 flutter run
 ```
+
+### 5. Pruebas
+
+```bash
+cd app
+flutter test                                                  # rápidas, sin red
+flutter test test/integration --dart-define=INTEGRATION=true  # contra Supabase local
+```
+
+Las de integración necesitan `supabase start` y crean usuarios de prueba que se borran con `supabase db reset`.
 
 ---
 
@@ -137,6 +160,7 @@ flutter run
 
 - **Commits**: [Conventional Commits](https://www.conventionalcommits.org/es/) (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`).
 - **Ramas**: `main` estable; nuevas funcionalidades en `feat/<nombre>`.
+- **Idioma**: el código, las tablas y las columnas van en inglés; los textos que ve el usuario (interfaz, mensajes, categorías por defecto), en español.
 - **Base de datos**: todo cambio de esquema se hace mediante una migración en `supabase/migrations/`, nunca a mano desde el panel.
 
 ---
