@@ -11,7 +11,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 ### Fase 1 — Núcleo
 - [x] **Autenticación**: registro e inicio de sesión con correo y contraseña.
 - [ ] **Panel general**: saldo total consolidado y saldo por cuenta.
-- [ ] **Cuentas**: bancos, efectivo, billeteras digitales y tarjetas.
+- [x] **Cuentas**: bancos, efectivo, billeteras digitales y tarjetas.
 - [ ] **Categorías** de ingresos y gastos, personalizables.
 - [ ] **Movimientos**: ingresos, gastos y transferencias entre cuentas.
 
@@ -142,6 +142,16 @@ Para probar en Android (emulador o celular por USB):
 adb reverse tcp:54321 tcp:54321
 flutter run
 ```
+
+### 5. Pruebas
+
+```bash
+cd app
+flutter test                                                  # rápidas, sin red
+flutter test test/integration --dart-define=INTEGRATION=true  # contra Supabase local
+```
+
+Las de integración necesitan `supabase start` y crean usuarios de prueba que se borran con `supabase db reset`.
 
 ---
 

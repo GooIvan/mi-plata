@@ -6,7 +6,7 @@ import '../../../core/router/app_routes.dart';
 import '../domain/auth_validators.dart';
 import 'auth_error_message.dart';
 import 'auth_providers.dart';
-import 'widgets/auth_error_banner.dart';
+import '../../../core/widgets/error_banner.dart';
 import 'widgets/auth_layout.dart';
 import 'widgets/password_field.dart';
 
@@ -107,7 +107,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 if (error != null) ...[
                   const SizedBox(height: 16),
-                  AuthErrorBanner(error),
+                  ErrorBanner(error),
                 ],
                 const SizedBox(height: 24),
                 FilledButton(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/router/app_routes.dart';
 import '../../auth/presentation/auth_providers.dart';
 
 /// Pantalla provisional: se reemplaza por el panel real (saldos por cuenta).
@@ -22,7 +24,21 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Center(child: Text(auth.currentUser?.email ?? '')),
+      body: ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(auth.currentUser?.email ?? ''),
+          ),
+          ListTile(
+            leading: const Icon(Icons.account_balance_wallet_outlined),
+            title: const Text('Cuentas'),
+            subtitle: const Text('Administra dónde está tu dinero'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRoutes.accounts),
+          ),
+        ],
+      ),
     );
   }
 }
