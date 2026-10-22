@@ -8,6 +8,7 @@ import 'package:mi_plata/core/format/date_format.dart';
 import 'package:mi_plata/core/riverpod/no_retry.dart';
 import 'package:mi_plata/features/accounts/presentation/accounts_providers.dart';
 import 'package:mi_plata/features/auth/presentation/auth_providers.dart';
+import 'package:mi_plata/features/budgets/presentation/budgets_providers.dart';
 import 'package:mi_plata/features/categories/presentation/categories_providers.dart';
 import 'package:mi_plata/features/debts/presentation/debts_providers.dart';
 import 'package:mi_plata/features/summary/presentation/summary_providers.dart';
@@ -53,6 +54,7 @@ Future<FakeBackend> pumpMiPlata(
         categoryRepositoryProvider.overrideWithValue(fakes.categories),
         summaryRepositoryProvider.overrideWithValue(fakes.summary),
         debtRepositoryProvider.overrideWithValue(fakes.debts),
+        budgetRepositoryProvider.overrideWithValue(fakes.budgets),
       ],
       child: const MiPlataApp(),
     ),

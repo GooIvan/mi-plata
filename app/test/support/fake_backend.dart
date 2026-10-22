@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:mi_plata/features/budgets/data/budget_repository.dart';
+import 'package:mi_plata/features/budgets/domain/budget_rule.dart';
 import 'package:mi_plata/features/categories/data/category_repository.dart';
 import 'package:mi_plata/features/categories/domain/category.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
@@ -570,12 +572,61 @@ class FakeDebtRepository implements DebtRepository {
   }
 }
 
+/// Imita la tabla `budgets`: una regla por categoría y mes, que se reemplaza al
+/// definirla de nuevo (como el `upsert` de la base de datos).
+class FakeBudgetRepository implements BudgetRepository {
+  FakeBudgetRepository([List<BudgetRule> rules = const []])
+    : rules = [...rules];
+
+  final List<BudgetRule> rules;
+  Object? error;
+  final calls = <String>[];
+
+  /// Si se asigna, las consultas esperan a que se complete.
+  Completer<void>? gate;
+
+  @override
+  Future<List<BudgetRule>> fetchAll() async {
+    calls.add('fetchAll');
+    await gate?.future;
+    if (error != null) throw error!;
+    return [...rules];
+  }
+
+  @override
+  Future<void> set({
+    required String categoryId,
+    required DateTime month,
+    required String amount,
+  }) async {
+    calls.add('set $categoryId ${month.year}-${month.month} $amount');
+    if (error != null) throw error!;
+
+    final first = DateTime(month.year, month.month);
+    final existing = rules.indexWhere(
+      (rule) => rule.categoryId == categoryId && rule.month == first,
+    );
+    final rule = BudgetRule(
+      id: existing >= 0 ? rules[existing].id : 'budget-${rules.length + 1}',
+      categoryId: categoryId,
+      month: first,
+      cents: (double.parse(amount) * 100).round(),
+    );
+    if (existing >= 0) {
+      rules[existing] = rule;
+    } else {
+      rules.add(rule);
+    }
+  }
+}
+
 /// Cuentas, categorías y movimientos enlazados, como la base de datos real.
 class FakeBackend {
   factory FakeBackend({
     List<Account> accounts = const [],
     List<Category> categories = const [],
     List<Transaction> transactions = const [],
+    List<BudgetRule> budgets = const [],
   }) {
     final shared = [...transactions];
     final accountsRepository = FakeAccountRepository(accounts, shared);
@@ -585,6 +636,7 @@ class FakeBackend {
       FakeCategoryRepository(categories),
       FakeSummaryRepository(shared),
       FakeDebtRepository(shared, accountsRepository),
+      FakeBudgetRepository(budgets),
     );
   }
 
@@ -594,6 +646,7 @@ class FakeBackend {
     this.categories,
     this.summary,
     this.debts,
+    this.budgets,
   );
 
   final FakeAccountRepository accounts;
@@ -601,4 +654,5 @@ class FakeBackend {
   final FakeCategoryRepository categories;
   final FakeSummaryRepository summary;
   final FakeDebtRepository debts;
+  final FakeBudgetRepository budgets;
 }

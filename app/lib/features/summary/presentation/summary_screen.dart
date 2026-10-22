@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/format/date_format.dart';
 import '../../../core/format/money_format.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../core/widgets/state_message.dart';
 import '../../transactions/domain/transaction_type.dart';
 import '../../transactions/presentation/transaction_form_screen.dart';
@@ -351,6 +353,18 @@ class _SummaryBody extends ConsumerWidget {
                   ),
               ],
             ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Card(
+          margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+          child: ListTile(
+            leading: const Icon(Icons.savings_outlined),
+            title: const Text('Presupuestos'),
+            subtitle: const Text('Cuánto llevas gastado de lo que planeaste'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRoutes.budgets),
           ),
         ),
       ],

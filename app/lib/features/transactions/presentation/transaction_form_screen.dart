@@ -9,6 +9,7 @@ import '../../../core/widgets/state_message.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/domain/amount_parser.dart';
 import '../../accounts/presentation/accounts_providers.dart';
+import '../../budgets/presentation/budget_expense_alert.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/domain/category_type.dart';
 import '../../categories/presentation/categories_providers.dart';
@@ -114,13 +115,28 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     });
 
     final transactions = ref.read(transactionsProvider.notifier);
+    final messenger = ScaffoldMessenger.of(context);
     try {
+      // Antes de guardar: después, el gasto ya estaría sumado en el mes.
+      final budgetAlert = await budgetAlertBeforeSaving(
+        ref,
+        draft: draft,
+        previous: widget.transaction,
+      );
       if (_isEditing) {
         await transactions.edit(widget.transaction!.id, draft);
       } else {
         await transactions.create(draft);
       }
       if (mounted) Navigator.of(context).pop();
+      if (budgetAlert != null) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(budgetAlert),
+            duration: const Duration(seconds: 6),
+          ),
+        );
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() {

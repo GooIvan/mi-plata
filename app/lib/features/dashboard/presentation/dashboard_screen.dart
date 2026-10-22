@@ -8,11 +8,14 @@ import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/account_type_ui.dart';
 import '../../accounts/presentation/accounts_providers.dart';
 import '../../auth/presentation/auth_providers.dart';
+import '../../budgets/presentation/budget_providers_overview.dart';
+import '../../summary/domain/month_summary.dart';
 import '../../transactions/presentation/transaction_error_message.dart';
 import '../../transactions/presentation/transaction_form_screen.dart';
 import '../../transactions/presentation/transactions_providers.dart';
 import '../../transactions/presentation/widgets/transaction_tile.dart';
 import '../../debts/presentation/debts_providers.dart';
+import 'widgets/budget_summary_card.dart';
 import 'widgets/debts_summary_card.dart';
 import 'widgets/total_balance_card.dart';
 
@@ -28,6 +31,12 @@ class DashboardScreen extends ConsumerWidget {
     final accounts = ref.watch(accountsProvider);
     final transactions = ref.watch(transactionsProvider);
     final debts = ref.watch(debtsProvider);
+    // Es un extra: mientras carga o si falla, simplemente no aparece.
+    final budgets = ref
+        .watch(
+          budgetOverviewProvider(SummaryCalculator.monthStart(DateTime.now())),
+        )
+        .value;
     final accountNames = ref.watch(accountNamesProvider);
     final categoryNames = ref.watch(categoryNamesProvider);
     final theme = Theme.of(context);
@@ -51,6 +60,11 @@ class DashboardScreen extends ConsumerWidget {
             tooltip: 'Resumen mensual',
             icon: const Icon(Icons.insights_outlined),
             onPressed: () => context.push(AppRoutes.summary),
+          ),
+          IconButton(
+            tooltip: 'Presupuestos',
+            icon: const Icon(Icons.savings_outlined),
+            onPressed: () => context.push(AppRoutes.budgets),
           ),
           IconButton(
             tooltip: 'Categorías',
@@ -105,6 +119,17 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                 ],
               ),
+            ),
+          ],
+          if (budgets != null && budgets.hasBudgets) ...[
+            _SectionHeader(
+              title: 'Presupuestos',
+              actionLabel: 'Ver todos',
+              onAction: () => context.push(AppRoutes.budgets),
+            ),
+            BudgetSummaryCard(
+              overview: budgets,
+              onTap: () => context.push(AppRoutes.budgets),
             ),
           ],
           _SectionHeader(
