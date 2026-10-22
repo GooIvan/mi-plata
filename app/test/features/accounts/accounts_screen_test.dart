@@ -1,47 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mi_plata/app.dart';
-import 'package:mi_plata/core/riverpod/no_retry.dart';
+import 'package:mi_plata/core/router/app_routes.dart';
 import 'package:mi_plata/features/accounts/domain/account_type.dart';
-import 'package:mi_plata/features/accounts/presentation/accounts_providers.dart';
 import 'package:mi_plata/features/accounts/presentation/widgets/account_form_sheet.dart';
-import 'package:mi_plata/features/auth/presentation/auth_providers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../support/fake_account_repository.dart';
-import '../../support/fake_auth_repository.dart';
+import '../../support/test_app.dart';
 
 /// Abre la app con sesión iniciada y entra a la pantalla de cuentas.
 Future<void> openAccounts(
   WidgetTester tester,
   FakeAccountRepository repository,
 ) async {
-  await tester.pumpWidget(
-    ProviderScope(
-      retry: noRetry,
-      overrides: [
-        authRepositoryProvider.overrideWithValue(
-          FakeAuthRepository(signedInAs: 'ana@correo.com'),
-        ),
-        accountRepositoryProvider.overrideWithValue(repository),
-      ],
-      child: const MiPlataApp(),
-    ),
-  );
-  await tester.pumpAndSettle();
-
-  await tester.tap(find.widgetWithText(ListTile, 'Cuentas'));
-  await tester.pumpAndSettle();
+  await pumpMiPlata(tester, accountRepository: repository);
+  await goTo(tester, AppRoutes.accounts);
 }
-
-/// Texto con los espacios raros (no separables) normalizados.
-Finder textLike(String text) => find.byWidgetPredicate(
-  (widget) =>
-      widget is Text &&
-      widget.data?.replaceAll(' ', ' ').replaceAll(RegExp(r'\s+'), ' ') ==
-          text,
-);
 
 Finder newAccountButton() =>
     find.widgetWithText(FloatingActionButton, 'Nueva cuenta');

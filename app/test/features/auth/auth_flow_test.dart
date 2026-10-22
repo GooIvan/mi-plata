@@ -1,21 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mi_plata/app.dart';
-import 'package:mi_plata/features/auth/presentation/auth_providers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../support/fake_auth_repository.dart';
+import '../../support/test_app.dart';
 
-Future<void> pumpApp(WidgetTester tester, FakeAuthRepository repository) async {
-  await tester.pumpWidget(
-    ProviderScope(
-      overrides: [authRepositoryProvider.overrideWithValue(repository)],
-      child: const MiPlataApp(),
-    ),
-  );
-  await tester.pumpAndSettle();
-}
+Future<void> pumpApp(WidgetTester tester, FakeAuthRepository repository) =>
+    pumpMiPlata(tester, auth: repository);
 
 Finder field(int index) => find.byType(TextFormField).at(index);
 Finder button(String label) => find.widgetWithText(FilledButton, label);

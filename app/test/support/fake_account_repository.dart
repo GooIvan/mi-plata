@@ -1,6 +1,8 @@
 import 'package:mi_plata/features/accounts/data/account_repository.dart';
 import 'package:mi_plata/features/accounts/domain/account.dart';
 import 'package:mi_plata/features/accounts/domain/account_type.dart';
+import 'package:mi_plata/features/transactions/domain/transaction.dart';
+import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Account testAccount(
@@ -19,11 +21,17 @@ Account testAccount(
 );
 
 /// Sustituye a [AccountRepository] en las pruebas, con las cuentas en memoria.
+///
+/// Si recibe la lista de [transactions] (compartida por referencia), el saldo
+/// de cada cuenta se calcula como lo hace la vista `v_account_balances`.
 class FakeAccountRepository implements AccountRepository {
-  FakeAccountRepository([List<Account> initial = const []])
-    : _accounts = [...initial];
+  FakeAccountRepository([
+    List<Account> initial = const [],
+    this.transactions = const [],
+  ]) : _accounts = [...initial];
 
   final List<Account> _accounts;
+  final List<Transaction> transactions;
 
   /// Error que lanzarán todas las operaciones mientras no sea null.
   Object? error;
@@ -32,11 +40,33 @@ class FakeAccountRepository implements AccountRepository {
 
   List<Account> get accounts => List.unmodifiable(_accounts);
 
+  double _flow(String accountId) {
+    var total = 0.0;
+    for (final transaction in transactions) {
+      if (transaction.accountId == accountId) {
+        total += transaction.type == TransactionType.income
+            ? transaction.amount
+            : -transaction.amount;
+      }
+      if (transaction.type == TransactionType.transfer &&
+          transaction.destinationAccountId == accountId) {
+        total += transaction.amount;
+      }
+    }
+    return total;
+  }
+
   @override
   Future<List<Account>> fetchAll() async {
     calls.add('fetchAll');
     if (error != null) throw error!;
-    return [..._accounts]..sort((a, b) => a.name.compareTo(b.name));
+    return [
+      for (final account in _accounts)
+        _copy(
+          account,
+          currentBalance: account.initialBalance + _flow(account.id),
+        ),
+    ]..sort((a, b) => a.name.compareTo(b.name));
   }
 
   @override
@@ -81,17 +111,19 @@ class FakeAccountRepository implements AccountRepository {
     calls.add('setArchived:$id:$isArchived');
     if (error != null) throw error!;
     final index = _accounts.indexWhere((account) => account.id == id);
-    final account = _accounts[index];
-    _accounts[index] = Account(
-      id: account.id,
-      name: account.name,
-      type: account.type,
-      currency: account.currency,
-      initialBalance: account.initialBalance,
-      currentBalance: account.currentBalance,
-      isArchived: isArchived,
-    );
+    _accounts[index] = _copy(_accounts[index], isArchived: isArchived);
   }
+
+  Account _copy(Account account, {double? currentBalance, bool? isArchived}) =>
+      Account(
+        id: account.id,
+        name: account.name,
+        type: account.type,
+        currency: account.currency,
+        initialBalance: account.initialBalance,
+        currentBalance: currentBalance ?? account.currentBalance,
+        isArchived: isArchived ?? account.isArchived,
+      );
 
   /// Imita el índice único de nombres entre cuentas activas.
   void _failIfNameTaken(String name, {String? exceptId}) {

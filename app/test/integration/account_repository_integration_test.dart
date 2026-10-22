@@ -2,79 +2,30 @@
 //
 //   supabase start
 //   flutter test test/integration --dart-define=INTEGRATION=true
-//
-// Lee SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY de app/.env. Cada ejecución crea
-// usuarios de prueba nuevos; se borran con `supabase db reset`.
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mi_plata/features/accounts/data/account_repository.dart';
 import 'package:mi_plata/features/accounts/domain/account_type.dart';
 import 'package:mi_plata/features/accounts/presentation/account_error_message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-const _enabled = bool.fromEnvironment('INTEGRATION');
-
-Map<String, String> _readEnv() {
-  final values = <String, String>{};
-  for (final line in File('.env').readAsLinesSync()) {
-    final separator = line.indexOf('=');
-    if (separator > 0 && !line.startsWith('#')) {
-      values[line.substring(0, separator)] = line.substring(separator + 1);
-    }
-  }
-  return values;
-}
+import '../support/integration_harness.dart';
 
 void main() {
   group(
     'AccountRepository contra Supabase local',
-    skip: _enabled
-        ? false
-        : 'Necesita Supabase local: --dart-define=INTEGRATION=true',
+    skip: integrationEnabled ? false : integrationSkipReason,
     () {
-      late Map<String, String> env;
-      late SupabaseClient ana;
+      late IntegrationHarness harness;
       late SupabaseClient beto;
       late AccountRepository repository;
-      final clients = <SupabaseClient>[];
-
-      // Flujo implícito: el PKCE de la app real necesita almacenamiento en disco.
-      SupabaseClient newClient() {
-        final client = SupabaseClient(
-          env['SUPABASE_URL']!,
-          env['SUPABASE_PUBLISHABLE_KEY']!,
-          authOptions: const AuthClientOptions(
-            authFlowType: AuthFlowType.implicit,
-          ),
-        );
-        clients.add(client);
-        return client;
-      }
-
-      Future<SupabaseClient> signedUpClient(String prefix) async {
-        final client = newClient();
-        final email = '$prefix-${DateTime.now().microsecondsSinceEpoch}@example.com';
-        final response = await client.auth.signUp(
-          email: email,
-          password: 'clave-segura-1',
-        );
-        expect(response.session, isNotNull, reason: 'el registro abre sesión');
-        return client;
-      }
 
       setUpAll(() async {
-        env = _readEnv();
-        ana = await signedUpClient('ana');
-        beto = await signedUpClient('beto');
-        repository = AccountRepository(ana);
+        harness = IntegrationHarness();
+        repository = AccountRepository(await harness.signedUpClient('ana'));
+        beto = await harness.signedUpClient('beto');
       });
 
-      tearDownAll(() async {
-        for (final client in clients) {
-          await client.dispose();
-        }
-      });
+      tearDownAll(() => harness.dispose());
 
       test('crear, listar, editar y archivar', () async {
         expect(await repository.fetchAll(), isEmpty);
@@ -192,11 +143,9 @@ void main() {
           initialBalance: '1',
         );
 
-        final deBeto = await AccountRepository(beto).fetchAll();
-        expect(deBeto, isEmpty);
-
+        expect(await AccountRepository(beto).fetchAll(), isEmpty);
         await expectLater(
-          AccountRepository(newClient()).fetchAll(),
+          AccountRepository(harness.newClient()).fetchAll(),
           throwsA(isA<PostgrestException>()),
         );
       });

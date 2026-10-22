@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/widgets/state_message.dart';
 import '../domain/account.dart';
 import 'account_error_message.dart';
 import 'accounts_providers.dart';
@@ -59,7 +60,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       ),
       body: accounts.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _Message(
+        error: (error, _) => StateMessage(
           icon: Icons.cloud_off_outlined,
           text: accountErrorMessage(error),
           actionLabel: 'Reintentar',
@@ -77,7 +78,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
 
   Widget _buildList(List<Account> all) {
     if (all.isEmpty) {
-      return _Message(
+      return StateMessage(
         icon: Icons.account_balance_wallet_outlined,
         text: 'Aún no tienes cuentas.\nCrea la primera para empezar.',
         actionLabel: 'Crear cuenta',
@@ -92,7 +93,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     ];
 
     if (visible.isEmpty) {
-      return _Message(
+      return StateMessage(
         icon: Icons.inventory_2_outlined,
         text: 'Todas tus cuentas están archivadas.',
         actionLabel: 'Mostrar archivadas',
@@ -113,41 +114,6 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               _setArchived(account, archived: !account.isArchived),
         );
       },
-    );
-  }
-}
-
-class _Message extends StatelessWidget {
-  const _Message({
-    required this.icon,
-    required this.text,
-    required this.actionLabel,
-    required this.onAction,
-  });
-
-  final IconData icon;
-  final String text;
-  final String actionLabel;
-  final VoidCallback onAction;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 56, color: theme.colorScheme.outline),
-            const SizedBox(height: 16),
-            Text(text, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            OutlinedButton(onPressed: onAction, child: Text(actionLabel)),
-          ],
-        ),
-      ),
     );
   }
 }
