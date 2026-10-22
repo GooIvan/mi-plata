@@ -52,10 +52,10 @@ mi-plata/
 │   └── lib/
 │       ├── core/       # Configuración, tema, utilidades compartidas
 │       └── features/   # Un módulo por funcionalidad
-│           ├── cuentas/
-│           ├── categorias/
-│           ├── movimientos/
-│           └── panel/
+│           ├── accounts/
+│           ├── categories/
+│           ├── transactions/
+│           └── dashboard/
 ├── supabase/           # Migraciones SQL, vistas y políticas de seguridad
 │   └── migrations/
 └── README.md
@@ -73,17 +73,17 @@ Cada módulo dentro de `features/` se organiza en capas:
 
 | Tabla | Descripción |
 |---|---|
-| `cuentas` | Dónde está el dinero: nombre, tipo, saldo inicial, moneda (`COP` por defecto) |
-| `categorias` | Clasificación de movimientos, de tipo ingreso o gasto |
-| `movimientos` | Ingresos, gastos y transferencias asociados a una cuenta |
-| `v_saldos_cuentas` | Vista que calcula el saldo actual de cada cuenta |
+| `accounts` | Dónde está el dinero: nombre, tipo, saldo inicial, moneda (`COP` por defecto) |
+| `categories` | Clasificación de movimientos, de tipo ingreso (`income`) o gasto (`expense`) |
+| `transactions` | Ingresos, gastos y transferencias (`income`, `expense`, `transfer`) asociados a una cuenta |
+| `v_account_balances` | Vista que calcula el saldo actual de cada cuenta |
 
 **Principios de diseño:**
 
 - Los montos se guardan como `numeric(14,2)`, nunca como `float`.
 - Los saldos **se calculan** a partir de los movimientos; no se almacenan.
-- Las transferencias entre cuentas no cuentan como gasto ni ingreso.
-- Las cuentas se archivan en lugar de eliminarse, para conservar el historial.
+- Las transferencias entre cuentas son una sola fila (`account_id` → `destination_account_id`) y no cuentan como gasto ni ingreso.
+- Las cuentas y categorías se archivan en lugar de eliminarse, para conservar el historial.
 - Todas las tablas incluyen `user_id` y están protegidas con Row Level Security (RLS).
 
 ---
@@ -139,6 +139,7 @@ flutter run
 
 - **Commits**: [Conventional Commits](https://www.conventionalcommits.org/es/) (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`).
 - **Ramas**: `main` estable; nuevas funcionalidades en `feat/<nombre>`.
+- **Idioma**: el código, las tablas y las columnas van en inglés; los textos que ve el usuario (interfaz, mensajes, categorías por defecto), en español.
 - **Base de datos**: todo cambio de esquema se hace mediante una migración en `supabase/migrations/`, nunca a mano desde el panel.
 
 ---
