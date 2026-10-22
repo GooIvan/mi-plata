@@ -66,6 +66,11 @@ void main() {
       expect(normalized(formatCompactMoney(1500000)), r'$1,5 M');
       expect(normalized(formatCompactMoney(4000000)), r'$4 M');
     });
+
+    test('un negativo lleva el signo antes del símbolo', () {
+      expect(normalized(formatCompactMoney(-500000)), r'-$500 mil');
+      expect(normalized(formatCompactMoney(-1500000)), r'-$1,5 M');
+    });
   });
 
   group('formatMoney', () {

@@ -7,11 +7,14 @@ import '../../../core/widgets/state_message.dart';
 import '../../transactions/domain/transaction_type.dart';
 import '../../transactions/presentation/transaction_form_screen.dart';
 import '../../transactions/presentation/transactions_providers.dart';
+import '../../accounts/presentation/accounts_providers.dart';
+import '../domain/balance_history.dart';
 import '../domain/month_summary.dart';
 import 'summary_colors.dart';
 import 'summary_comparison.dart';
 import 'summary_error_message.dart';
 import 'summary_providers.dart';
+import 'widgets/balance_history_card.dart';
 import 'widgets/category_ranking.dart';
 import 'widgets/month_navigator.dart';
 import 'widgets/monthly_trend_chart.dart';
@@ -149,6 +152,50 @@ class _SummaryBody extends ConsumerWidget {
   final TransactionType kind;
   final ValueChanged<TransactionType> onKindChanged;
 
+  /// La evolución del dinero total, con su separación; nada si no hay cuentas
+  /// activas. Si falla la carga, lo dice (con la opción de reintentar).
+  Widget _balanceHistory(WidgetRef ref, DateTime month) {
+    final accounts = ref.watch(accountsProvider);
+    final flows = ref.watch(accountFlowsProvider);
+
+    if (flows.hasError && !flows.isLoading) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Card(
+          margin: EdgeInsets.zero,
+          child: ListTile(
+            title: const Text('No se pudo cargar la evolución del dinero.'),
+            trailing: TextButton(
+              onPressed: () => ref.invalidate(accountFlowsProvider),
+              child: const Text('Reintentar'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final loaded = accounts.value;
+    final flowRows = flows.value;
+    if (loaded == null ||
+        flowRows == null ||
+        loaded.every((account) => account.isArchived)) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: BalanceHistoryCard(
+        points: BalanceHistory.compute(
+          accounts: loaded,
+          flows: flowRows,
+          end: month,
+          months: trendMonths,
+        ),
+        selectedMonth: month,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -247,6 +294,7 @@ class _SummaryBody extends ConsumerWidget {
         const SizedBox(height: 16),
         MonthlyTrendChart(points: view.trend, selectedMonth: month),
         const SizedBox(height: 16),
+        _balanceHistory(ref, month),
         Card(
           margin: EdgeInsets.zero,
           child: Padding(

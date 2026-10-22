@@ -16,7 +16,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 - [x] **Movimientos**: ingresos, gastos y transferencias entre cuentas. Se pueden buscar por texto y filtrar por tipo, cuenta, categoría y fechas; la lista carga por páginas.
 
 ### Fase 2 — Análisis y deudas
-- [x] **Resumen mensual**: ingresos vs. gastos y distribución por categoría con gráficos. Las transferencias no cuentan como ingreso ni gasto. Compara cada cifra y cada categoría con el mes anterior, y muestra el ritmo de gasto con su proyección a fin de mes.
+- [x] **Resumen mensual**: ingresos vs. gastos y distribución por categoría con gráficos. Las transferencias no cuentan como ingreso ni gasto. Compara cada cifra y cada categoría con el mes anterior, muestra el ritmo de gasto con su proyección a fin de mes y la evolución del dinero total mes a mes.
 - [x] **Deudas**: lo que debo y lo que me deben, con registro de abonos. Cada abono es un movimiento real (gasto si debo, ingreso si me deben) y el préstamo inicial se puede registrar opcionalmente en una cuenta.
 
 ### Fase 3 — Ahorro
@@ -85,6 +85,7 @@ Cada módulo dentro de `features/` se organiza en capas:
 | `debt_payments` | Enlaza cada deuda con los movimientos que son sus abonos |
 | `v_debt_balances` | Vista con lo pagado y lo pendiente de cada deuda |
 | `v_monthly_totals` | Vista con ingresos y gastos por mes, tipo, categoría y moneda (para el resumen) |
+| `v_monthly_account_flows` | Vista con lo que entró y salió de cada cuenta cada mes; con el saldo inicial reconstruye el dinero al cierre de cualquier mes |
 
 Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa.
 

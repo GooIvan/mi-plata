@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/ledger_revision.dart';
 import '../../../core/supabase/supabase_provider.dart';
 import '../data/summary_repository.dart';
+import '../domain/balance_history.dart';
 import '../domain/month_summary.dart';
 import '../domain/monthly_total.dart';
 
@@ -12,6 +13,13 @@ const trendMonths = 6;
 final summaryRepositoryProvider = Provider<SummaryRepository>(
   (ref) => SummaryRepository(ref.watch(supabaseClientProvider)),
 );
+
+/// Lo que entró y salió de cada cuenta cada mes, de todo el historial. No
+/// depende del mes que se mira: así cambiar de mes no vuelve a consultarlo.
+final accountFlowsProvider = FutureProvider.autoDispose<List<AccountFlow>>((ref) {
+  ref.watch(ledgerRevisionProvider);
+  return ref.watch(summaryRepositoryProvider).fetchAccountFlows();
+});
 
 /// Los totales del mes pedido y de los cinco anteriores, en una sola consulta:
 /// con eso se arman tanto el resumen del mes como la tendencia.

@@ -10,6 +10,7 @@ import 'package:mi_plata/features/debts/domain/debt_direction.dart';
 import 'package:mi_plata/features/debts/domain/debt_draft.dart';
 import 'package:mi_plata/features/debts/domain/debt_payment.dart';
 import 'package:mi_plata/features/summary/data/summary_repository.dart';
+import 'package:mi_plata/features/summary/domain/balance_history.dart';
 import 'package:mi_plata/features/summary/domain/monthly_total.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mi_plata/features/transactions/data/transaction_repository.dart';
@@ -265,6 +266,53 @@ class FakeSummaryRepository implements SummaryRepository {
       totals[key] = (sum + t.amount, count + 1);
     }
 
+    return _monthlyTotals(totals);
+  }
+
+  /// Cuántas veces se pidieron los flujos por cuenta.
+  var flowRequests = 0;
+
+  /// Un error solo para los flujos por cuenta (los totales mensuales siguen bien).
+  Object? flowsError;
+
+  /// Imita `v_monthly_account_flows`: una transferencia resta en el origen y
+  /// suma en el destino.
+  @override
+  Future<List<AccountFlow>> fetchAccountFlows() async {
+    flowRequests++;
+    await gate?.future;
+    if (flowsError != null) throw flowsError!;
+    if (error != null) throw error!;
+
+    final flows = <(DateTime, String), int>{};
+    void add(DateTime month, String accountId, int cents) {
+      final key = (month, accountId);
+      flows[key] = (flows[key] ?? 0) + cents;
+    }
+
+    for (final t in transactions) {
+      final month = DateTime(t.date.year, t.date.month);
+      final cents = (t.amount * 100).round();
+      switch (t.type) {
+        case TransactionType.income:
+          add(month, t.accountId, cents);
+        case TransactionType.expense:
+          add(month, t.accountId, -cents);
+        case TransactionType.transfer:
+          add(month, t.accountId, -cents);
+          add(month, t.destinationAccountId!, cents);
+      }
+    }
+
+    return [
+      for (final MapEntry(key: (month, accountId), value: cents) in flows.entries)
+        AccountFlow(month: month, accountId: accountId, currency: 'COP', cents: cents),
+    ];
+  }
+
+  List<MonthlyTotal> _monthlyTotals(
+    Map<(DateTime, TransactionType, String?), (double, int)> totals,
+  ) {
     return [
       for (final MapEntry(key: (month, type, categoryId), value: (sum, count))
           in totals.entries)

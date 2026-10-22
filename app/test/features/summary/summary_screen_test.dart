@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mi_plata/core/format/date_format.dart';
+import 'package:mi_plata/features/accounts/domain/account.dart';
 import 'package:mi_plata/features/categories/domain/category.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
 import 'package:mi_plata/features/transactions/domain/transaction.dart';
@@ -54,6 +55,7 @@ Future<FakeBackend> openSummary(
   WidgetTester tester, {
   List<Transaction> transactions = const [],
   List<Category>? categories,
+  List<Account>? accounts,
 }) async {
   // Una pantalla alta: la lista se construye bajo demanda y así todo cabe.
   tester.view.physicalSize = const Size(900, 3600);
@@ -61,7 +63,7 @@ Future<FakeBackend> openSummary(
   addTearDown(tester.view.reset);
 
   final backend = FakeBackend(
-    accounts: [testAccount('Bancolombia')],
+    accounts: accounts ?? [testAccount('Bancolombia')],
     categories: categories ?? _categories,
     transactions: transactions,
   );
@@ -127,7 +129,13 @@ void main() {
       );
 
       expect(find.text('Gastaste más de lo que ingresaste'), findsOneWidget);
-      expect(textLike(r'-$250.000'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: tile('Balance del mes').first,
+          matching: textLike(r'-$250.000'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('con ingresos y gastos iguales lo dice', (tester) async {
@@ -496,6 +504,109 @@ void main() {
 
       expect(find.textContaining('que en $previousName'), findsNothing);
       expect(find.textContaining(' en $previousName'), findsNothing);
+    });
+  });
+
+  group('dinero total a lo largo del tiempo', () {
+    // Banco empieza con 1.000.000. El mes pasado gastó 250.000 y este mes
+    // ingresó 3.000.000 y gastó 1.000.000: cierra el mes pasado en 750.000 y
+    // este mes en 2.750.000.
+    final data = [
+      tx(_expense, 250000, category: 'Mercado', date: monthsAgo(1)),
+      tx(_income, 3000000, category: 'Salario'),
+      tx(_expense, 1000000, category: 'Mercado'),
+    ];
+    final accounts = [testAccount('Bancolombia', balance: 1000000)];
+
+    Finder card() => find.ancestor(
+      of: find.text('Al cierre de cada mes'),
+      matching: find.byType(Card),
+    );
+
+    testWidgets('muestra el dinero total al cierre del mes y cuánto cambió', (
+      tester,
+    ) async {
+      await openSummary(tester, transactions: data, accounts: accounts);
+
+      expect(find.text('Dinero total'), findsOneWidget);
+      expect(find.byType(LineChart), findsOneWidget);
+      expect(
+        find.descendant(of: card().first, matching: textLike(r'$2.750.000')),
+        findsOneWidget,
+      );
+      // Hace cinco meses había 1.000.000: son 1.750.000 más.
+      expect(find.text(r'$1.750.000 más que hace 5 meses'), findsOneWidget);
+    });
+
+    testWidgets('al ir al mes anterior muestra su cierre, sin volver a consultar', (
+      tester,
+    ) async {
+      final backend = await openSummary(tester, transactions: data, accounts: accounts);
+      expect(backend.summary.flowRequests, 1);
+
+      await tester.tap(find.byTooltip('Mes anterior'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(of: card().first, matching: textLike(r'$750.000')),
+        findsOneWidget,
+      );
+      // Los flujos son de todo el historial: cambiar de mes no los pide otra vez.
+      expect(backend.summary.flowRequests, 1);
+    });
+
+    testWidgets('la tabla trae el cierre de cada uno de los seis meses', (tester) async {
+      await openSummary(tester, transactions: data, accounts: accounts);
+
+      await tester.tap(find.text('Ver saldos como tabla'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cierre de'), findsOneWidget);
+      expect(find.text('Ocultar tabla de saldos'), findsOneWidget);
+      // Cuatro meses con 1.000.000, el mes pasado con 750.000 y este con
+      // 2.750.000 (en la tarjeta: el mismo monto sale en otras tarjetas).
+      Finder inCard(String amount) =>
+          find.descendant(of: card().first, matching: textLike(amount));
+      expect(inCard(r'$1.000.000'), findsNWidgets(4));
+      expect(inCard(r'$750.000'), findsOneWidget);
+      expect(inCard(r'$2.750.000'), findsNWidgets(2)); // el encabezado y la tabla
+    });
+
+    testWidgets('no aparece si todas las cuentas están archivadas', (tester) async {
+      await openSummary(
+        tester,
+        transactions: data,
+        accounts: [testAccount('Vieja', balance: 500, archived: true)],
+      );
+
+      expect(find.text('Al cierre de cada mes'), findsNothing);
+      expect(find.byType(LineChart), findsNothing);
+    });
+
+    testWidgets('si falla la carga lo dice y permite reintentar', (tester) async {
+      final backend = FakeBackend(
+        accounts: accounts,
+        categories: _categories,
+        transactions: data,
+      );
+      backend.summary.flowsError = const PostgrestException(message: 'boom', code: '500');
+      tester.view.physicalSize = const Size(900, 3600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await pumpMiPlata(tester, backend: backend);
+      await tester.tap(find.byTooltip('Resumen mensual'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('No se pudo cargar la evolución del dinero.'), findsOneWidget);
+      // Lo demás del resumen sigue ahí.
+      expect(find.text('Balance del mes'), findsOneWidget);
+
+      backend.summary.flowsError = null;
+      await tester.tap(find.widgetWithText(TextButton, 'Reintentar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('No se pudo cargar la evolución del dinero.'), findsNothing);
+      expect(find.byType(LineChart), findsOneWidget);
     });
   });
 
