@@ -13,7 +13,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 - [x] **Panel general**: saldo total consolidado y saldo por cuenta.
 - [x] **Cuentas**: bancos, efectivo, billeteras digitales y tarjetas.
 - [x] **Categorías** de ingresos y gastos, personalizables: crear, renombrar y archivar (cada usuario empieza con 13 por defecto).
-- [x] **Movimientos**: ingresos, gastos y transferencias entre cuentas.
+- [x] **Movimientos**: ingresos, gastos y transferencias entre cuentas. Se pueden buscar por texto y filtrar por tipo, cuenta, categoría y fechas; la lista carga por páginas.
 
 ### Fase 2 — Análisis y deudas
 - [x] **Resumen mensual**: ingresos vs. gastos y distribución por categoría con gráficos. Las transferencias no cuentan como ingreso ni gasto. Compara cada cifra y cada categoría con el mes anterior, y muestra el ritmo de gasto con su proyección a fin de mes.

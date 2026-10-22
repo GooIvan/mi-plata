@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,34 +8,112 @@ import '../../../core/widgets/state_message.dart';
 import '../domain/transaction.dart';
 import 'transaction_error_message.dart';
 import 'transaction_form_screen.dart';
+import 'transaction_list_providers.dart';
+import 'transaction_type_ui.dart';
 import 'transactions_providers.dart';
+import 'widgets/transaction_filter_sheet.dart';
 import 'widgets/transaction_tile.dart';
 
-class TransactionsScreen extends ConsumerWidget {
+class TransactionsScreen extends ConsumerStatefulWidget {
   const TransactionsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final transactions = ref.watch(transactionsProvider);
+  ConsumerState<TransactionsScreen> createState() => _TransactionsScreenState();
+}
+
+class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
+  /// Lo que se espera tras la última tecla antes de buscar.
+  static const _searchDelay = Duration(milliseconds: 400);
+
+  final _search = TextEditingController();
+  Timer? _debounce;
+  bool _searching = false;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _search.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(_searchDelay, () {
+      final notifier = ref.read(transactionFilterProvider.notifier);
+      notifier.set(ref.read(transactionFilterProvider).withText(value));
+    });
+  }
+
+  void _closeSearch() {
+    _debounce?.cancel();
+    _search.clear();
+    setState(() => _searching = false);
+    final notifier = ref.read(transactionFilterProvider.notifier);
+    notifier.set(ref.read(transactionFilterProvider).withText(null));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filter = ref.watch(transactionFilterProvider);
+    final page = ref.watch(transactionListProvider);
+    final filtersCount = filter.activeCount - (filter.text != null ? 1 : 0);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Movimientos')),
-      body: transactions.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => StateMessage(
-          icon: Icons.cloud_off_outlined,
-          text: transactionErrorMessage(error),
-          actionLabel: 'Reintentar',
-          onAction: () => ref.invalidate(transactionsProvider),
-        ),
-        data: (list) => list.isEmpty
-            ? StateMessage(
-                icon: Icons.receipt_long_outlined,
-                text: 'Aún no registras movimientos.\nAnota el primero.',
-                actionLabel: 'Registrar movimiento',
-                onAction: () => showTransactionForm(context),
+      appBar: AppBar(
+        title: _searching
+            ? TextField(
+                controller: _search,
+                autofocus: true,
+                textInputAction: TextInputAction.search,
+                onChanged: _onSearchChanged,
+                decoration: const InputDecoration(
+                  hintText: 'Buscar en la descripción',
+                  border: InputBorder.none,
+                ),
               )
-            : _TransactionList(transactions: list),
+            : const Text('Movimientos'),
+        actions: [
+          if (_searching)
+            IconButton(
+              tooltip: 'Cerrar búsqueda',
+              icon: const Icon(Icons.close),
+              onPressed: _closeSearch,
+            )
+          else
+            IconButton(
+              tooltip: 'Buscar',
+              icon: const Icon(Icons.search),
+              onPressed: () => setState(() => _searching = true),
+            ),
+          IconButton(
+            tooltip: 'Filtrar',
+            icon: Badge(
+              isLabelVisible: filtersCount > 0,
+              label: Text('$filtersCount'),
+              child: const Icon(Icons.filter_list),
+            ),
+            onPressed: () => showTransactionFilterSheet(context),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          if (filtersCount > 0) const _ActiveFilters(),
+          Expanded(
+            child: page.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => StateMessage(
+                icon: Icons.cloud_off_outlined,
+                text: transactionErrorMessage(error),
+                actionLabel: 'Reintentar',
+                onAction: () => ref.invalidate(transactionListProvider),
+              ),
+              data: (data) => data.items.isEmpty
+                  ? _EmptyState(isFiltered: !filter.isEmpty)
+                  : _TransactionList(page: data),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showTransactionForm(context),
@@ -44,11 +124,92 @@ class TransactionsScreen extends ConsumerWidget {
   }
 }
 
-/// Movimientos agrupados por día, con un encabezado en cada cambio de fecha.
-class _TransactionList extends ConsumerWidget {
-  const _TransactionList({required this.transactions});
+class _EmptyState extends ConsumerWidget {
+  const _EmptyState({required this.isFiltered});
 
-  final List<Transaction> transactions;
+  final bool isFiltered;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (isFiltered) {
+      return StateMessage(
+        icon: Icons.search_off,
+        text: 'No hay movimientos con estos filtros.',
+        actionLabel: 'Limpiar filtros',
+        onAction: () => ref.read(transactionFilterProvider.notifier).clear(),
+      );
+    }
+
+    return StateMessage(
+      icon: Icons.receipt_long_outlined,
+      text: 'Aún no registras movimientos.\nAnota el primero.',
+      actionLabel: 'Registrar movimiento',
+      onAction: () => showTransactionForm(context),
+    );
+  }
+}
+
+/// Los filtros puestos, cada uno como una etiqueta que se puede quitar.
+class _ActiveFilters extends ConsumerWidget {
+  const _ActiveFilters();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final filter = ref.watch(transactionFilterProvider);
+    final notifier = ref.read(transactionFilterProvider.notifier);
+    final accountNames = ref.watch(accountNamesProvider);
+    final categoryNames = ref.watch(categoryNamesProvider);
+    final range = describeRange(filter.from, filter.to);
+
+    Widget chip(String label, VoidCallback onRemove) => InputChip(
+      label: Text(label),
+      onDeleted: onRemove,
+      deleteButtonTooltipMessage: 'Quitar filtro: $label',
+    );
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            if (filter.type != null)
+              chip(filter.type!.pluralLabel, () => notifier.set(filter.withType(null))),
+            if (filter.accountId != null)
+              chip(
+                accountNames[filter.accountId] ?? 'Cuenta',
+                () => notifier.set(filter.withAccount(null)),
+              ),
+            if (filter.uncategorized)
+              chip('Sin categoría', () => notifier.set(filter.withCategory(null)))
+            else if (filter.categoryId != null)
+              chip(
+                categoryNames[filter.categoryId] ?? 'Categoría',
+                () => notifier.set(filter.withCategory(null)),
+              ),
+            if (range != null)
+              chip(range, () => notifier.set(filter.withRange(null, null))),
+            TextButton(
+              // Quita los filtros, pero conserva la búsqueda en curso.
+              onPressed: () => notifier.set(filter.onlyText),
+              child: const Text('Limpiar filtros'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Movimientos agrupados por día, con un encabezado en cada cambio de fecha.
+/// Al llegar al final pide la página siguiente.
+class _TransactionList extends ConsumerWidget {
+  const _TransactionList({required this.page});
+
+  final TransactionPage page;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -59,7 +220,7 @@ class _TransactionList extends ConsumerWidget {
     // Cada elemento es el encabezado de un día (DateTime) o un movimiento.
     final items = <Object>[];
     DateTime? lastDay;
-    for (final transaction in transactions) {
+    for (final transaction in page.items) {
       if (lastDay == null || !DateUtils.isSameDay(lastDay, transaction.date)) {
         items.add(transaction.date);
         lastDay = transaction.date;
@@ -69,8 +230,12 @@ class _TransactionList extends ConsumerWidget {
 
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 88),
-      itemCount: items.length,
+      itemCount: items.length + (page.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index == items.length) {
+          return _LoadMore(page: page);
+        }
+
         final item = items[index];
         if (item is DateTime) {
           return Padding(
@@ -92,6 +257,53 @@ class _TransactionList extends ConsumerWidget {
           onTap: () => showTransactionForm(context, transaction: transaction),
         );
       },
+    );
+  }
+}
+
+/// El final de la lista: al aparecer en pantalla pide más, y si falla ofrece
+/// reintentar.
+class _LoadMore extends ConsumerStatefulWidget {
+  const _LoadMore({required this.page});
+
+  final TransactionPage page;
+
+  @override
+  ConsumerState<_LoadMore> createState() => _LoadMoreState();
+}
+
+class _LoadMoreState extends ConsumerState<_LoadMore> {
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.page.loadMoreFailed) _request();
+  }
+
+  /// Se pide después de dibujar: no se cambia el estado en medio de un build.
+  void _request() => WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (mounted) ref.read(transactionListProvider.notifier).loadMore();
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.page.loadMoreFailed) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const Text('No se pudieron cargar más movimientos.'),
+            TextButton(
+              onPressed: _request,
+              child: const Text('Reintentar'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return const Padding(
+      padding: EdgeInsets.all(24),
+      child: Center(child: CircularProgressIndicator()),
     );
   }
 }

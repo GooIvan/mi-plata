@@ -25,10 +25,14 @@ class TransactionsNotifier extends AsyncNotifier<List<Transaction>> {
   TransactionRepository get _repository =>
       ref.read(transactionRepositoryProvider);
 
+  /// Cuántos movimientos recientes se piden: los que muestra el panel. La
+  /// lista completa, con filtros y páginas, está en `transactionListProvider`.
+  static const recentCount = 20;
+
   @override
   Future<List<Transaction>> build() {
     ref.watch(ledgerRevisionProvider);
-    return _repository.fetchRecent();
+    return _repository.fetchRecent(limit: recentCount);
   }
 
   Future<void> create(TransactionDraft draft) async {

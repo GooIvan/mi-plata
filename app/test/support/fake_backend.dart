@@ -15,6 +15,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mi_plata/features/transactions/data/transaction_repository.dart';
 import 'package:mi_plata/features/transactions/domain/transaction.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_draft.dart';
+import 'package:mi_plata/features/transactions/domain/transaction_filter.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 
 import 'fake_account_repository.dart';
@@ -146,6 +147,55 @@ class FakeTransactionRepository implements TransactionRepository {
         return byDate != 0 ? byDate : b.key.compareTo(a.key);
       });
     return [for (final entry in indexed.take(limit)) entry.value];
+  }
+
+  /// Las páginas que se han pedido, para comprobar cuántas y con qué filtro.
+  final pageRequests = <({TransactionFilter filter, int offset, int limit})>[];
+
+  /// Si es true, las páginas posteriores a la primera fallan (la primera no).
+  bool failLaterPages = false;
+
+  bool _matches(Transaction t, TransactionFilter filter) {
+    final text = filter.text?.toLowerCase();
+    if (text != null && !(t.description ?? '').toLowerCase().contains(text)) {
+      return false;
+    }
+    if (filter.type != null && t.type != filter.type) return false;
+    if (filter.accountId != null &&
+        t.accountId != filter.accountId &&
+        t.destinationAccountId != filter.accountId) {
+      return false;
+    }
+    if (filter.uncategorized && t.categoryId != null) return false;
+    if (filter.categoryId != null && t.categoryId != filter.categoryId) {
+      return false;
+    }
+    final day = DateTime(t.date.year, t.date.month, t.date.day);
+    if (filter.from != null && day.isBefore(filter.from!)) return false;
+    if (filter.to != null && day.isAfter(filter.to!)) return false;
+    return true;
+  }
+
+  @override
+  Future<List<Transaction>> fetchPage({
+    required TransactionFilter filter,
+    required int offset,
+    int limit = TransactionRepository.pageSize,
+  }) async {
+    pageRequests.add((filter: filter, offset: offset, limit: limit));
+    if (error != null) throw error!;
+    if (failLaterPages && offset > 0) {
+      throw const PostgrestException(message: 'boom', code: '500');
+    }
+
+    final indexed = transactions.asMap().entries
+        .where((entry) => _matches(entry.value, filter))
+        .toList()
+      ..sort((a, b) {
+        final byDate = b.value.date.compareTo(a.value.date);
+        return byDate != 0 ? byDate : b.key.compareTo(a.key);
+      });
+    return [for (final entry in indexed.skip(offset).take(limit)) entry.value];
   }
 
   @override
