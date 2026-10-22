@@ -405,4 +405,107 @@ void main() {
       expect(find.textContaining('Aún no hay movimientos'), findsOneWidget);
     });
   });
+
+  group('comparación con el mes anterior', () {
+    // Perezoso: los datos de fecha se inicializan en setUpAll, después de
+    // declarar el grupo.
+    late final previousName = formatMonthName(monthsAgo(1));
+
+    // Este mes: ingresos 3.000.000 y gastos 161.000 (Mercado 111.000).
+    // Mes anterior: ingresos 2.000.000 y gastos 150.000 (Mercado 100.000).
+    final both = [
+      tx(_income, 3000000, category: 'Salario'),
+      tx(_expense, 111000, category: 'Mercado'),
+      tx(_expense, 50000, category: 'Transporte'),
+      tx(_income, 2000000, category: 'Salario', date: monthsAgo(1)),
+      tx(_expense, 100000, category: 'Mercado', date: monthsAgo(1)),
+      tx(_expense, 50000, category: 'Transporte', date: monthsAgo(1)),
+    ];
+
+    testWidgets('las tarjetas comparan ingresos y gastos', (tester) async {
+      await openSummary(tester, transactions: both);
+
+      expect(
+        find.descendant(
+          of: tile('Ingresos').first,
+          matching: find.text('50 % más que en $previousName'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: tile('Gastos').first,
+          matching: find.text('7 % más que en $previousName'), // 161 / 150
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('cada categoría dice cómo cambió', (tester) async {
+      await openSummary(tester, transactions: both);
+
+      expect(find.text('11 % más que en $previousName'), findsOneWidget); // Mercado
+      expect(find.text('Igual que en $previousName'), findsOneWidget); // Transporte
+    });
+
+    testWidgets('un gasto que baja dice "menos"', (tester) async {
+      await openSummary(
+        tester,
+        transactions: [
+          tx(_expense, 90000, category: 'Mercado'),
+          tx(_expense, 100000, category: 'Mercado', date: monthsAgo(1)),
+        ],
+      );
+
+      expect(find.text('10 % menos que en $previousName'), findsWidgets);
+    });
+
+    testWidgets('el reparto de ingresos compara con los ingresos', (tester) async {
+      await openSummary(tester, transactions: both);
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(SegmentedButton<TransactionType>),
+          matching: find.text('Ingresos'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // La tarjeta de ingresos y la fila de "Salario".
+      expect(find.text('50 % más que en $previousName'), findsNWidgets(2));
+    });
+
+    testWidgets('una categoría nueva dice lo que había antes: cero', (tester) async {
+      await openSummary(
+        tester,
+        transactions: [
+          tx(_expense, 40000, category: 'Transporte'),
+          tx(_expense, 100000, category: 'Mercado', date: monthsAgo(1)),
+        ],
+      );
+
+      // Transporte no tuvo gastos el mes anterior: lo dice con palabras.
+      expect(find.text('Sin gastos en $previousName'), findsWidgets);
+    });
+
+    testWidgets('si el mes anterior no tuvo movimientos no compara', (tester) async {
+      await openSummary(
+        tester,
+        transactions: [tx(_expense, 100000, category: 'Mercado')],
+      );
+
+      expect(find.textContaining('que en $previousName'), findsNothing);
+      expect(find.textContaining(' en $previousName'), findsNothing);
+    });
+  });
+
+  testWidgets('la tarjeta de ritmo de gasto aparece en el resumen', (tester) async {
+    await openSummary(
+      tester,
+      transactions: [tx(_expense, 100000, category: 'Mercado')],
+    );
+
+    expect(find.text('Ritmo de gasto'), findsOneWidget);
+    expect(find.text('Promedio por día'), findsOneWidget);
+  });
 }

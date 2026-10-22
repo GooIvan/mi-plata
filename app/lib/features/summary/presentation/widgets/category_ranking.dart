@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/format/money_format.dart';
 import '../../domain/month_summary.dart';
+import '../summary_comparison.dart';
 
 /// El reparto por categoría como barras horizontales, de mayor a menor.
 ///
@@ -15,6 +16,10 @@ class CategoryRanking extends StatelessWidget {
     required this.names,
     required this.color,
     required this.mutedColor,
+    required this.previousCents,
+    required this.previousHasData,
+    required this.previousMonthName,
+    required this.upIsGood,
   });
 
   final List<CategoryShare> shares;
@@ -25,6 +30,27 @@ class CategoryRanking extends StatelessWidget {
 
   /// Para "Otras" y "Sin categoría", que no son una categoría concreta.
   final Color mutedColor;
+
+  /// Lo que tuvo cada categoría el mes anterior, para ver cómo cambió.
+  final Map<String?, int> previousCents;
+  final bool previousHasData;
+  final String previousMonthName;
+
+  /// Si que una categoría suba es buena noticia (ingresos) o mala (gastos).
+  final bool upIsGood;
+
+  /// Cómo cambió una categoría frente al mes anterior. "Otras" junta varias
+  /// categorías distintas cada mes, así que no se compara.
+  ComparisonCaption? _comparison(CategoryShare share) {
+    if (share.kind == ShareKind.other) return null;
+    return compareWithPrevious(
+      current: share.cents,
+      previous: previousCents[share.categoryId] ?? 0,
+      previousHasData: previousHasData,
+      previousMonthName: previousMonthName,
+      noneNoun: upIsGood ? 'ingresos' : 'gastos',
+    );
+  }
 
   String _name(CategoryShare share) => switch (share.kind) {
     ShareKind.category => names[share.categoryId] ?? 'Categoría',
@@ -70,6 +96,28 @@ class CategoryRanking extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (_comparison(share) case final comparison?) ...[
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(
+                        comparison.icon,
+                        size: 12,
+                        color: comparison.color(
+                          theme.colorScheme,
+                          upIsGood: upIsGood,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        comparison.text,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 4),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(3),

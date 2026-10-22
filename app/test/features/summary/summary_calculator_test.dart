@@ -230,4 +230,121 @@ void main() {
       expect(SummaryCalculator.trend([], oct, months: 3), hasLength(3));
     });
   });
+
+  group('Change.between', () {
+    test('subir: la variación es sobre lo anterior', () {
+      final change = Change.between(11000, 10000);
+
+      expect(change.isUp, isTrue);
+      expect(change.deltaCents, 1000);
+      expect(change.fraction, closeTo(0.1, 1e-9));
+    });
+
+    test('bajar da una fracción negativa', () {
+      final change = Change.between(5000, 10000);
+
+      expect(change.isDown, isTrue);
+      expect(change.fraction, -0.5);
+    });
+
+    test('igual no cambia', () {
+      expect(Change.between(300, 300).isSame, isTrue);
+    });
+
+    test('si antes era cero no hay porcentaje, pero sí diferencia', () {
+      final change = Change.between(5000, 0);
+
+      expect(change.fraction, isNull);
+      expect(change.deltaCents, 5000);
+      expect(change.isUp, isTrue);
+    });
+  });
+
+  group('por categoría sin agrupar', () {
+    test('conserva el monto exacto de cada categoría, incluso las agrupadas', () {
+      final summary = SummaryCalculator.forMonth([
+        for (var i = 0; i < 10; i++)
+          row(oct, expense, 1000.0 - i, category: 'c$i'),
+        row(oct, expense, 50),
+      ], oct);
+
+      // En el reparto las más pequeñas van en "Otras", pero aquí no.
+      expect(summary.expenseByCategory.any((s) => s.kind == ShareKind.other), isTrue);
+      expect(summary.expenseCentsByCategory, hasLength(11));
+      expect(summary.expenseCentsByCategory['c9'], (991 * 100));
+      expect(summary.expenseCentsByCategory[null], 5000); // sin categoría
+    });
+
+    test('el mes sin gastos tiene el mapa vacío', () {
+      final summary = SummaryCalculator.forMonth([], oct);
+
+      expect(summary.expenseCentsByCategory, isEmpty);
+      expect(summary.incomeCentsByCategory, isEmpty);
+    });
+  });
+
+  group('días del mes', () {
+    test('conoce los meses de 28, 29, 30 y 31 días', () {
+      expect(SummaryCalculator.daysInMonth(DateTime(2026, 2)), 28);
+      expect(SummaryCalculator.daysInMonth(DateTime(2028, 2)), 29); // bisiesto
+      expect(SummaryCalculator.daysInMonth(DateTime(2026, 4)), 30);
+      expect(SummaryCalculator.daysInMonth(DateTime(2026, 10)), 31);
+      expect(SummaryCalculator.daysInMonth(DateTime(2026, 12)), 31);
+    });
+  });
+
+  group('ritmo de gasto', () {
+    // 100.000 gastados en octubre (31 días).
+    final summary = SummaryCalculator.forMonth([row(oct, expense, 100000)], oct);
+
+    test('en el mes en curso promedia sobre los días transcurridos', () {
+      final pace = SummaryCalculator.pace(summary, DateTime(2026, 10, 10));
+
+      expect(pace.daysCounted, 10);
+      expect(pace.dailyAverageCents, 1000000); // 10.000 por día
+      expect(pace.projectedCents, 31000000); // 310.000 a fin de mes
+    });
+
+    test('con uno o dos días de datos no se proyecta: engañaría', () {
+      final first = SummaryCalculator.pace(summary, DateTime(2026, 10, 1));
+      final second = SummaryCalculator.pace(summary, DateTime(2026, 10, 2));
+      final third = SummaryCalculator.pace(summary, DateTime(2026, 10, 3));
+
+      expect(first.projectedCents, isNull);
+      expect(second.projectedCents, isNull);
+      expect(third.projectedCents, isNotNull);
+      expect(first.dailyAverageCents, 10000000); // el promedio sí se calcula
+    });
+
+    test('el último día la proyección coincide con lo gastado', () {
+      final pace = SummaryCalculator.pace(summary, DateTime(2026, 10, 31));
+
+      expect(pace.projectedCents, summary.expenseCents);
+    });
+
+    test('un mes ya terminado promedia sobre todos sus días y no proyecta', () {
+      final pace = SummaryCalculator.pace(summary, DateTime(2026, 11, 5));
+
+      expect(pace.daysCounted, 31);
+      expect(pace.projectedCents, isNull);
+      expect(pace.dailyAverageCents, (10000000 / 31).round());
+    });
+
+    test('sin gastos el ritmo es cero', () {
+      final empty = SummaryCalculator.forMonth([], oct);
+      final pace = SummaryCalculator.pace(empty, DateTime(2026, 10, 15));
+
+      expect(pace.dailyAverageCents, 0);
+      expect(pace.projectedCents, 0);
+    });
+
+    test('febrero usa sus 28 días', () {
+      final feb = DateTime(2026, 2);
+      final february = SummaryCalculator.forMonth([row(feb, expense, 280)], feb);
+      final pace = SummaryCalculator.pace(february, DateTime(2026, 2, 14));
+
+      expect(pace.daysInMonth, 28);
+      expect(pace.projectedCents, 56000); // 280 / 14 * 28 = 560
+    });
+  });
 }

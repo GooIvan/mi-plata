@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/format/date_format.dart';
 import '../../../core/format/money_format.dart';
 import '../../../core/widgets/state_message.dart';
 import '../../transactions/domain/transaction_type.dart';
@@ -8,22 +9,28 @@ import '../../transactions/presentation/transaction_form_screen.dart';
 import '../../transactions/presentation/transactions_providers.dart';
 import '../domain/month_summary.dart';
 import 'summary_colors.dart';
+import 'summary_comparison.dart';
 import 'summary_error_message.dart';
 import 'summary_providers.dart';
 import 'widgets/category_ranking.dart';
 import 'widgets/month_navigator.dart';
 import 'widgets/monthly_trend_chart.dart';
+import 'widgets/pace_card.dart';
 import 'widgets/stat_tile.dart';
 
 /// Lo que se dibuja: el resumen del mes y la tendencia de los últimos meses.
 class _SummaryView {
   const _SummaryView({
     required this.summary,
+    required this.previous,
     required this.trend,
     required this.hasAnyData,
   });
 
   final MonthSummary summary;
+
+  /// El mes anterior, para comparar.
+  final MonthSummary previous;
   final List<MonthPoint> trend;
 
   /// Falso si no hay un solo movimiento en todo el período consultado.
@@ -59,6 +66,10 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
       final rows = totals.requireValue;
       _shown = _SummaryView(
         summary: SummaryCalculator.forMonth(rows, _month),
+        previous: SummaryCalculator.forMonth(
+          rows,
+          SummaryCalculator.addMonths(_month, -1),
+        ),
         trend: SummaryCalculator.trend(rows, _month, months: trendMonths),
         hasAnyData: rows.isNotEmpty,
       );
@@ -165,6 +176,28 @@ class _SummaryBody extends ConsumerWidget {
         ? summary.expenseByCategory
         : summary.incomeByCategory;
 
+    // Cada cifra se compara con el mes anterior, si tuvo movimientos.
+    final previous = view.previous;
+    final previousName = formatMonthName(previous.month);
+    ComparisonCaption? compare(int current, int before, String noun) =>
+        compareWithPrevious(
+          current: current,
+          previous: before,
+          previousHasData: !previous.isEmpty,
+          previousMonthName: previousName,
+          noneNoun: noun,
+        );
+    final incomeComparison = compare(
+      summary.incomeCents,
+      previous.incomeCents,
+      'ingresos',
+    );
+    final expenseComparison = compare(
+      summary.expenseCents,
+      previous.expenseCents,
+      'gastos',
+    );
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       children: [
@@ -185,6 +218,12 @@ class _SummaryBody extends ConsumerWidget {
                 label: 'Ingresos',
                 value: formatMoney(summary.incomeCents / 100),
                 marker: colors.income,
+                caption: incomeComparison?.text,
+                captionIcon: incomeComparison?.icon,
+                captionIconColor: incomeComparison?.color(
+                  theme.colorScheme,
+                  upIsGood: true,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -193,10 +232,18 @@ class _SummaryBody extends ConsumerWidget {
                 label: 'Gastos',
                 value: formatMoney(summary.expenseCents / 100),
                 marker: colors.expense,
+                caption: expenseComparison?.text,
+                captionIcon: expenseComparison?.icon,
+                captionIconColor: expenseComparison?.color(
+                  theme.colorScheme,
+                  upIsGood: false,
+                ),
               ),
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        PaceCard(summary: summary, previous: previous, today: DateTime.now()),
         const SizedBox(height: 16),
         MonthlyTrendChart(points: view.trend, selectedMonth: month),
         const SizedBox(height: 16),
@@ -247,6 +294,12 @@ class _SummaryBody extends ConsumerWidget {
                     names: names,
                     color: isExpense ? colors.expense : colors.income,
                     mutedColor: colors.axisLabel,
+                    previousCents: isExpense
+                        ? previous.expenseCentsByCategory
+                        : previous.incomeCentsByCategory,
+                    previousHasData: !previous.isEmpty,
+                    previousMonthName: previousName,
+                    upIsGood: !isExpense,
                   ),
               ],
             ),

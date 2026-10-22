@@ -51,18 +51,71 @@ class MonthSummary {
     required this.expenseCents,
     required this.incomeByCategory,
     required this.expenseByCategory,
+    required this.incomeCentsByCategory,
+    required this.expenseCentsByCategory,
     required this.movements,
   });
 
   final DateTime month;
   final int incomeCents;
   final int expenseCents;
+
+  /// El reparto ya ordenado y con las pequeñas agrupadas en "Otras".
   final List<CategoryShare> incomeByCategory;
   final List<CategoryShare> expenseByCategory;
+
+  /// Los montos de cada categoría sin agrupar (la clave nula es "sin
+  /// categoría"): sirven para comparar una categoría con la del mes anterior.
+  final Map<String?, int> incomeCentsByCategory;
+  final Map<String?, int> expenseCentsByCategory;
   final int movements;
 
   int get balanceCents => incomeCents - expenseCents;
   bool get isEmpty => movements == 0;
+}
+
+/// Cómo cambió una cifra respecto a otra (por ejemplo, frente al mes anterior).
+class Change {
+  const Change({required this.deltaCents, required this.fraction});
+
+  /// Compara [current] con [previous], ambos en centavos.
+  factory Change.between(int current, int previous) => Change(
+    deltaCents: current - previous,
+    fraction: previous == 0 ? null : (current - previous) / previous,
+  );
+
+  /// Cuánto subió (positivo) o bajó (negativo).
+  final int deltaCents;
+
+  /// La variación sobre lo anterior: 0,12 es un 12 % más. Es null cuando antes
+  /// era cero, porque entonces no existe un porcentaje.
+  final double? fraction;
+
+  bool get isUp => deltaCents > 0;
+  bool get isDown => deltaCents < 0;
+  bool get isSame => deltaCents == 0;
+}
+
+/// A qué ritmo se está gastando en un mes.
+class SpendingPace {
+  const SpendingPace({
+    required this.dailyAverageCents,
+    required this.daysCounted,
+    required this.daysInMonth,
+    this.projectedCents,
+  });
+
+  /// El gasto promedio de cada día.
+  final int dailyAverageCents;
+
+  /// Los días que se tuvieron en cuenta: los transcurridos si el mes sigue en
+  /// curso, o todos si ya terminó.
+  final int daysCounted;
+  final int daysInMonth;
+
+  /// Cuánto sumaría el mes a este ritmo. Solo existe mientras el mes sigue en
+  /// curso y ya pasaron unos días: con uno o dos, la proyección engaña.
+  final int? projectedCents;
 }
 
 /// Calcula el resumen a partir de las filas de `v_monthly_totals`.
@@ -91,15 +144,48 @@ class SummaryCalculator {
         .where((row) => row.currency == currency && row.month == start)
         .toList();
 
+    final income = _byCategory(ofMonth, TransactionType.income);
+    final expense = _byCategory(ofMonth, TransactionType.expense);
+
     return MonthSummary(
       month: start,
       incomeCents: _sum(ofMonth, TransactionType.income),
       expenseCents: _sum(ofMonth, TransactionType.expense),
-      incomeByCategory: _shares(ofMonth, TransactionType.income),
-      expenseByCategory: _shares(ofMonth, TransactionType.expense),
+      incomeByCategory: _shares(income),
+      expenseByCategory: _shares(expense),
+      incomeCentsByCategory: income,
+      expenseCentsByCategory: expense,
       movements: ofMonth.fold(0, (total, row) => total + row.movements),
     );
   }
+
+  /// Los días que tiene [month].
+  static int daysInMonth(DateTime month) =>
+      DateTime(month.year, month.month + 1, 0).day;
+
+  /// El ritmo de gasto de [summary], visto desde [today].
+  ///
+  /// Si el mes está en curso, el promedio cuenta solo los días que han pasado y
+  /// se proyecta a fin de mes (a partir del tercer día); si ya terminó, el
+  /// promedio es sobre todos sus días y no hay nada que proyectar.
+  static SpendingPace pace(MonthSummary summary, DateTime today) {
+    final days = daysInMonth(summary.month);
+    final isCurrent = monthStart(today) == summary.month;
+    final counted = isCurrent ? today.day.clamp(1, days) : days;
+    final average = (summary.expenseCents / counted).round();
+
+    return SpendingPace(
+      dailyAverageCents: average,
+      daysCounted: counted,
+      daysInMonth: days,
+      projectedCents: isCurrent && counted >= minDaysToProject
+          ? (summary.expenseCents * days / counted).round()
+          : null,
+    );
+  }
+
+  /// Desde qué día del mes se proyecta el gasto a fin de mes.
+  static const minDaysToProject = 3;
 
   /// Ingresos y gastos de los [months] meses que terminan en [end], del más
   /// viejo al más reciente. Un mes sin movimientos cuenta como cero.
@@ -126,9 +212,9 @@ class SummaryCalculator {
       .where((row) => row.type == type)
       .fold(0, (total, row) => total + _cents(row.total));
 
-  /// El reparto de [type] por categoría, de mayor a menor. Las más pequeñas
-  /// se agrupan en una sola porción "Otras" después de [maxCategories].
-  static List<CategoryShare> _shares(
+  /// Lo de cada categoría de [type], en centavos (la clave nula es "sin
+  /// categoría").
+  static Map<String?, int> _byCategory(
     List<MonthlyTotal> rows,
     TransactionType type,
   ) {
@@ -140,7 +226,12 @@ class SummaryCalculator {
         ifAbsent: () => _cents(row.total),
       );
     }
+    return byCategory;
+  }
 
+  /// El reparto por categoría, de mayor a menor. Las más pequeñas se agrupan
+  /// en una sola porción "Otras" después de [maxCategories].
+  static List<CategoryShare> _shares(Map<String?, int> byCategory) {
     final total = byCategory.values.fold(0, (sum, cents) => sum + cents);
     if (total <= 0) return const [];
 

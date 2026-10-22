@@ -31,6 +31,10 @@ String formatMonth(DateTime month) => toBeginningOfSentenceCase(
   DateFormat('MMMM y', dateLocale).format(month),
 )!;
 
+/// "octubre", para frases como "más que en septiembre".
+String formatMonthName(DateTime month) =>
+    DateFormat('MMMM', dateLocale).format(month);
+
 /// "oct", para ejes de gráficos.
 String formatMonthShort(DateTime month) =>
     DateFormat('MMM', dateLocale).format(month).replaceAll('.', '');
