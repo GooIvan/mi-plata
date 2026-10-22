@@ -123,15 +123,23 @@ SUPABASE_URL=https://<id-del-proyecto>.supabase.co
 SUPABASE_PUBLISHABLE_KEY=<tu-publishable-key>
 ```
 
-Para desarrollo local, `supabase status` muestra la URL y la publishable key. Desde el emulador de Android, `localhost` del equipo es `10.0.2.2`.
+Para desarrollo local, `supabase status` muestra la URL y la publishable key. En Android (emulador o celular por USB) hay que ejecutar antes `adb reverse tcp:54321 tcp:54321` para que `127.0.0.1` llegue a tu equipo.
 
 > ⚠️ El archivo `.env` está en `.gitignore`. Nunca subas tus llaves al repositorio y jamás uses la `secret key` (antes `service_role`) dentro de la app.
 
 ### 4. Ejecutar la app
 
 ```bash
+supabase start          # base de datos local (desde la raíz del repositorio)
 cd app
 flutter pub get
+flutter run -d linux    # escritorio: liviano, ideal para desarrollar la interfaz
+```
+
+Para probar en Android (emulador o celular por USB):
+
+```bash
+adb reverse tcp:54321 tcp:54321
 flutter run
 ```
 
