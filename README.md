@@ -9,6 +9,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 ## ✨ Funcionalidades
 
 ### Fase 1 — Núcleo
+- [x] **Autenticación**: registro e inicio de sesión con correo y contraseña.
 - [ ] **Panel general**: saldo total consolidado y saldo por cuenta.
 - [ ] **Cuentas**: bancos, efectivo, billeteras digitales y tarjetas.
 - [ ] **Categorías** de ingresos y gastos, personalizables.
@@ -52,6 +53,7 @@ mi-plata/
 │   └── lib/
 │       ├── core/       # Configuración, tema, utilidades compartidas
 │       └── features/   # Un módulo por funcionalidad
+│           ├── auth/
 │           ├── accounts/
 │           ├── categories/
 │           ├── transactions/
