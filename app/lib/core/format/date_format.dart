@@ -19,6 +19,15 @@ String formatDay(DateTime date, {DateTime? today}) {
   return toBeginningOfSentenceCase(DateFormat(pattern, dateLocale).format(day))!;
 }
 
+/// "Octubre 2026".
+String formatMonth(DateTime month) => toBeginningOfSentenceCase(
+  DateFormat('MMMM y', dateLocale).format(month),
+)!;
+
+/// "oct", para ejes de gráficos.
+String formatMonthShort(DateTime month) =>
+    DateFormat('MMM', dateLocale).format(month).replaceAll('.', '');
+
 /// "12 de octubre de 2026".
 String formatFullDate(DateTime date) =>
     DateFormat("d 'de' MMMM 'de' y", dateLocale).format(date);

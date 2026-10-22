@@ -45,6 +45,11 @@ class DashboardScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            tooltip: 'Resumen mensual',
+            icon: const Icon(Icons.insights_outlined),
+            onPressed: () => context.push(AppRoutes.summary),
+          ),
+          IconButton(
             tooltip: 'Categorías',
             icon: const Icon(Icons.category_outlined),
             onPressed: () => context.push(AppRoutes.categories),

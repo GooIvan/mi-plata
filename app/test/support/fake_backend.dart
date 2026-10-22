@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:mi_plata/features/categories/data/category_repository.dart';
 import 'package:mi_plata/features/categories/domain/category.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
 import 'package:mi_plata/features/accounts/domain/account.dart';
+import 'package:mi_plata/features/summary/data/summary_repository.dart';
+import 'package:mi_plata/features/summary/domain/monthly_total.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mi_plata/features/transactions/data/transaction_repository.dart';
 import 'package:mi_plata/features/transactions/domain/transaction.dart';
@@ -173,6 +177,54 @@ class FakeTransactionRepository implements TransactionRepository {
   );
 }
 
+/// Imita la vista `v_monthly_totals`: agrupa por mes, tipo y categoría, y deja
+/// fuera las transferencias.
+class FakeSummaryRepository implements SummaryRepository {
+  FakeSummaryRepository(this.transactions);
+
+  final List<Transaction> transactions;
+  Object? error;
+  final requests = <({DateTime from, DateTime to})>[];
+
+  /// Si se asigna, las consultas esperan a que se complete: sirve para ver
+  /// la pantalla mientras carga.
+  Completer<void>? gate;
+
+  @override
+  Future<List<MonthlyTotal>> fetchMonthlyTotals({
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    requests.add((from: from, to: to));
+    await gate?.future;
+    if (error != null) throw error!;
+
+    final totals = <(DateTime, TransactionType, String?), (double, int)>{};
+    for (final t in transactions) {
+      if (t.type == TransactionType.transfer) continue;
+      final month = DateTime(t.date.year, t.date.month);
+      if (month.isBefore(from) || month.isAfter(to)) continue;
+
+      final key = (month, t.type, t.categoryId);
+      final (sum, count) = totals[key] ?? (0.0, 0);
+      totals[key] = (sum + t.amount, count + 1);
+    }
+
+    return [
+      for (final MapEntry(key: (month, type, categoryId), value: (sum, count))
+          in totals.entries)
+        MonthlyTotal(
+          month: month,
+          currency: 'COP',
+          type: type,
+          categoryId: categoryId,
+          total: sum,
+          movements: count,
+        ),
+    ];
+  }
+}
+
 /// Cuentas, categorías y movimientos enlazados, como la base de datos real.
 class FakeBackend {
   factory FakeBackend({
@@ -185,12 +237,19 @@ class FakeBackend {
       FakeAccountRepository(accounts, shared),
       FakeTransactionRepository(shared),
       FakeCategoryRepository(categories),
+      FakeSummaryRepository(shared),
     );
   }
 
-  FakeBackend._(this.accounts, this.transactions, this.categories);
+  FakeBackend._(
+    this.accounts,
+    this.transactions,
+    this.categories,
+    this.summary,
+  );
 
   final FakeAccountRepository accounts;
   final FakeTransactionRepository transactions;
   final FakeCategoryRepository categories;
+  final FakeSummaryRepository summary;
 }

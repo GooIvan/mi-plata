@@ -5,6 +5,7 @@ import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/accounts_providers.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/presentation/categories_providers.dart';
+import '../../summary/presentation/summary_providers.dart';
 import '../data/transaction_repository.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_draft.dart';
@@ -47,6 +48,7 @@ class TransactionsNotifier extends AsyncNotifier<List<Transaction>> {
   void _refresh() {
     ref.invalidateSelf();
     ref.invalidate(accountsProvider);
+    ref.invalidate(monthlyTotalsProvider);
   }
 }
 

@@ -52,6 +52,22 @@ void main() {
     expect(formatFullDate(DateTime(2026, 3, 5)), '5 de marzo de 2026');
   });
 
+  test('formatMonth y formatMonthShort', () {
+    expect(formatMonth(DateTime(2026, 10)), 'Octubre 2026');
+    expect(formatMonth(DateTime(2027, 1, 20)), 'Enero 2027');
+    expect(formatMonthShort(DateTime(2026, 10)), 'oct');
+    expect(formatMonthShort(DateTime(2026, 9)), isNot(contains('.')));
+  });
+
+  group('formatCompactMoney', () {
+    test('abrevia miles y millones para los ejes', () {
+      expect(normalized(formatCompactMoney(0)), r'$0');
+      expect(normalized(formatCompactMoney(500000)), r'$500 mil');
+      expect(normalized(formatCompactMoney(1500000)), r'$1,5 M');
+      expect(normalized(formatCompactMoney(4000000)), r'$4 M');
+    });
+  });
+
   group('formatMoney', () {
     test('el símbolo va antes y el punto separa miles', () {
       expect(normalized(formatMoney(1500000)), r'$1.500.000');

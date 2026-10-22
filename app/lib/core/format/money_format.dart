@@ -1,5 +1,9 @@
 import 'package:intl/intl.dart';
 
+/// Una cifra corta para ejes de gráficos: "$1,5 M", "$500 mil".
+String formatCompactMoney(double value) =>
+    '\$${NumberFormat.compact(locale: 'es_CO').format(value)}';
+
 /// Da formato de moneda colombiano: "$1.500.000" (con centavos solo si los hay).
 ///
 /// El patrón es explícito porque el de `es_CO` en intl pone el símbolo al

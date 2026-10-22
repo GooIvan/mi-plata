@@ -16,7 +16,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 - [x] **Movimientos**: ingresos, gastos y transferencias entre cuentas.
 
 ### Fase 2 — Análisis y deudas
-- [ ] **Resumen mensual**: ingresos vs. gastos y distribución por categoría con gráficos.
+- [x] **Resumen mensual**: ingresos vs. gastos y distribución por categoría con gráficos. Las transferencias no cuentan como ingreso ni gasto.
 - [ ] **Deudas**: lo que debo y lo que me deben, con registro de abonos.
 
 ### Fase 3 — Ahorro
