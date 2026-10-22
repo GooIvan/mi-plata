@@ -626,4 +626,59 @@ void main() {
       expect(find.textContaining('Atención:'), findsNothing);
     });
   });
+
+  group('categorías archivadas', () {
+    FakeBackend withArchivedCategory() => FakeBackend(
+      accounts: [testAccount('Bancolombia', balance: 1000000)],
+      categories: [
+        testCategory('Mercado', CategoryType.expense),
+        testCategory('Vieja', CategoryType.expense, archived: true),
+      ],
+      transactions: [
+        testTransaction(
+          'tx-1',
+          type: TransactionType.expense,
+          accountId: 'id-Bancolombia',
+          categoryId: 'cat-Vieja',
+          amount: 5000,
+          date: DateTime(_today.year, _today.month, _today.day),
+        ),
+      ],
+    );
+
+    testWidgets('los movimientos viejos siguen mostrando su nombre', (tester) async {
+      await pumpMiPlata(tester, backend: withArchivedCategory());
+      await goTo(tester, AppRoutes.transactions);
+
+      expect(find.text('Vieja'), findsOneWidget);
+    });
+
+    testWidgets('no se ofrece al registrar un movimiento nuevo', (tester) async {
+      await pumpMiPlata(tester, backend: withArchivedCategory());
+      await openForm(tester);
+
+      await tester.tap(categoryDropdown());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Mercado'), findsOneWidget);
+      expect(find.text('Vieja'), findsNothing);
+      expect(find.text('Vieja (archivada)'), findsNothing);
+    });
+
+    testWidgets('al editar un movimiento que la usa, se conserva', (tester) async {
+      final backend = withArchivedCategory();
+      await pumpMiPlata(tester, backend: backend);
+      await goTo(tester, AppRoutes.transactions);
+      await tester.tap(find.text('Vieja'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Vieja (archivada)'), findsOneWidget);
+
+      await tester.enterText(amountField(), '6.000');
+      await tester.tap(submit('Guardar cambios'));
+      await tester.pumpAndSettle();
+
+      expect(backend.transactions.updated['tx-1']!.categoryId, 'cat-Vieja');
+    });
+  });
 }

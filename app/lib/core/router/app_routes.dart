@@ -6,6 +6,7 @@ class AppRoutes {
   static const register = '/register';
   static const accounts = '/accounts';
   static const transactions = '/transactions';
+  static const categories = '/categories';
 
   /// Rutas accesibles sin sesión.
   static const public = {login, register};

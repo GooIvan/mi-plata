@@ -45,6 +45,11 @@ class DashboardScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            tooltip: 'Categorías',
+            icon: const Icon(Icons.category_outlined),
+            onPressed: () => context.push(AppRoutes.categories),
+          ),
+          IconButton(
             tooltip: 'Cerrar sesión',
             icon: const Icon(Icons.logout),
             onPressed: auth.signOut,

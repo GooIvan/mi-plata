@@ -76,7 +76,7 @@ void main() {
         final all = await accounts.fetchAll();
         bancolombia = all.firstWhere((a) => a.name == 'Bancolombia');
         efectivo = all.firstWhere((a) => a.name == 'Efectivo');
-        category = {for (final c in await categories.fetchActive()) c.name: c};
+        category = {for (final c in await categories.fetchAll()) c.name: c};
       });
 
       tearDownAll(() => harness.dispose());

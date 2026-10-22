@@ -274,8 +274,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final categoryType = _type == TransactionType.income
         ? CategoryType.income
         : CategoryType.expense;
+    // Una categoría archivada solo se ofrece si ya es la elegida (al editar).
     final categories = allCategories
-        .where((category) => category.type == categoryType)
+        .where(
+          (category) =>
+              category.type == categoryType &&
+              (!category.isArchived || category.id == _categoryId),
+        )
         .toList();
     final destinations = accounts
         .where((account) => account.id != _accountId)
@@ -382,7 +387,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   for (final category in categories)
                     DropdownMenuItem<String?>(
                       value: category.id,
-                      child: Text(category.name, overflow: TextOverflow.ellipsis),
+                      child: Text(
+                        category.isArchived
+                            ? '${category.name} (archivada)'
+                            : category.name,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                 ],
                 onChanged: _saving

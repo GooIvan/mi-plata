@@ -2,6 +2,7 @@ import 'package:mi_plata/features/categories/data/category_repository.dart';
 import 'package:mi_plata/features/categories/domain/category.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
 import 'package:mi_plata/features/accounts/domain/account.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mi_plata/features/transactions/data/transaction_repository.dart';
 import 'package:mi_plata/features/transactions/domain/transaction.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_draft.dart';
@@ -9,8 +10,11 @@ import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 
 import 'fake_account_repository.dart';
 
-Category testCategory(String name, CategoryType type) =>
-    Category(id: 'cat-$name', name: name, type: type);
+Category testCategory(
+  String name,
+  CategoryType type, {
+  bool archived = false,
+}) => Category(id: 'cat-$name', name: name, type: type, isArchived: archived);
 
 Transaction testTransaction(
   String id, {
@@ -33,15 +37,81 @@ Transaction testTransaction(
 );
 
 class FakeCategoryRepository implements CategoryRepository {
-  FakeCategoryRepository([this.categories = const []]);
+  FakeCategoryRepository([List<Category> initial = const []])
+    : _categories = [...initial];
 
-  final List<Category> categories;
+  final List<Category> _categories;
+
+  /// Error que lanzarán todas las operaciones mientras no sea null.
   Object? error;
 
+  final calls = <String>[];
+
+  List<Category> get categories => List.unmodifiable(_categories);
+
   @override
-  Future<List<Category>> fetchActive() async {
+  Future<List<Category>> fetchAll() async {
+    calls.add('fetchAll');
     if (error != null) throw error!;
-    return [...categories]..sort((a, b) => a.name.compareTo(b.name));
+    return [..._categories]..sort((a, b) => a.name.compareTo(b.name));
+  }
+
+  @override
+  Future<void> create({required String name, required CategoryType type}) async {
+    calls.add('create:$name:${type.name}');
+    if (error != null) throw error!;
+    _failIfNameTaken(name, type);
+    _categories.add(testCategory(name, type));
+  }
+
+  @override
+  Future<void> rename(String id, String name) async {
+    calls.add('rename:$id:$name');
+    if (error != null) throw error!;
+    final index = _categories.indexWhere((category) => category.id == id);
+    final category = _categories[index];
+    _failIfNameTaken(name, category.type, exceptId: id);
+    _categories[index] = Category(
+      id: id,
+      name: name,
+      type: category.type,
+      isArchived: category.isArchived,
+    );
+  }
+
+  @override
+  Future<void> setArchived(String id, {required bool isArchived}) async {
+    calls.add('setArchived:$id:$isArchived');
+    if (error != null) throw error!;
+    final index = _categories.indexWhere((category) => category.id == id);
+    final category = _categories[index];
+    _failIfNameTaken(category.name, category.type, exceptId: id, enforce: !isArchived);
+    _categories[index] = Category(
+      id: id,
+      name: category.name,
+      type: category.type,
+      isArchived: isArchived,
+    );
+  }
+
+  /// Imita el índice único: nombre repetido entre activas del mismo tipo.
+  void _failIfNameTaken(
+    String name,
+    CategoryType type, {
+    String? exceptId,
+    bool enforce = true,
+  }) {
+    if (!enforce) return;
+    final taken = _categories.any(
+      (category) =>
+          !category.isArchived &&
+          category.type == type &&
+          category.id != exceptId &&
+          category.name.toLowerCase() == name.toLowerCase(),
+    );
+    if (taken) {
+      throw const PostgrestException(message: 'duplicate key', code: '23505');
+    }
   }
 }
 

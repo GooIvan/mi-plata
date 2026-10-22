@@ -12,7 +12,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 - [x] **Autenticación**: registro e inicio de sesión con correo y contraseña.
 - [x] **Panel general**: saldo total consolidado y saldo por cuenta.
 - [x] **Cuentas**: bancos, efectivo, billeteras digitales y tarjetas.
-- [ ] **Categorías** de ingresos y gastos, personalizables. *(cada usuario ya recibe 13 por defecto; falta poder crear y editar las suyas)*
+- [x] **Categorías** de ingresos y gastos, personalizables: crear, renombrar y archivar (cada usuario empieza con 13 por defecto).
 - [x] **Movimientos**: ingresos, gastos y transferencias entre cuentas.
 
 ### Fase 2 — Análisis y deudas
