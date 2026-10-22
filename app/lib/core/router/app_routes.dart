@@ -8,6 +8,7 @@ class AppRoutes {
   static const transactions = '/transactions';
   static const categories = '/categories';
   static const summary = '/summary';
+  static const debts = '/debts';
 
   /// Rutas accesibles sin sesión.
   static const public = {login, register};

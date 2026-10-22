@@ -17,6 +17,7 @@ import '../domain/transaction.dart';
 import '../domain/transaction_draft.dart';
 import '../domain/transaction_type.dart';
 import '../domain/transaction_validators.dart';
+import 'negative_balance_dialog.dart';
 import 'negative_balance_message.dart';
 import 'transaction_error_message.dart';
 import 'transaction_type_ui.dart';
@@ -131,31 +132,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
   /// Avisa que el cambio deja cuentas en negativo; devuelve si el usuario
   /// quiere guardar de todos modos.
-  Future<bool> _confirmNegativeBalance(List<NegativeBalance> warnings) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          _isEditing ? '¿Guardar de todos modos?' : '¿Registrar de todos modos?',
-        ),
-        content: Text(
-          '${negativeBalanceMessage(warnings)}\n\n'
-          'Si el monto es correcto, puedes continuar.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Corregir'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(_isEditing ? 'Guardar igual' : 'Registrar igual'),
-          ),
-        ],
-      ),
-    );
-    return confirmed ?? false;
-  }
+  Future<bool> _confirmNegativeBalance(List<NegativeBalance> warnings) =>
+      confirmNegativeBalance(
+        context,
+        warnings,
+        title: _isEditing
+            ? '¿Guardar de todos modos?'
+            : '¿Registrar de todos modos?',
+        confirmLabel: _isEditing ? 'Guardar igual' : 'Registrar igual',
+      );
 
   Future<void> _confirmDelete() async {
     final warnings = NegativeBalanceCheck.after(

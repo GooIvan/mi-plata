@@ -12,6 +12,8 @@ import '../../transactions/presentation/transaction_error_message.dart';
 import '../../transactions/presentation/transaction_form_screen.dart';
 import '../../transactions/presentation/transactions_providers.dart';
 import '../../transactions/presentation/widgets/transaction_tile.dart';
+import '../../debts/presentation/debts_providers.dart';
+import 'widgets/debts_summary_card.dart';
 import 'widgets/total_balance_card.dart';
 
 /// Vista principal: el dinero total, las cuentas y los últimos movimientos.
@@ -25,6 +27,7 @@ class DashboardScreen extends ConsumerWidget {
     final auth = ref.watch(authRepositoryProvider);
     final accounts = ref.watch(accountsProvider);
     final transactions = ref.watch(transactionsProvider);
+    final debts = ref.watch(debtsProvider);
     final accountNames = ref.watch(accountNamesProvider);
     final categoryNames = ref.watch(categoryNamesProvider);
     final theme = Theme.of(context);
@@ -104,6 +107,15 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ),
           ],
+          _SectionHeader(
+            title: 'Deudas',
+            actionLabel: 'Ver todas',
+            onAction: () => context.push(AppRoutes.debts),
+          ),
+          DebtsSummaryCard(
+            debts: debts,
+            onTap: () => context.push(AppRoutes.debts),
+          ),
           _SectionHeader(
             title: 'Últimos movimientos',
             actionLabel: 'Ver todos',

@@ -17,7 +17,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 
 ### Fase 2 — Análisis y deudas
 - [x] **Resumen mensual**: ingresos vs. gastos y distribución por categoría con gráficos. Las transferencias no cuentan como ingreso ni gasto.
-- [ ] **Deudas**: lo que debo y lo que me deben, con registro de abonos.
+- [x] **Deudas**: lo que debo y lo que me deben, con registro de abonos. Cada abono es un movimiento real (gasto si debo, ingreso si me deben) y el préstamo inicial se puede registrar opcionalmente en una cuenta.
 
 ### Fase 3 — Ahorro
 - [ ] **Metas de ahorro** con monto objetivo, fecha límite y progreso.
@@ -57,6 +57,8 @@ mi-plata/
 │           ├── accounts/
 │           ├── categories/
 │           ├── transactions/
+│           ├── summary/
+│           ├── debts/
 │           └── dashboard/
 ├── supabase/           # Migraciones SQL, vistas y políticas de seguridad
 │   └── migrations/
@@ -79,6 +81,12 @@ Cada módulo dentro de `features/` se organiza en capas:
 | `categories` | Clasificación de movimientos, de tipo ingreso (`income`) o gasto (`expense`) |
 | `transactions` | Ingresos, gastos y transferencias (`income`, `expense`, `transfer`) asociados a una cuenta |
 | `v_account_balances` | Vista que calcula el saldo actual de cada cuenta |
+| `debts` | Lo que debo (`payable`) o me deben (`receivable`): persona, monto, fechas y notas |
+| `debt_payments` | Enlaza cada deuda con los movimientos que son sus abonos |
+| `v_debt_balances` | Vista con lo pagado y lo pendiente de cada deuda |
+| `v_monthly_totals` | Vista con ingresos y gastos por mes, tipo, categoría y moneda (para el resumen) |
+
+Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa.
 
 **Principios de diseño:**
 

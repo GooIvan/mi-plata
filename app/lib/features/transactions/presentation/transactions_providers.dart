@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers/ledger_revision.dart';
 import '../../../core/supabase/supabase_provider.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/accounts_providers.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/presentation/categories_providers.dart';
-import '../../summary/presentation/summary_providers.dart';
 import '../data/transaction_repository.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_draft.dart';
@@ -26,7 +26,10 @@ class TransactionsNotifier extends AsyncNotifier<List<Transaction>> {
       ref.read(transactionRepositoryProvider);
 
   @override
-  Future<List<Transaction>> build() => _repository.fetchRecent();
+  Future<List<Transaction>> build() {
+    ref.watch(ledgerRevisionProvider);
+    return _repository.fetchRecent();
+  }
 
   Future<void> create(TransactionDraft draft) async {
     await _repository.create(draft);
@@ -43,13 +46,9 @@ class TransactionsNotifier extends AsyncNotifier<List<Transaction>> {
     _refresh();
   }
 
-  /// Los saldos de las cuentas se calculan con los movimientos, así que
-  /// cualquier cambio obliga a recargarlos también.
-  void _refresh() {
-    ref.invalidateSelf();
-    ref.invalidate(accountsProvider);
-    ref.invalidate(monthlyTotalsProvider);
-  }
+  /// Los saldos, el resumen y las deudas se calculan con los movimientos: al
+  /// cambiar uno, todos se recargan (ver [ledgerRevisionProvider]).
+  void _refresh() => ref.read(ledgerRevisionProvider.notifier).bump();
 }
 
 /// Nombres por id, para mostrar en las listas sin consultar cada vez.

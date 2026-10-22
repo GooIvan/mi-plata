@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers/ledger_revision.dart';
 import '../../../core/supabase/supabase_provider.dart';
 import '../data/account_repository.dart';
 import '../domain/account.dart';
@@ -20,7 +21,11 @@ class AccountsNotifier extends AsyncNotifier<List<Account>> {
   AccountRepository get _repository => ref.read(accountRepositoryProvider);
 
   @override
-  Future<List<Account>> build() => _repository.fetchAll();
+  Future<List<Account>> build() {
+    // Los saldos dependen de los movimientos: se recarga cuando cambian.
+    ref.watch(ledgerRevisionProvider);
+    return _repository.fetchAll();
+  }
 
   Future<void> create({
     required String name,

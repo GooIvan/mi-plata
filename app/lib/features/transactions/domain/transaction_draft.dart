@@ -1,3 +1,4 @@
+import '../../../core/format/date_format.dart';
 import 'transaction_type.dart';
 
 /// Los datos de un movimiento antes de guardarlo (al crearlo o editarlo).
@@ -30,13 +31,7 @@ class TransactionDraft {
     'destination_account_id': destinationAccountId,
     'category_id': categoryId,
     'amount': amount,
-    'transaction_date': _dateOnly(date),
+    'transaction_date': toDbDate(date),
     'description': description,
   };
-
-  static String _dateOnly(DateTime date) {
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    return '${date.year}-$month-$day';
-  }
 }

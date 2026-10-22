@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers/ledger_revision.dart';
 import '../../../core/supabase/supabase_provider.dart';
 import '../data/summary_repository.dart';
 import '../domain/month_summary.dart';
@@ -16,9 +17,10 @@ final summaryRepositoryProvider = Provider<SummaryRepository>(
 /// con eso se arman tanto el resumen del mes como la tendencia.
 ///
 /// Se pide por mes (el primer día) y se vuelve a pedir cuando cambia un
-/// movimiento; ver `TransactionsNotifier`.
+/// movimiento (ver [ledgerRevisionProvider]).
 final monthlyTotalsProvider = FutureProvider.autoDispose
     .family<List<MonthlyTotal>, DateTime>((ref, month) {
+      ref.watch(ledgerRevisionProvider);
       return ref
           .watch(summaryRepositoryProvider)
           .fetchMonthlyTotals(
