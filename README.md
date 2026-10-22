@@ -84,6 +84,7 @@ Cada módulo dentro de `features/` se organiza en capas:
 
 - Los montos se guardan como `numeric(14,2)`, nunca como `float`.
 - Los saldos **se calculan** a partir de los movimientos; no se almacenan.
+- Un saldo puede ser negativo (sobregiro, tarjetas), así que la base de datos no lo impide; en cambio la app **avisa antes de guardar** un movimiento que deje una cuenta en negativo. Las tarjetas quedan exentas.
 - Las transferencias entre cuentas son una sola fila (`account_id` → `destination_account_id`) y no cuentan como gasto ni ingreso.
 - Las cuentas y categorías se archivan en lugar de eliminarse, para conservar el historial.
 - Todas las tablas incluyen `user_id` y están protegidas con Row Level Security (RLS).

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mi_plata/core/router/app_routes.dart';
 import 'package:mi_plata/features/accounts/domain/account_type.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
+import 'package:mi_plata/features/transactions/domain/transaction.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -388,6 +389,241 @@ void main() {
 
       expect(backend.transactions.deleted, isEmpty);
       expect(find.text('Editar movimiento'), findsOneWidget);
+    });
+  });
+
+  group('aviso de saldo negativo', () {
+    FakeBackend nequiConCuatroMil({List<Transaction> transactions = const []}) =>
+        FakeBackend(
+          accounts: [
+            testAccount('Nequi', type: AccountType.wallet, balance: 4000),
+            testAccount('Efectivo', type: AccountType.cash, balance: 0),
+            testAccount('Visa', type: AccountType.card, balance: -50000),
+          ],
+          transactions: transactions,
+        );
+
+    Future<void> fillExpense(
+      WidgetTester tester, {
+      required String amount,
+      String account = 'Nequi',
+    }) async {
+      await openForm(tester);
+      await tester.enterText(amountField(), amount);
+      await pick(tester, accountDropdown(0), account);
+    }
+
+    testWidgets('un gasto mayor al saldo pide confirmar, y se puede corregir', (
+      tester,
+    ) async {
+      final backend = nequiConCuatroMil();
+      await pumpMiPlata(tester, backend: backend);
+      await fillExpense(tester, amount: '6.000');
+
+      await tester.tap(submit('Registrar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('¿Registrar de todos modos?'), findsOneWidget);
+      expect(find.textContaining(r'Nequi quedará en -$2.000.'), findsOneWidget);
+      expect(backend.transactions.created, isEmpty);
+
+      // "Corregir" vuelve al formulario sin guardar nada.
+      await tester.tap(find.widgetWithText(TextButton, 'Corregir'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(submit('Registrar'), findsOneWidget);
+      expect(backend.transactions.created, isEmpty);
+    });
+
+    testWidgets('"Registrar igual" guarda y el saldo queda en negativo', (
+      tester,
+    ) async {
+      final backend = nequiConCuatroMil();
+      await pumpMiPlata(tester, backend: backend);
+      await fillExpense(tester, amount: '6.000');
+
+      await tester.tap(submit('Registrar'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Registrar igual'));
+      await tester.pumpAndSettle();
+
+      expect(backend.transactions.created, hasLength(1));
+      expect(submit('Registrar'), findsNothing); // volvió al panel
+      expect(textLike(r'-$2.000'), findsOneWidget);
+    });
+
+    testWidgets('dejar la cuenta justo en cero no avisa', (tester) async {
+      final backend = nequiConCuatroMil();
+      await pumpMiPlata(tester, backend: backend);
+      await fillExpense(tester, amount: '4.000');
+
+      await tester.tap(submit('Registrar'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(backend.transactions.created, hasLength(1));
+    });
+
+    testWidgets('una transferencia avisa por la cuenta de origen', (tester) async {
+      final backend = nequiConCuatroMil();
+      await pumpMiPlata(tester, backend: backend);
+      await openForm(tester);
+
+      await tester.tap(segment('Transferencia'));
+      await tester.pumpAndSettle();
+      await tester.enterText(amountField(), '6000');
+      await pick(tester, accountDropdown(0), 'Nequi');
+      await pick(tester, accountDropdown(1), 'Efectivo');
+
+      await tester.tap(submit('Registrar'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining(r'Nequi quedará en -$2.000.'), findsOneWidget);
+      expect(find.textContaining('Efectivo quedará'), findsNothing);
+      expect(backend.transactions.created, isEmpty);
+    });
+
+    testWidgets('en una tarjeta de crédito no avisa', (tester) async {
+      final backend = nequiConCuatroMil();
+      await pumpMiPlata(tester, backend: backend);
+      await fillExpense(tester, amount: '20.000', account: 'Visa');
+
+      await tester.tap(submit('Registrar'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(backend.transactions.created, hasLength(1));
+    });
+
+    group('al editar', () {
+      // Nequi tenía 4.000, se gastaron 3.000 y hoy tiene 1.000.
+      FakeBackend conUnGasto() => nequiConCuatroMil(
+        transactions: [
+          testTransaction(
+            'tx-1',
+            type: TransactionType.expense,
+            accountId: 'id-Nequi',
+            amount: 3000,
+            date: DateTime(_today.year, _today.month, _today.day),
+            description: 'Compra',
+          ),
+        ],
+      );
+
+      Future<void> openPurchase(WidgetTester tester) async {
+        await goTo(tester, AppRoutes.transactions);
+        await tester.tap(find.text('Compra'));
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('subir el monto más allá del saldo avisa con "Guardar igual"', (
+        tester,
+      ) async {
+        final backend = conUnGasto();
+        await pumpMiPlata(tester, backend: backend);
+        await openPurchase(tester);
+
+        await tester.enterText(amountField(), '4.500');
+        await tester.tap(submit('Guardar cambios'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('¿Guardar de todos modos?'), findsOneWidget);
+        expect(find.textContaining(r'Nequi quedará en -$500.'), findsOneWidget);
+        expect(backend.transactions.updated, isEmpty);
+
+        await tester.tap(find.widgetWithText(FilledButton, 'Guardar igual'));
+        await tester.pumpAndSettle();
+        expect(backend.transactions.updated['tx-1']!.amount, '4500');
+      });
+
+      testWidgets('un cambio que sigue dentro del saldo no avisa', (tester) async {
+        final backend = conUnGasto();
+        await pumpMiPlata(tester, backend: backend);
+        await openPurchase(tester);
+
+        await tester.enterText(amountField(), '3.500'); // quedan 500
+        await tester.tap(submit('Guardar cambios'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AlertDialog), findsNothing);
+        expect(backend.transactions.updated['tx-1']!.amount, '3500');
+      });
+
+      testWidgets('cambiar solo la descripción no avisa', (tester) async {
+        final backend = conUnGasto();
+        await pumpMiPlata(tester, backend: backend);
+        await openPurchase(tester);
+
+        await tester.enterText(descriptionField(), 'Compra del mes');
+        await tester.tap(submit('Guardar cambios'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AlertDialog), findsNothing);
+        expect(backend.transactions.updated['tx-1']!.description, 'Compra del mes');
+      });
+    });
+
+    testWidgets('eliminar un ingreso que ya se gastó lo advierte', (tester) async {
+      // Entraron 5.000 y salieron 4.000: hoy hay 1.000. Borrar el ingreso deja -4.000.
+      final backend = FakeBackend(
+        accounts: [testAccount('Nequi', type: AccountType.wallet, balance: 0)],
+        transactions: [
+          testTransaction(
+            'tx-in',
+            type: TransactionType.income,
+            accountId: 'id-Nequi',
+            amount: 5000,
+            date: DateTime(_today.year, _today.month, _today.day - 1),
+            description: 'Sueldo',
+          ),
+          testTransaction(
+            'tx-out',
+            type: TransactionType.expense,
+            accountId: 'id-Nequi',
+            amount: 4000,
+            date: DateTime(_today.year, _today.month, _today.day),
+            description: 'Compra',
+          ),
+        ],
+      );
+      await pumpMiPlata(tester, backend: backend);
+      await goTo(tester, AppRoutes.transactions);
+      await tester.tap(find.text('Sueldo'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Eliminar movimiento'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Atención:'), findsOneWidget);
+      expect(find.textContaining(r'Nequi quedará en -$4.000.'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Eliminar'));
+      await tester.pumpAndSettle();
+      expect(backend.transactions.deleted, ['tx-in']);
+    });
+
+    testWidgets('eliminar un gasto no muestra ninguna advertencia', (tester) async {
+      final backend = nequiConCuatroMil(
+        transactions: [
+          testTransaction(
+            'tx-1',
+            type: TransactionType.expense,
+            accountId: 'id-Nequi',
+            amount: 3000,
+            date: DateTime(_today.year, _today.month, _today.day),
+            description: 'Compra',
+          ),
+        ],
+      );
+      await pumpMiPlata(tester, backend: backend);
+      await goTo(tester, AppRoutes.transactions);
+      await tester.tap(find.text('Compra'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Eliminar movimiento'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Atención:'), findsNothing);
     });
   });
 }

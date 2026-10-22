@@ -12,10 +12,12 @@ import '../../accounts/presentation/accounts_providers.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/domain/category_type.dart';
 import '../../categories/presentation/categories_providers.dart';
+import '../domain/negative_balance_check.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_draft.dart';
 import '../domain/transaction_type.dart';
 import '../domain/transaction_validators.dart';
+import 'negative_balance_message.dart';
 import 'transaction_error_message.dart';
 import 'transaction_type_ui.dart';
 import 'transactions_providers.dart';
@@ -86,11 +88,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _saving = true;
-      _error = null;
-    });
-
     final description = _description.text.trim();
     final draft = TransactionDraft(
       type: _type,
@@ -101,6 +98,19 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       date: _date,
       description: description.isEmpty ? null : description,
     );
+
+    final warnings = NegativeBalanceCheck.after(
+      accounts: ref.read(accountsProvider).value ?? const <Account>[],
+      draft: draft,
+      previous: widget.transaction,
+    );
+    if (warnings.isNotEmpty && !await _confirmNegativeBalance(warnings)) return;
+    if (!mounted) return;
+
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
 
     final transactions = ref.read(transactionsProvider.notifier);
     try {
@@ -119,13 +129,46 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
+  /// Avisa que el cambio deja cuentas en negativo; devuelve si el usuario
+  /// quiere guardar de todos modos.
+  Future<bool> _confirmNegativeBalance(List<NegativeBalance> warnings) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          _isEditing ? '¿Guardar de todos modos?' : '¿Registrar de todos modos?',
+        ),
+        content: Text(
+          '${negativeBalanceMessage(warnings)}\n\n'
+          'Si el monto es correcto, puedes continuar.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Corregir'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(_isEditing ? 'Guardar igual' : 'Registrar igual'),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
   Future<void> _confirmDelete() async {
+    final warnings = NegativeBalanceCheck.after(
+      accounts: ref.read(accountsProvider).value ?? const <Account>[],
+      previous: widget.transaction,
+    );
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('¿Eliminar este movimiento?'),
-        content: const Text(
-          'El saldo de tus cuentas se recalculará sin este movimiento.',
+        content: Text(
+          'El saldo de tus cuentas se recalculará sin este movimiento.'
+          '${warnings.isEmpty ? '' : '\n\nAtención:\n${negativeBalanceMessage(warnings)}'}',
         ),
         actions: [
           TextButton(
