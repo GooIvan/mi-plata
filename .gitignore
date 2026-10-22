@@ -1,0 +1,14 @@
+# Variables de entorno y llaves: nunca al repositorio
+.env
+.env.*
+!.env.example
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# IDEs y sistema
+.idea/
+.vscode/
+*.iml
+.DS_Store

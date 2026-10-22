@@ -47,7 +47,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 ## 📁 Estructura del repositorio
 
 ```
-cuentas-claras/
+mi-plata/
 ├── app/                # Proyecto Flutter
 │   └── lib/
 │       ├── core/       # Configuración, tema, utilidades compartidas
@@ -100,8 +100,8 @@ Cada módulo dentro de `features/` se organiza en capas:
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/<tu-usuario>/cuentas-claras.git
-cd cuentas-claras
+git clone https://github.com/<tu-usuario>/mi-plata.git
+cd mi-plata
 ```
 
 ### 2. Configurar la base de datos
@@ -114,14 +114,16 @@ supabase db push
 
 ### 3. Configurar variables de entorno
 
-Crear el archivo `app/.env` con:
+Copiar `app/.env.example` a `app/.env` y completar los valores:
 
 ```env
 SUPABASE_URL=https://<id-del-proyecto>.supabase.co
-SUPABASE_ANON_KEY=<tu-anon-key>
+SUPABASE_PUBLISHABLE_KEY=<tu-publishable-key>
 ```
 
-> ⚠️ El archivo `.env` está en `.gitignore`. Nunca subas tus llaves al repositorio y jamás uses la `service_role key` dentro de la app.
+Para desarrollo local, `supabase status` muestra la URL y la publishable key. Desde el emulador de Android, `localhost` del equipo es `10.0.2.2`.
+
+> ⚠️ El archivo `.env` está en `.gitignore`. Nunca subas tus llaves al repositorio y jamás uses la `secret key` (antes `service_role`) dentro de la app.
 
 ### 4. Ejecutar la app
 
