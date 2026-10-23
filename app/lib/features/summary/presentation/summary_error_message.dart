@@ -1,9 +1,11 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../l10n/l10n.dart';
+
 /// Traduce un error al cargar el resumen a un mensaje para el usuario.
-String summaryErrorMessage(Object error) {
+String summaryErrorMessage(AppLocalizations l10n, Object error) {
   if (error is PostgrestException && error.code == 'PGRST301') {
-    return 'Tu sesión expiró. Vuelve a iniciar sesión.';
+    return l10n.commonSessionExpired;
   }
-  return 'No se pudo cargar el resumen. Revisa tu conexión e intenta de nuevo.';
+  return l10n.summaryLoadError;
 }

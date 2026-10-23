@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_routes.dart';
+import '../../../l10n/l10n.dart';
 import '../domain/auth_validators.dart';
 import 'auth_error_message.dart';
 import 'auth_providers.dart';
@@ -41,11 +42,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final state = ref.watch(authControllerProvider);
     final isLoading = state.isLoading;
     final error = state.hasError && !isLoading
-        ? authErrorMessage(state.error!)
+        ? authErrorMessage(context.l10n, state.error!)
         : null;
 
     return AuthLayout(
-      subtitle: 'Inicia sesión para continuar',
+      subtitle: context.l10n.authLoginSubtitle,
       children: [
         Form(
           key: _formKey,
@@ -59,20 +60,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   autofillHints: const [AutofillHints.email],
-                  validator: AuthValidators.email,
-                  decoration: const InputDecoration(
-                    labelText: 'Correo electrónico',
-                    border: OutlineInputBorder(),
+                  validator: (value) => AuthValidators.email(context.l10n, value),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.authEmailLabel,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
                 PasswordField(
                   controller: _password,
-                  label: 'Contraseña',
+                  label: context.l10n.authPasswordLabel,
                   enabled: !isLoading,
                   autofillHints: const [AutofillHints.password],
                   textInputAction: TextInputAction.done,
-                  validator: AuthValidators.requiredPassword,
+                  validator: (value) =>
+                      AuthValidators.requiredPassword(context.l10n, value),
                   onFieldSubmitted: (_) => _submit(),
                 ),
                 if (error != null) ...[
@@ -88,14 +90,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Entrar'),
+                      : Text(context.l10n.authLoginButton),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: isLoading
                       ? null
                       : () => context.go(AppRoutes.register),
-                  child: const Text('¿No tienes cuenta? Regístrate'),
+                  child: Text(context.l10n.authGoToRegister),
                 ),
               ],
             ),

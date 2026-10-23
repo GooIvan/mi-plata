@@ -1,3 +1,5 @@
+import '../../../core/format/formats.dart';
+import '../../../l10n/l10n.dart';
 import '../../accounts/domain/amount_parser.dart';
 
 /// Reglas del formulario de movimientos. Los mensajes llegan al usuario.
@@ -6,19 +8,21 @@ class TransactionValidators {
 
   static const maxDescriptionLength = 200;
 
-  static String? amount(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Ingresa el monto';
+  static String? amount(AppLocalizations l10n, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return l10n.transactionsAmountRequired;
+    }
 
-    final parsed = AmountParser.parse(value);
-    if (parsed == null) return 'Monto no válido. Ejemplo: 1.500.000 o 1500,50';
-    if (parsed.startsWith('-')) return 'El monto no puede ser negativo';
-    if (double.parse(parsed) == 0) return 'El monto debe ser mayor que cero';
+    final parsed = AmountParser.parse(value, Formats(l10n));
+    if (parsed == null) return l10n.commonInvalidAmount;
+    if (parsed.startsWith('-')) return l10n.transactionsAmountNegative;
+    if (double.parse(parsed) == 0) return l10n.transactionsAmountZero;
     return null;
   }
 
-  static String? description(String? value) {
+  static String? description(AppLocalizations l10n, String? value) {
     if ((value?.trim().length ?? 0) > maxDescriptionLength) {
-      return 'Usa $maxDescriptionLength caracteres o menos';
+      return l10n.commonNameTooLong(maxDescriptionLength);
     }
     return null;
   }

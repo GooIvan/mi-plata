@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/format/date_format.dart';
+import '../../../core/format/formats.dart';
 import '../../../core/widgets/state_message.dart';
+import '../../../l10n/l10n.dart';
 import '../domain/transaction.dart';
 import 'transaction_error_message.dart';
 import 'transaction_form_screen.dart';
@@ -56,6 +57,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   Widget build(BuildContext context) {
     final filter = ref.watch(transactionFilterProvider);
     final page = ref.watch(transactionListProvider);
+    final l10n = context.l10n;
     final filtersCount = filter.activeCount - (filter.text != null ? 1 : 0);
 
     return Scaffold(
@@ -66,27 +68,27 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 autofocus: true,
                 textInputAction: TextInputAction.search,
                 onChanged: _onSearchChanged,
-                decoration: const InputDecoration(
-                  hintText: 'Buscar en la descripción',
+                decoration: InputDecoration(
+                  hintText: l10n.transactionsSearchHint,
                   border: InputBorder.none,
                 ),
               )
-            : const Text('Movimientos'),
+            : Text(l10n.transactionsTitle),
         actions: [
           if (_searching)
             IconButton(
-              tooltip: 'Cerrar búsqueda',
+              tooltip: l10n.transactionsSearchClose,
               icon: const Icon(Icons.close),
               onPressed: _closeSearch,
             )
           else
             IconButton(
-              tooltip: 'Buscar',
+              tooltip: l10n.transactionsSearch,
               icon: const Icon(Icons.search),
               onPressed: () => setState(() => _searching = true),
             ),
           IconButton(
-            tooltip: 'Filtrar',
+            tooltip: l10n.transactionsFilter,
             icon: Badge(
               isLabelVisible: filtersCount > 0,
               label: Text('$filtersCount'),
@@ -104,8 +106,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => StateMessage(
                 icon: Icons.cloud_off_outlined,
-                text: transactionErrorMessage(error),
-                actionLabel: 'Reintentar',
+                text: transactionErrorMessage(l10n, error),
+                actionLabel: l10n.commonRetry,
                 onAction: () => ref.invalidate(transactionListProvider),
               ),
               data: (data) => data.items.isEmpty
@@ -118,7 +120,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showTransactionForm(context),
         icon: const Icon(Icons.add),
-        label: const Text('Nuevo movimiento'),
+        label: Text(l10n.transactionsNew),
       ),
     );
   }
@@ -131,19 +133,21 @@ class _EmptyState extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+
     if (isFiltered) {
       return StateMessage(
         icon: Icons.search_off,
-        text: 'No hay movimientos con estos filtros.',
-        actionLabel: 'Limpiar filtros',
+        text: l10n.transactionsNoMatches,
+        actionLabel: l10n.transactionsClearFilters,
         onAction: () => ref.read(transactionFilterProvider.notifier).clear(),
       );
     }
 
     return StateMessage(
       icon: Icons.receipt_long_outlined,
-      text: 'Aún no registras movimientos.\nAnota el primero.',
-      actionLabel: 'Registrar movimiento',
+      text: l10n.transactionsEmpty,
+      actionLabel: l10n.transactionsRecordOne,
       onAction: () => showTransactionForm(context),
     );
   }
@@ -159,12 +163,13 @@ class _ActiveFilters extends ConsumerWidget {
     final notifier = ref.read(transactionFilterProvider.notifier);
     final accountNames = ref.watch(accountNamesProvider);
     final categoryNames = ref.watch(categoryNamesProvider);
-    final range = describeRange(filter.from, filter.to);
+    final l10n = context.l10n;
+    final range = describeRange(l10n, filter.from, filter.to);
 
     Widget chip(String label, VoidCallback onRemove) => InputChip(
       label: Text(label),
       onDeleted: onRemove,
-      deleteButtonTooltipMessage: 'Quitar filtro: $label',
+      deleteButtonTooltipMessage: l10n.transactionsRemoveFilter(label),
     );
 
     return Align(
@@ -177,17 +182,23 @@ class _ActiveFilters extends ConsumerWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             if (filter.type != null)
-              chip(filter.type!.pluralLabel, () => notifier.set(filter.withType(null))),
+              chip(
+                filter.type!.pluralLabel(l10n),
+                () => notifier.set(filter.withType(null)),
+              ),
             if (filter.accountId != null)
               chip(
-                accountNames[filter.accountId] ?? 'Cuenta',
+                accountNames[filter.accountId] ?? l10n.commonAccount,
                 () => notifier.set(filter.withAccount(null)),
               ),
             if (filter.uncategorized)
-              chip('Sin categoría', () => notifier.set(filter.withCategory(null)))
+              chip(
+                l10n.commonNoCategory,
+                () => notifier.set(filter.withCategory(null)),
+              )
             else if (filter.categoryId != null)
               chip(
-                categoryNames[filter.categoryId] ?? 'Categoría',
+                categoryNames[filter.categoryId] ?? l10n.commonCategory,
                 () => notifier.set(filter.withCategory(null)),
               ),
             if (range != null)
@@ -195,7 +206,7 @@ class _ActiveFilters extends ConsumerWidget {
             TextButton(
               // Quita los filtros, pero conserva la búsqueda en curso.
               onPressed: () => notifier.set(filter.onlyText),
-              child: const Text('Limpiar filtros'),
+              child: Text(l10n.transactionsClearFilters),
             ),
           ],
         ),
@@ -241,7 +252,7 @@ class _TransactionList extends ConsumerWidget {
           return Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Text(
-              formatDay(item),
+              context.formats.day(item),
               style: theme.textTheme.labelLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -291,10 +302,10 @@ class _LoadMoreState extends ConsumerState<_LoadMore> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Text('No se pudieron cargar más movimientos.'),
+            Text(context.l10n.transactionsLoadMoreError),
             TextButton(
               onPressed: _request,
-              child: const Text('Reintentar'),
+              child: Text(context.l10n.commonRetry),
             ),
           ],
         ),

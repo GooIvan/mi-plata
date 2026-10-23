@@ -12,11 +12,21 @@ import 'package:mi_plata/features/categories/presentation/category_error_message
 import 'package:mi_plata/features/transactions/data/transaction_repository.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_draft.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
+import 'package:mi_plata/l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../support/test_app.dart';
 
 import '../support/integration_harness.dart';
 
+late AppLocalizations l10n;
+
 void main() {
+  setUpAll(() async {
+    l10n = await loadL10n();
+    await initDates();
+  });
+
   group(
     'CategoryRepository contra Supabase local',
     skip: integrationEnabled ? false : integrationSkipReason,
@@ -77,7 +87,7 @@ void main() {
             isA<PostgrestException>()
                 .having((e) => e.code, 'code', '23505')
                 .having(
-                  (e) => categoryErrorMessage(e),
+                  (e) => categoryErrorMessage(l10n, e),
                   'mensaje',
                   'Ya tienes una categoría activa con ese nombre.',
                 ),

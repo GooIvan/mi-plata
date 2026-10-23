@@ -7,6 +7,7 @@ import 'package:mi_plata/features/debts/domain/debt_totals.dart';
 import 'package:mi_plata/features/debts/domain/debt_validators.dart';
 import 'package:mi_plata/features/debts/presentation/debt_error_message.dart';
 import 'package:mi_plata/features/debts/presentation/debt_ui.dart';
+import 'package:mi_plata/l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../support/test_app.dart';
@@ -39,8 +40,14 @@ Debt debt({
 
 DateTime inDays(int days) => DateTime(2026, 10, 22 + days);
 
+late AppLocalizations l10n;
+
 void main() {
-  setUpAll(initDates);
+  setUpAll(() async {
+    l10n = await loadL10n();
+    await initDates();
+  });
+
 
   group('modelo', () {
     test('Debt.fromJson lee una fila de v_debt_balances', () {
@@ -175,7 +182,7 @@ void main() {
   });
 
   group('textos de estado', () {
-    String text(Debt d) => debtStatusText(d, today);
+    String text(Debt d) => debtStatusText(l10n, d, today);
 
     test('describe cada caso en una frase', () {
       expect(text(debt()), 'Sin fecha de vencimiento');
@@ -255,38 +262,38 @@ void main() {
 
   group('validadores', () {
     test('la persona es obligatoria y tiene un máximo', () {
-      expect(DebtValidators.counterparty('Juan'), isNull);
-      expect(DebtValidators.counterparty('  '), 'Escribe el nombre de la persona');
-      expect(DebtValidators.counterparty(null), 'Escribe el nombre de la persona');
-      expect(DebtValidators.counterparty('x' * 61), 'Usa 60 caracteres o menos');
+      expect(DebtValidators.counterparty(l10n, 'Juan'), isNull);
+      expect(DebtValidators.counterparty(l10n, '  '), 'Escribe el nombre de la persona');
+      expect(DebtValidators.counterparty(l10n, null), 'Escribe el nombre de la persona');
+      expect(DebtValidators.counterparty(l10n, 'x' * 61), 'Usa 60 caracteres o menos');
     });
 
     test('las notas tienen un máximo', () {
-      expect(DebtValidators.notes(null), isNull);
-      expect(DebtValidators.notes('x' * 300), isNull);
-      expect(DebtValidators.notes('x' * 301), 'Usa 300 caracteres o menos');
+      expect(DebtValidators.notes(l10n, null), isNull);
+      expect(DebtValidators.notes(l10n, 'x' * 300), isNull);
+      expect(DebtValidators.notes(l10n, 'x' * 301), 'Usa 300 caracteres o menos');
     });
 
     test('el monto debe ser positivo', () {
-      expect(DebtValidators.amount('500.000'), isNull);
-      expect(DebtValidators.amount('0'), 'El monto debe ser mayor que cero');
-      expect(DebtValidators.amount(''), 'Ingresa el monto');
+      expect(DebtValidators.amount(l10n, '500.000'), isNull);
+      expect(DebtValidators.amount(l10n, '0'), 'El monto debe ser mayor que cero');
+      expect(DebtValidators.amount(l10n, ''), 'Ingresa el monto');
     });
 
     test('el vencimiento no puede ser antes del inicio', () {
       final start = DateTime(2026, 10, 10, 15);
-      expect(DebtValidators.dueDate(null, start), isNull);
-      expect(DebtValidators.dueDate(DateTime(2026, 10, 10), start), isNull);
-      expect(DebtValidators.dueDate(DateTime(2026, 11, 1), start), isNull);
+      expect(DebtValidators.dueDate(l10n, null, start), isNull);
+      expect(DebtValidators.dueDate(l10n, DateTime(2026, 10, 10), start), isNull);
+      expect(DebtValidators.dueDate(l10n, DateTime(2026, 11, 1), start), isNull);
       expect(
-        DebtValidators.dueDate(DateTime(2026, 10, 9), start),
+        DebtValidators.dueDate(l10n, DateTime(2026, 10, 9), start),
         'El vencimiento no puede ser anterior al inicio',
       );
     });
 
     group('abono', () {
       String? check(String? value) =>
-          DebtValidators.paymentAmount(value, remaining: 300000);
+          DebtValidators.paymentAmount(l10n, value, remaining: 300000);
 
       test('acepta hasta lo que falta, inclusive', () {
         expect(check('100.000'), isNull);
@@ -347,7 +354,7 @@ void main() {
 
   group('debtErrorMessage', () {
     String message(String? code, [String text = 'x']) =>
-        debtErrorMessage(PostgrestException(message: text, code: code));
+        debtErrorMessage(l10n, PostgrestException(message: text, code: code));
 
     test('muestra tal cual los mensajes en español de nuestras reglas', () {
       const own = 'El abono supera lo que falta por pagar';
@@ -365,7 +372,7 @@ void main() {
       expect(message('23503'), startsWith('La cuenta o la deuda ya no existe'));
       expect(message('PGRST301'), startsWith('Tu sesión expiró'));
       expect(message('XX000'), startsWith('No se pudo completar'));
-      expect(debtErrorMessage(StateError('x')), startsWith('No se pudo'));
+      expect(debtErrorMessage(l10n, StateError('x')), startsWith('No se pudo'));
     });
   });
 }

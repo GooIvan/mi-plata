@@ -14,11 +14,21 @@ import 'package:mi_plata/features/debts/presentation/debt_error_message.dart';
 import 'package:mi_plata/features/transactions/data/transaction_repository.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_draft.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
+import 'package:mi_plata/l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../support/test_app.dart';
 
 import '../support/integration_harness.dart';
 
+late AppLocalizations l10n;
+
 void main() {
+  setUpAll(() async {
+    l10n = await loadL10n();
+    await initDates();
+  });
+
   group(
     'DebtRepository contra Supabase local',
     skip: integrationEnabled ? false : integrationSkipReason,
@@ -217,7 +227,7 @@ void main() {
               isA<PostgrestException>()
                   .having((e) => e.code, 'code', '23514')
                   .having(
-                    (e) => debtErrorMessage(e),
+                    (e) => debtErrorMessage(l10n, e),
                     'mensaje al usuario',
                     'El abono supera lo que falta por pagar',
                   ),

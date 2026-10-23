@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/format/money_format.dart';
+import '../../../../core/format/formats.dart';
+import '../../../../l10n/l10n.dart';
+import '../../../transactions/domain/transaction_type.dart';
 import '../../domain/month_summary.dart';
 import '../summary_comparison.dart';
 
@@ -41,26 +43,30 @@ class CategoryRanking extends StatelessWidget {
 
   /// Cómo cambió una categoría frente al mes anterior. "Otras" junta varias
   /// categorías distintas cada mes, así que no se compara.
-  ComparisonCaption? _comparison(CategoryShare share) {
+  ComparisonCaption? _comparison(AppLocalizations l10n, CategoryShare share) {
     if (share.kind == ShareKind.other) return null;
     return compareWithPrevious(
+      l10n,
       current: share.cents,
       previous: previousCents[share.categoryId] ?? 0,
       previousHasData: previousHasData,
       previousMonthName: previousMonthName,
-      noneNoun: upIsGood ? 'ingresos' : 'gastos',
+      noneKind: upIsGood ? TransactionType.income : TransactionType.expense,
     );
   }
 
-  String _name(CategoryShare share) => switch (share.kind) {
-    ShareKind.category => names[share.categoryId] ?? 'Categoría',
-    ShareKind.uncategorized => 'Sin categoría',
-    ShareKind.other => 'Otras',
-  };
+  String _name(AppLocalizations l10n, CategoryShare share) =>
+      switch (share.kind) {
+        ShareKind.category => names[share.categoryId] ?? l10n.commonCategory,
+        ShareKind.uncategorized => l10n.commonNoCategory,
+        ShareKind.other => l10n.summaryOtherCategories,
+      };
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
 
     return Column(
       children: [
@@ -74,20 +80,20 @@ class CategoryRanking extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        _name(share),
+                        _name(l10n, share),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      formatMoney(share.cents / 100),
+                      formats.money(share.cents / 100),
                       style: theme.textTheme.titleSmall,
                     ),
                     SizedBox(
                       width: 52,
                       child: Text(
-                        formatPercent(share.share),
+                        formatPercent(l10n, share.share),
                         textAlign: TextAlign.end,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
@@ -96,7 +102,7 @@ class CategoryRanking extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (_comparison(share) case final comparison?) ...[
+                if (_comparison(l10n, share) case final comparison?) ...[
                   const SizedBox(height: 2),
                   Row(
                     children: [
@@ -149,8 +155,8 @@ class CategoryRanking extends StatelessWidget {
 }
 
 /// "34 %", o "<1 %" si es una fracción pequeña pero no cero.
-String formatPercent(double share) {
+String formatPercent(AppLocalizations l10n, double share) {
   final percent = (share * 100).round();
-  if (percent == 0 && share > 0) return '<1 %';
-  return '$percent %';
+  if (percent == 0 && share > 0) return l10n.commonPercentUnderOne;
+  return l10n.commonPercent(percent);
 }

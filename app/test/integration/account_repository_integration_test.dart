@@ -6,11 +6,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mi_plata/features/accounts/data/account_repository.dart';
 import 'package:mi_plata/features/accounts/domain/account_type.dart';
 import 'package:mi_plata/features/accounts/presentation/account_error_message.dart';
+import 'package:mi_plata/l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../support/test_app.dart';
 
 import '../support/integration_harness.dart';
 
+late AppLocalizations l10n;
+
 void main() {
+  setUpAll(() async {
+    l10n = await loadL10n();
+    await initDates();
+  });
+
   group(
     'AccountRepository contra Supabase local',
     skip: integrationEnabled ? false : integrationSkipReason,
@@ -80,7 +90,7 @@ void main() {
             isA<PostgrestException>()
                 .having((e) => e.code, 'code', '23505')
                 .having(
-                  (e) => accountErrorMessage(e),
+                  (e) => accountErrorMessage(l10n, e),
                   'mensaje',
                   'Ya tienes una cuenta activa con ese nombre.',
                 ),

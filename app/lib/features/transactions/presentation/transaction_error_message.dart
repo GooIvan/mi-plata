@@ -1,7 +1,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../l10n/l10n.dart';
+
 /// Traduce un error de la base de datos a un mensaje para el usuario.
-String transactionErrorMessage(Object error) {
+String transactionErrorMessage(AppLocalizations l10n, Object error) {
   if (error is PostgrestException) {
     switch (error.code) {
       case '23514':
@@ -9,13 +11,13 @@ String transactionErrorMessage(Object error) {
         // triggers (categoría que no corresponde, monedas distintas) ya
         // vienen en español y se muestran tal cual.
         return error.message.contains('violates check constraint')
-            ? 'Revisa los datos del movimiento: el monto, las cuentas y la categoría.'
+            ? l10n.transactionsErrorInvalid
             : error.message;
       case '23503':
-        return 'La cuenta o la categoría ya no existe. Vuelve a abrir el formulario.';
+        return l10n.transactionsErrorMissingReference;
       case 'PGRST301':
-        return 'Tu sesión expiró. Vuelve a iniciar sesión.';
+        return l10n.commonSessionExpired;
     }
   }
-  return 'No se pudo completar la operación. Revisa tu conexión e intenta de nuevo.';
+  return l10n.commonLoadError;
 }

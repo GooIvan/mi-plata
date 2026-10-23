@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/format/money_format.dart';
+import '../../../core/format/formats.dart';
 import '../../../core/router/app_routes.dart';
+import '../../../l10n/l10n.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/account_type_ui.dart';
 import '../../accounts/presentation/accounts_providers.dart';
@@ -40,6 +41,8 @@ class DashboardScreen extends ConsumerWidget {
     final accountNames = ref.watch(accountNamesProvider);
     final categoryNames = ref.watch(categoryNamesProvider);
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
 
     final activeAccounts =
         accounts.value?.where((account) => !account.isArchived).toList() ??
@@ -57,24 +60,24 @@ class DashboardScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            tooltip: 'Resumen mensual',
+            tooltip: l10n.dashboardSummaryTooltip,
             icon: const Icon(Icons.insights_outlined),
             onPressed: () => context.push(AppRoutes.summary),
           ),
           IconButton(
-            tooltip: 'Presupuestos',
+            tooltip: l10n.budgetsTitle,
             icon: const Icon(Icons.savings_outlined),
             onPressed: () => context.push(AppRoutes.budgets),
           ),
           IconButton(
-            tooltip: 'Categorías',
+            tooltip: l10n.categoriesTitle,
             icon: const Icon(Icons.category_outlined),
             onPressed: () => context.push(AppRoutes.categories),
           ),
           IconButton(
-            tooltip: 'Cerrar sesión',
-            icon: const Icon(Icons.logout),
-            onPressed: auth.signOut,
+            tooltip: l10n.settingsTitle,
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => context.push(AppRoutes.settings),
           ),
         ],
       ),
@@ -88,8 +91,8 @@ class DashboardScreen extends ConsumerWidget {
           ),
           if (activeAccounts.isNotEmpty) ...[
             _SectionHeader(
-              title: 'Cuentas',
-              actionLabel: 'Ver todas',
+              title: l10n.accountsTitle,
+              actionLabel: l10n.commonSeeAll,
               onAction: () => context.push(AppRoutes.accounts),
             ),
             Card(
@@ -105,7 +108,7 @@ class DashboardScreen extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       trailing: Text(
-                        formatMoney(
+                        formats.money(
                           account.currentBalance,
                           currency: account.currency,
                         ),
@@ -123,8 +126,8 @@ class DashboardScreen extends ConsumerWidget {
           ],
           if (budgets != null && budgets.hasBudgets) ...[
             _SectionHeader(
-              title: 'Presupuestos',
-              actionLabel: 'Ver todos',
+              title: l10n.budgetsTitle,
+              actionLabel: l10n.commonSeeAllMasculine,
               onAction: () => context.push(AppRoutes.budgets),
             ),
             BudgetSummaryCard(
@@ -133,8 +136,8 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ],
           _SectionHeader(
-            title: 'Deudas',
-            actionLabel: 'Ver todas',
+            title: l10n.debtsTitle,
+            actionLabel: l10n.commonSeeAll,
             onAction: () => context.push(AppRoutes.debts),
           ),
           DebtsSummaryCard(
@@ -142,8 +145,8 @@ class DashboardScreen extends ConsumerWidget {
             onTap: () => context.push(AppRoutes.debts),
           ),
           _SectionHeader(
-            title: 'Últimos movimientos',
-            actionLabel: 'Ver todos',
+            title: l10n.dashboardRecentTransactions,
+            actionLabel: l10n.commonSeeAllMasculine,
             onAction: () => context.push(AppRoutes.transactions),
           ),
           transactions.when(
@@ -154,17 +157,17 @@ class DashboardScreen extends ConsumerWidget {
             error: (error, _) => Card(
               margin: EdgeInsets.zero,
               child: ListTile(
-                title: Text(transactionErrorMessage(error)),
+                title: Text(transactionErrorMessage(l10n, error)),
                 trailing: TextButton(
                   onPressed: () => ref.invalidate(transactionsProvider),
-                  child: const Text('Reintentar'),
+                  child: Text(l10n.commonRetry),
                 ),
               ),
             ),
             data: (list) => list.isEmpty
-                ? const Card(
+                ? Card(
                     margin: EdgeInsets.zero,
-                    child: ListTile(title: Text('Aún no registras movimientos.')),
+                    child: ListTile(title: Text(l10n.dashboardNoTransactions)),
                   )
                 : Card(
                     margin: EdgeInsets.zero,
@@ -189,7 +192,7 @@ class DashboardScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showTransactionForm(context),
         icon: const Icon(Icons.add),
-        label: const Text('Nuevo movimiento'),
+        label: Text(l10n.transactionsNew),
       ),
     );
   }

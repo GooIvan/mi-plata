@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/format/money_format.dart';
+import '../../../../core/format/formats.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../accounts/domain/account.dart';
 import '../../../accounts/domain/account_totals.dart';
 
@@ -38,8 +39,11 @@ class TotalBalanceCard extends StatelessWidget {
             error: (error, _) => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('No se pudo cargar tu dinero.'),
-                TextButton(onPressed: onRetry, child: const Text('Reintentar')),
+                Text(context.l10n.dashboardLoadMoneyError),
+                TextButton(
+                  onPressed: onRetry,
+                  child: Text(context.l10n.commonRetry),
+                ),
               ],
             ),
             data: (all) {
@@ -48,11 +52,11 @@ class TotalBalanceCard extends StatelessWidget {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Aún no tienes cuentas'),
+                    Text(context.l10n.dashboardNoAccounts),
                     const SizedBox(height: 12),
                     FilledButton.tonal(
                       onPressed: onCreateAccount,
-                      child: const Text('Crear cuenta'),
+                      child: Text(context.l10n.accountsCreateButton),
                     ),
                   ],
                 );
@@ -74,6 +78,7 @@ class _Totals extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final formats = context.formats;
 
     // El peso colombiano primero; cualquier otra moneda, debajo.
     final totals = AccountTotals.centsByCurrency(accounts).entries.toList()
@@ -88,10 +93,13 @@ class _Totals extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Dinero total', style: theme.textTheme.labelLarge),
+        Text(
+          context.l10n.dashboardTotalMoney,
+          style: theme.textTheme.labelLarge,
+        ),
         const SizedBox(height: 4),
         Text(
-          formatMoney(main.value / 100, currency: main.key),
+          formats.money(main.value / 100, currency: main.key),
           style: theme.textTheme.displaySmall?.copyWith(
             fontWeight: FontWeight.bold,
             color: main.value < 0 ? theme.colorScheme.error : null,
@@ -101,13 +109,13 @@ class _Totals extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              formatMoney(other.value / 100, currency: other.key),
+              formats.money(other.value / 100, currency: other.key),
               style: theme.textTheme.titleLarge,
             ),
           ),
         const SizedBox(height: 8),
         Text(
-          accounts.length == 1 ? 'En 1 cuenta' : 'En ${accounts.length} cuentas',
+          context.l10n.dashboardAccountsCount(accounts.length),
           style: theme.textTheme.bodySmall,
         ),
       ],

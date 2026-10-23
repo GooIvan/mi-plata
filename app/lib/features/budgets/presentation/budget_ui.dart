@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/format/money_format.dart';
+import '../../../core/format/formats.dart';
+import '../../../l10n/l10n.dart';
 import '../domain/budget_calculator.dart';
 
 /// Los colores de estado: la paleta fija de bueno, advertencia y crítico. Nunca
@@ -19,33 +20,42 @@ IconData budgetStatusIcon(BudgetStatus status) => switch (status) {
 
 /// La frase del estado: "Quedan $300.000", "Cerca del límite: quedan $50.000",
 /// "Te pasaste por $20.000".
-String budgetStatusText(BudgetStatus status, int remainingCents) {
-  final amount = formatMoney(remainingCents.abs() / 100);
+String budgetStatusText(
+  AppLocalizations l10n,
+  BudgetStatus status,
+  int remainingCents,
+) {
+  final amount = Formats(l10n).money(remainingCents.abs() / 100);
   return switch (status) {
-    BudgetStatus.ok => 'Quedan $amount',
+    BudgetStatus.ok => l10n.budgetsStatusOk(amount),
     BudgetStatus.near =>
       remainingCents == 0
-          ? 'Llegaste al límite'
-          : 'Cerca del límite: quedan $amount',
-    BudgetStatus.over => 'Te pasaste por $amount',
+          ? l10n.budgetsStatusAtLimit
+          : l10n.budgetsStatusNear(amount),
+    BudgetStatus.over => l10n.budgetsStatusOver(amount),
   };
 }
 
 /// Lo que dice el aviso al registrar un gasto que acerca o pasa un presupuesto.
-String budgetAlertMessage(BudgetAlert alert, String categoryName) {
-  final spent = formatMoney(alert.spentAfterCents / 100);
-  final limit = formatMoney(alert.limitCents / 100);
+String budgetAlertMessage(
+  AppLocalizations l10n,
+  BudgetAlert alert,
+  String categoryName,
+) {
+  final formats = Formats(l10n);
+  final spent = formats.money(alert.spentAfterCents / 100);
+  final limit = formats.money(alert.limitCents / 100);
 
   if (alert.status == BudgetStatus.over) {
-    return 'Superaste el presupuesto de $categoryName: $spent de $limit.';
+    return l10n.budgetsAlertOver(categoryName, spent, limit);
   }
   final percent = (alert.spentAfterCents * 100 / alert.limitCents).floor();
-  return 'Vas en $percent % del presupuesto de $categoryName ($spent de $limit).';
+  return l10n.budgetsAlertNear(percent, categoryName, spent, limit);
 }
 
 /// "1 categoría superada · 2 cerca del límite": lo que pide atención, o null si
 /// ninguna categoría está cerca del límite ni lo pasó.
-String? budgetAttentionText(BudgetOverview overview) {
+String? budgetAttentionText(AppLocalizations l10n, BudgetOverview overview) {
   final over = overview.budgeted
       .where((budget) => budget.status == BudgetStatus.over)
       .length;
@@ -54,9 +64,8 @@ String? budgetAttentionText(BudgetOverview overview) {
       .length;
 
   final parts = [
-    if (over > 0)
-      over == 1 ? '1 categoría superada' : '$over categorías superadas',
-    if (near > 0) '$near cerca del límite',
+    if (over > 0) l10n.budgetsOverCount(over),
+    if (near > 0) l10n.budgetsNearCount(near),
   ];
   return parts.isEmpty ? null : parts.join(' · ');
 }

@@ -4,9 +4,19 @@ import 'package:mi_plata/features/transactions/domain/transaction_draft.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_validators.dart';
 import 'package:mi_plata/features/transactions/presentation/transaction_error_message.dart';
+import 'package:mi_plata/l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../support/test_app.dart';
+
+late AppLocalizations l10n;
+
 void main() {
+  setUpAll(() async {
+    l10n = await loadL10n();
+    await initDates();
+  });
+
   group('Transaction.fromJson', () {
     test('lee una transferencia', () {
       final transaction = Transaction.fromJson({
@@ -60,39 +70,41 @@ void main() {
 
   group('TransactionValidators', () {
     test('el monto debe existir, ser válido y positivo', () {
-      expect(TransactionValidators.amount('150.000'), isNull);
-      expect(TransactionValidators.amount('0,50'), isNull);
-      expect(TransactionValidators.amount(null), 'Ingresa el monto');
-      expect(TransactionValidators.amount('  '), 'Ingresa el monto');
+      expect(TransactionValidators.amount(l10n, '150.000'), isNull);
+      expect(TransactionValidators.amount(l10n, '0,50'), isNull);
+      expect(TransactionValidators.amount(l10n, null), 'Ingresa el monto');
+      expect(TransactionValidators.amount(l10n, '  '), 'Ingresa el monto');
       expect(
-        TransactionValidators.amount('0'),
+        TransactionValidators.amount(l10n, '0'),
         'El monto debe ser mayor que cero',
       );
       expect(
-        TransactionValidators.amount('0,00'),
+        TransactionValidators.amount(l10n, '0,00'),
         'El monto debe ser mayor que cero',
       );
       expect(
-        TransactionValidators.amount('-10'),
+        TransactionValidators.amount(l10n, '-10'),
         'El monto no puede ser negativo',
       );
-      expect(TransactionValidators.amount('abc'), startsWith('Monto no válido'));
+      expect(TransactionValidators.amount(l10n, 'abc'), startsWith('Monto no válido'));
     });
 
     test('la descripción tiene un máximo', () {
-      expect(TransactionValidators.description(null), isNull);
-      expect(TransactionValidators.description('x' * 200), isNull);
+      expect(TransactionValidators.description(l10n, null), isNull);
+      expect(TransactionValidators.description(l10n, 'x' * 200), isNull);
       expect(
-        TransactionValidators.description('x' * 201),
+        TransactionValidators.description(l10n, 'x' * 201),
         'Usa 200 caracteres o menos',
       );
     });
   });
 
   group('transactionErrorMessage', () {
-    String message(String? code, [String text = 'x']) => transactionErrorMessage(
-      PostgrestException(message: text, code: code),
-    );
+    String message(String? code, [String text = 'x']) =>
+        transactionErrorMessage(
+          l10n,
+          PostgrestException(message: text, code: code),
+        );
 
     test('oculta los mensajes técnicos de las restricciones CHECK', () {
       expect(
@@ -113,7 +125,7 @@ void main() {
       expect(message('23503'), startsWith('La cuenta o la categoría ya no existe'));
       expect(message('PGRST301'), startsWith('Tu sesión expiró'));
       expect(message('XX000'), startsWith('No se pudo completar'));
-      expect(transactionErrorMessage(StateError('x')), startsWith('No se pudo'));
+      expect(transactionErrorMessage(l10n, StateError('x')), startsWith('No se pudo'));
     });
   });
 }

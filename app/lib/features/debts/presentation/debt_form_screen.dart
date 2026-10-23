@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/format/date_format.dart';
-import '../../../core/format/money_format.dart';
+import '../../../core/format/formats.dart';
 import '../../../core/widgets/error_banner.dart';
+import '../../../l10n/l10n.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/domain/amount_parser.dart';
 import '../../accounts/presentation/accounts_providers.dart';
@@ -57,9 +57,7 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
   late final _counterparty = TextEditingController(
     text: widget.debt?.counterparty,
   );
-  late final _amount = TextEditingController(
-    text: widget.debt == null ? '' : AmountParser.toInput(widget.debt!.amount),
-  );
+  final _amount = TextEditingController();
   late final _notes = TextEditingController(text: widget.debt?.notes);
   late DebtDirection _direction =
       widget.debt?.direction ?? widget.initialDirection;
@@ -68,10 +66,25 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
   bool _registerMoney = false;
   String? _accountId;
   bool _saving = false;
+  bool _amountReady = false;
   String? _error;
 
   bool get _isEditing => widget.debt != null;
   bool get _isPayable => _direction == DebtDirection.payable;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // El monto se escribe según el idioma, así que el texto inicial espera a
+    // tener el contexto.
+    if (!_amountReady) {
+      _amountReady = true;
+      final debt = widget.debt;
+      if (debt != null) {
+        _amount.text = AmountParser.toInput(debt.amount, context.formats);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -90,33 +103,36 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
   );
 
   Future<void> _pickStart() async {
-    final picked = await _pick(_start, 'Fecha de inicio');
+    final picked = await _pick(_start, context.l10n.debtsPickStartHelp);
     if (picked != null) setState(() => _start = picked);
   }
 
   Future<void> _pickDue() async {
-    final picked = await _pick(_due ?? _start, 'Fecha de vencimiento');
+    final picked = await _pick(_due ?? _start, context.l10n.debtsPickDueHelp);
     if (picked != null) setState(() => _due = picked);
   }
 
   String? _amountError(String? value) {
-    final error = DebtValidators.amount(value);
+    final l10n = context.l10n;
+    final error = DebtValidators.amount(l10n, value);
     if (error != null) return error;
 
+    final formats = context.formats;
     final paid = widget.debt?.paid ?? 0;
-    final cents = (double.parse(AmountParser.parse(value)!) * 100).round();
+    final cents = (double.parse(AmountParser.parse(value, formats)!) * 100)
+        .round();
     if (paid > 0 && cents < (paid * 100).round()) {
-      return 'No puede ser menor a lo ya pagado (${formatMoney(paid)})';
+      return l10n.debtsAmountBelowPaid(formats.money(paid));
     }
     return null;
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (DebtValidators.dueDate(_due, _start) != null) return;
+    if (DebtValidators.dueDate(context.l10n, _due, _start) != null) return;
 
     final counterparty = _counterparty.text.trim();
-    final amount = AmountParser.parse(_amount.text)!;
+    final amount = AmountParser.parse(_amount.text, context.formats)!;
     final notes = _notes.text.trim().isEmpty ? null : _notes.text.trim();
     final debts = ref.read(debtsProvider.notifier);
 
@@ -146,8 +162,8 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
             !await confirmNegativeBalance(
               context,
               warnings,
-              title: '¿Registrar de todos modos?',
-              confirmLabel: 'Registrar igual',
+              title: context.l10n.negativeBalanceRecordTitle,
+              confirmLabel: context.l10n.negativeBalanceRecordAnyway,
             )) {
           return;
         }
@@ -185,7 +201,7 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _error = debtErrorMessage(error);
+        _error = debtErrorMessage(context.l10n, error);
       });
     }
   }
@@ -193,7 +209,8 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dueError = DebtValidators.dueDate(_due, _start);
+    final l10n = context.l10n;
+    final dueError = DebtValidators.dueDate(l10n, _due, _start);
     final accounts = (ref.watch(accountsProvider).value ?? const <Account>[])
         .where((account) => !account.isArchived)
         .toList();
@@ -202,7 +219,7 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Editar deuda' : 'Nueva deuda')),
+      appBar: AppBar(title: Text(_isEditing ? l10n.debtsEdit : l10n.debtsNew)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -214,7 +231,10 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                 showSelectedIcon: false,
                 segments: [
                   for (final direction in DebtDirection.values)
-                    ButtonSegment(value: direction, label: Text(direction.label)),
+                    ButtonSegment(
+                      value: direction,
+                      label: Text(direction.label(l10n)),
+                    ),
                 ],
                 selected: {_direction},
                 onSelectionChanged: _isEditing || _saving
@@ -228,10 +248,12 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                 autofocus: !_isEditing,
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.next,
-                validator: DebtValidators.counterparty,
+                validator: (value) => DebtValidators.counterparty(l10n, value),
                 decoration: InputDecoration(
-                  labelText: _isPayable ? 'A quién le debes' : 'Quién te debe',
-                  hintText: 'Ej: Juan',
+                  labelText: _isPayable
+                      ? l10n.debtsCounterpartyPayable
+                      : l10n.debtsCounterpartyReceivable,
+                  hintText: l10n.debtsCounterpartyHint,
                   border: const OutlineInputBorder(),
                 ),
               ),
@@ -242,11 +264,11 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 textInputAction: TextInputAction.next,
                 validator: _amountError,
-                decoration: const InputDecoration(
-                  labelText: 'Monto total',
-                  hintText: 'Ej: 500.000',
+                decoration: InputDecoration(
+                  labelText: l10n.debtsAmountLabel,
+                  hintText: l10n.debtsAmountHint,
                   prefixText: r'$ ',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
@@ -255,12 +277,12 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                 borderRadius: BorderRadius.circular(4),
                 child: InputDecorator(
                   decoration: InputDecoration(
-                    labelText: 'Inicio',
+                    labelText: l10n.debtsStartLabel,
                     border: const OutlineInputBorder(),
                     enabled: !_isEditing,
                     suffixIcon: const Icon(Icons.calendar_today_outlined),
                   ),
-                  child: Text(formatFullDate(_start)),
+                  child: Text(context.formats.fullDate(_start)),
                 ),
               ),
               const SizedBox(height: 16),
@@ -269,13 +291,13 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                 borderRadius: BorderRadius.circular(4),
                 child: InputDecorator(
                   decoration: InputDecoration(
-                    labelText: 'Vencimiento (opcional)',
+                    labelText: l10n.debtsDueLabel,
                     border: const OutlineInputBorder(),
                     errorText: dueError,
                     suffixIcon: _due == null
                         ? const Icon(Icons.event_outlined)
                         : IconButton(
-                            tooltip: 'Quitar la fecha de vencimiento',
+                            tooltip: l10n.debtsRemoveDue,
                             icon: const Icon(Icons.close),
                             onPressed: _saving
                                 ? null
@@ -283,7 +305,9 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                           ),
                   ),
                   child: Text(
-                    _due == null ? 'Sin fecha' : formatFullDate(_due!),
+                    _due == null
+                        ? l10n.debtsNoDate
+                        : context.formats.fullDate(_due!),
                   ),
                 ),
               ),
@@ -293,24 +317,24 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                 enabled: !_saving,
                 maxLines: 3,
                 textCapitalization: TextCapitalization.sentences,
-                validator: DebtValidators.notes,
-                decoration: const InputDecoration(
-                  labelText: 'Notas (opcional)',
+                validator: (value) => DebtValidators.notes(l10n, value),
+                decoration: InputDecoration(
+                  labelText: l10n.debtsNotesLabel,
                   alignLabelWithHint: true,
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
               ),
               if (!_isEditing) ...[
                 const SizedBox(height: 8),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Registrar el dinero en una cuenta'),
+                  title: Text(l10n.debtsRegisterMoney),
                   subtitle: Text(
                     accounts.isEmpty
-                        ? 'Primero crea una cuenta.'
+                        ? l10n.debtsRegisterMoneyNeedAccount
                         : _isPayable
-                        ? 'El dinero que te prestaron entra a la cuenta.'
-                        : 'El dinero que prestaste sale de la cuenta.',
+                        ? l10n.debtsRegisterMoneyPayable
+                        : l10n.debtsRegisterMoneyReceivable,
                   ),
                   value: _registerMoney,
                   onChanged: accounts.isEmpty || _saving
@@ -322,7 +346,7 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                   AccountDropdown(
                     accounts: accounts,
                     value: _accountId,
-                    label: _isPayable ? 'Recibir en' : 'Sacar de',
+                    label: _isPayable ? l10n.debtsReceiveIn : l10n.debtsTakeFrom,
                     enabled: !_saving,
                     onChanged: (id) => setState(() => _accountId = id),
                   ),
@@ -341,13 +365,14 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text(_isEditing ? 'Guardar cambios' : 'Crear deuda'),
+                    : Text(
+                        _isEditing ? l10n.commonSaveChanges : l10n.debtsCreate,
+                      ),
               ),
               if (_isEditing && (widget.debt?.paid ?? 0) > 0) ...[
                 const SizedBox(height: 12),
                 Text(
-                  'El sentido y el inicio no se pueden cambiar. El monto no '
-                  'puede ser menor a lo ya pagado.',
+                  l10n.debtsLockedNote,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,

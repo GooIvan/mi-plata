@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../domain/category.dart';
 import '../category_type_ui.dart';
 
@@ -19,26 +20,30 @@ class CategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Opacity(
       opacity: category.isArchived ? 0.6 : 1,
       child: ListTile(
         leading: CircleAvatar(child: Icon(category.type.icon)),
         title: Text(category.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle: category.isArchived ? const Text('Archivada') : null,
+        subtitle: category.isArchived ? Text(l10n.commonArchivedTag) : null,
         trailing: PopupMenuButton<CategoryMenuAction>(
-          tooltip: 'Opciones',
+          tooltip: l10n.commonOptions,
           onSelected: (action) => switch (action) {
             CategoryMenuAction.edit => onEdit(),
             CategoryMenuAction.toggleArchived => onToggleArchived(),
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: CategoryMenuAction.edit,
-              child: Text('Editar'),
+              child: Text(l10n.commonEdit),
             ),
             PopupMenuItem(
               value: CategoryMenuAction.toggleArchived,
-              child: Text(category.isArchived ? 'Restaurar' : 'Archivar'),
+              child: Text(
+                category.isArchived ? l10n.commonRestore : l10n.commonArchive,
+              ),
             ),
           ],
         ),

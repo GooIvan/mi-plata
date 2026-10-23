@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../summary/domain/month_summary.dart';
 import '../../summary/presentation/summary_providers.dart';
 import '../../transactions/domain/transaction.dart';
@@ -19,7 +20,8 @@ import 'budgets_providers.dart';
 /// Al editar un gasto de la misma categoría y mes, solo cuenta la diferencia
 /// con lo que ya estaba guardado.
 Future<String?> budgetAlertBeforeSaving(
-  WidgetRef ref, {
+  WidgetRef ref,
+  AppLocalizations l10n, {
   required TransactionDraft draft,
   Transaction? previous,
 }) async {
@@ -56,8 +58,8 @@ Future<String?> budgetAlertBeforeSaving(
     if (alert == null) return null;
 
     final name =
-        ref.read(categoryNamesProvider)[categoryId] ?? 'esta categoría';
-    return budgetAlertMessage(alert, name);
+        ref.read(categoryNamesProvider)[categoryId] ?? l10n.budgetsThisCategory;
+    return budgetAlertMessage(l10n, alert, name);
   } catch (_) {
     return null;
   }

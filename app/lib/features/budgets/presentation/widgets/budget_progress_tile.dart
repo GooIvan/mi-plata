@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/format/money_format.dart';
+import '../../../../core/format/formats.dart';
+import '../../../../l10n/l10n.dart';
 import '../../domain/budget_calculator.dart';
 import '../budget_ui.dart';
 
@@ -23,6 +24,8 @@ class BudgetProgressTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
     final status = progress.status;
     final color = budgetStatusColor(status);
 
@@ -45,13 +48,13 @@ class BudgetProgressTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  formatMoney(progress.spentCents / 100),
+                  formats.money(progress.spentCents / 100),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  ' de ${formatMoney(progress.limitCents / 100)}',
+                  ' ${l10n.budgetsOfLimit(formats.money(progress.limitCents / 100))}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -75,12 +78,12 @@ class BudgetProgressTile extends StatelessWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    budgetStatusText(status, progress.remainingCents),
+                    budgetStatusText(l10n, status, progress.remainingCents),
                     style: theme.textTheme.bodySmall,
                   ),
                 ),
                 Text(
-                  '${(progress.fraction * 100).round()} %',
+                  l10n.commonPercent((progress.fraction * 100).round()),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

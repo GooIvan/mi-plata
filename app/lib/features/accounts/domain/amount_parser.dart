@@ -1,6 +1,9 @@
+import '../../../core/format/formats.dart';
+
 /// Convierte lo que escribe el usuario en un decimal exacto, como texto.
 ///
-/// Usa el formato colombiano: el punto separa miles y la coma los decimales.
+/// Sigue la costumbre del idioma: en español el punto separa miles y la coma
+/// los decimales; en inglés, al revés.
 /// "1.500.000" -> "1500000", "1.500,50" -> "1500.50", "-200000" -> "-200000".
 class AmountParser {
   const AmountParser._();
@@ -9,17 +12,23 @@ class AmountParser {
   static const maxIntegerDigits = 12;
 
   static final _ignored = RegExp(r'[\s$]');
-  static final _pattern = RegExp(r'^(-)?(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d{1,2}))?$');
 
   /// Devuelve null si el texto no es un monto válido. Un texto vacío vale 0.
-  static String? parse(String? input) {
+  static String? parse(String? input, Formats formats) {
     final text = (input ?? '').replaceAll(_ignored, '');
     if (text.isEmpty) return '0';
 
-    final match = _pattern.firstMatch(text);
+    final decimal = RegExp.escape(formats.decimalSeparator);
+    final group = formats.decimalSeparator == ',' ? '.' : ',';
+    final pattern = RegExp(
+      '^(-)?(\\d{1,3}(?:${RegExp.escape(group)}\\d{3})+|\\d+)'
+      '(?:$decimal(\\d{1,2}))?\$',
+    );
+
+    final match = pattern.firstMatch(text);
     if (match == null) return null;
 
-    final integer = match.group(2)!.replaceAll('.', '');
+    final integer = match.group(2)!.replaceAll(group, '');
     if (integer.length > maxIntegerDigits) return null;
 
     final sign = match.group(1) ?? '';
@@ -28,11 +37,11 @@ class AmountParser {
   }
 
   /// Texto para mostrar un monto en un campo editable ("1500000" o "1500,50").
-  static String toInput(double value) {
+  static String toInput(double value, Formats formats) {
     final fixed = value.toStringAsFixed(2);
     final trimmed = fixed.endsWith('.00')
         ? fixed.substring(0, fixed.length - 3)
         : fixed;
-    return trimmed.replaceAll('.', ',');
+    return trimmed.replaceAll('.', formats.decimalSeparator);
   }
 }

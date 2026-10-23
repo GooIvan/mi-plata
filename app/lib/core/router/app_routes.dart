@@ -10,6 +10,7 @@ class AppRoutes {
   static const summary = '/summary';
   static const debts = '/debts';
   static const budgets = '/budgets';
+  static const settings = '/settings';
 
   /// Rutas accesibles sin sesión.
   static const public = {login, register};

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
+import '../../transactions/domain/transaction_type.dart';
 import '../domain/month_summary.dart';
 
 /// Una frase que compara una cifra con la del mes anterior, con su ícono.
@@ -29,14 +31,15 @@ class ComparisonCaption {
 /// Devuelve null cuando no hay nada útil que decir: el mes anterior no tuvo
 /// movimientos ([previousHasData] falso), o la cifra fue cero en los dos meses.
 ///
-/// [noneNoun] ("gastos", "ingresos") hace más claro el caso en que antes no
-/// había nada: "Sin gastos en septiembre" en lugar de "$0 en septiembre".
-ComparisonCaption? compareWithPrevious({
+/// [noneKind] (gasto o ingreso) hace más claro el caso en que antes no había
+/// nada: "Sin gastos en septiembre" en lugar de "$0 en septiembre".
+ComparisonCaption? compareWithPrevious(
+  AppLocalizations l10n, {
   required int current,
   required int previous,
   required bool previousHasData,
   required String previousMonthName,
-  String? noneNoun,
+  TransactionType? noneKind,
 }) {
   if (!previousHasData || (current == 0 && previous == 0)) return null;
 
@@ -44,7 +47,7 @@ ComparisonCaption? compareWithPrevious({
 
   if (change.isSame) {
     return ComparisonCaption(
-      text: 'Igual que en $previousMonthName',
+      text: l10n.summarySameAs(previousMonthName),
       icon: Icons.remove,
       change: change,
     );
@@ -54,15 +57,19 @@ ComparisonCaption? compareWithPrevious({
   final String text;
   if (fraction == null) {
     // Antes era cero: no existe un porcentaje.
-    text = noneNoun == null
-        ? r'$0 en ' + previousMonthName
-        : 'Sin $noneNoun en $previousMonthName';
+    text = switch (noneKind) {
+      TransactionType.expense => l10n.summaryNoExpensesIn(previousMonthName),
+      TransactionType.income => l10n.summaryNoIncomeIn(previousMonthName),
+      _ => l10n.summaryZeroIn(previousMonthName),
+    };
   } else {
     final percent = (fraction.abs() * 100).round();
-    final amount = percent == 0 ? '<1 %' : '$percent %';
+    final amount = percent == 0
+        ? l10n.commonPercentUnderOne
+        : l10n.commonPercent(percent);
     text = change.isUp
-        ? '$amount más que en $previousMonthName'
-        : '$amount menos que en $previousMonthName';
+        ? l10n.summaryMoreThan(amount, previousMonthName)
+        : l10n.summaryLessThan(amount, previousMonthName);
   }
 
   return ComparisonCaption(

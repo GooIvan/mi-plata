@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_routes.dart';
+import '../../../l10n/l10n.dart';
 import '../domain/auth_validators.dart';
 import 'auth_error_message.dart';
 import 'auth_providers.dart';
@@ -43,12 +44,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     // router lleva al panel por su cuenta.
     if (outcome == SignUpOutcome.confirmationRequired) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Te enviamos un correo para confirmar tu cuenta. '
-            'Después podrás iniciar sesión.',
-          ),
-        ),
+        SnackBar(content: Text(context.l10n.authConfirmEmailSent)),
       );
       context.go(AppRoutes.login);
     }
@@ -59,11 +55,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final state = ref.watch(authControllerProvider);
     final isLoading = state.isLoading;
     final error = state.hasError && !isLoading
-        ? authErrorMessage(state.error!)
+        ? authErrorMessage(context.l10n, state.error!)
         : null;
 
     return AuthLayout(
-      subtitle: 'Crea tu cuenta para empezar',
+      subtitle: context.l10n.authRegisterSubtitle,
       children: [
         Form(
           key: _formKey,
@@ -77,29 +73,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   autofillHints: const [AutofillHints.email],
-                  validator: AuthValidators.email,
-                  decoration: const InputDecoration(
-                    labelText: 'Correo electrónico',
-                    border: OutlineInputBorder(),
+                  validator: (value) => AuthValidators.email(context.l10n, value),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.authEmailLabel,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 16),
                 PasswordField(
                   controller: _password,
-                  label: 'Contraseña',
+                  label: context.l10n.authPasswordLabel,
                   enabled: !isLoading,
                   autofillHints: const [AutofillHints.newPassword],
                   textInputAction: TextInputAction.next,
-                  validator: AuthValidators.newPassword,
+                  validator: (value) =>
+                      AuthValidators.newPassword(context.l10n, value),
                 ),
                 const SizedBox(height: 16),
                 PasswordField(
                   controller: _confirmation,
-                  label: 'Repite la contraseña',
+                  label: context.l10n.authPasswordRepeatLabel,
                   enabled: !isLoading,
                   autofillHints: const [AutofillHints.newPassword],
                   textInputAction: TextInputAction.done,
                   validator: (value) => AuthValidators.passwordConfirmation(
+                    context.l10n,
                     value,
                     _password.text,
                   ),
@@ -118,12 +116,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Crear cuenta'),
+                      : Text(context.l10n.authRegisterButton),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: isLoading ? null : () => context.go(AppRoutes.login),
-                  child: const Text('¿Ya tienes cuenta? Inicia sesión'),
+                  child: Text(context.l10n.authGoToLogin),
                 ),
               ],
             ),

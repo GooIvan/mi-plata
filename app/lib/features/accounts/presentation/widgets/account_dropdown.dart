@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
 import '../../domain/account.dart';
 
 /// Un selector de cuenta. Marca las archivadas, por si el movimiento que se
@@ -30,13 +31,15 @@ class AccountDropdown extends StatelessWidget {
           DropdownMenuItem(
             value: account.id,
             child: Text(
-              account.isArchived ? '${account.name} (archivada)' : account.name,
+              account.isArchived
+                  ? context.l10n.accountsArchivedName(account.name)
+                  : account.name,
               overflow: TextOverflow.ellipsis,
             ),
           ),
       ],
       onChanged: enabled ? onChanged : null,
-      validator: (id) => id == null ? 'Elige una cuenta' : null,
+      validator: (id) => id == null ? context.l10n.accountsChoose : null,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),

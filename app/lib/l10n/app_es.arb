@@ -1,0 +1,813 @@
+{
+  "@@locale": "es",
+  "commonRetry": "Reintentar",
+  "commonCancel": "Cancelar",
+  "commonSave": "Guardar",
+  "commonSaveChanges": "Guardar cambios",
+  "commonEdit": "Editar",
+  "commonDelete": "Eliminar",
+  "commonArchive": "Archivar",
+  "commonRestore": "Restaurar",
+  "commonUndo": "Deshacer",
+  "commonOptions": "Opciones",
+  "commonSeeAll": "Ver todas",
+  "@commonSeeAll": {
+    "description": "Enlace de una sección con elementos en femenino (cuentas, deudas)"
+  },
+  "commonSeeAllMasculine": "Ver todos",
+  "@commonSeeAllMasculine": {
+    "description": "Enlace de una sección con elementos en masculino (movimientos, presupuestos)"
+  },
+  "commonShowArchived": "Mostrar archivadas",
+  "commonHideArchived": "Ocultar archivadas",
+  "commonIncomes": "Ingresos",
+  "commonExpenses": "Gastos",
+  "commonNoCategory": "Sin categoría",
+  "commonLoadError": "No se pudo completar la operación. Revisa tu conexión e intenta de nuevo.",
+  "commonSessionExpired": "Tu sesión expiró. Vuelve a iniciar sesión.",
+  "commonNameTooLong": "Usa {max} caracteres o menos",
+  "@commonNameTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "commonInvalidAmount": "Monto no válido. Ejemplo: 1.500.000 o 1500,50",
+  "today": "Hoy",
+  "yesterday": "Ayer",
+  "authEmailLabel": "Correo electrónico",
+  "authPasswordLabel": "Contraseña",
+  "authPasswordRepeatLabel": "Repite la contraseña",
+  "authShowPassword": "Mostrar contraseña",
+  "authHidePassword": "Ocultar contraseña",
+  "authLoginSubtitle": "Inicia sesión para continuar",
+  "authRegisterSubtitle": "Crea tu cuenta para empezar",
+  "authLoginButton": "Entrar",
+  "authRegisterButton": "Crear cuenta",
+  "authGoToRegister": "¿No tienes cuenta? Regístrate",
+  "authGoToLogin": "¿Ya tienes cuenta? Inicia sesión",
+  "authConfirmEmailSent": "Te enviamos un correo para confirmar tu cuenta. Después podrás iniciar sesión.",
+  "authEmailRequired": "Ingresa tu correo",
+  "authEmailInvalid": "El correo no es válido",
+  "authPasswordRequired": "Ingresa tu contraseña",
+  "authNewPasswordRequired": "Crea una contraseña",
+  "authPasswordTooShort": "Usa al menos {min} caracteres",
+  "@authPasswordTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "authPasswordRepeatRequired": "Repite tu contraseña",
+  "authPasswordMismatch": "Las contraseñas no coinciden",
+  "authErrorOffline": "No hay conexión con el servidor. Revisa tu internet e intenta de nuevo.",
+  "authErrorInvalidCredentials": "Correo o contraseña incorrectos.",
+  "authErrorEmailExists": "Ya existe una cuenta con ese correo.",
+  "authErrorWeakPassword": "La contraseña es muy débil. Usa una más larga o más variada.",
+  "authErrorEmailNotConfirmed": "Confirma tu correo antes de iniciar sesión.",
+  "authErrorRateLimit": "Demasiados intentos. Espera un momento e intenta de nuevo.",
+  "authErrorSignupDisabled": "El registro de usuarios está deshabilitado.",
+  "authErrorGeneric": "No se pudo completar la operación. Intenta de nuevo.",
+  "dashboardTotalMoney": "Dinero total",
+  "dashboardLoadMoneyError": "No se pudo cargar tu dinero.",
+  "dashboardNoAccounts": "Aún no tienes cuentas",
+  "dashboardAccountsCount": "{count, plural, one{En {count} cuenta} other{En {count} cuentas}}",
+  "@dashboardAccountsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardRecentTransactions": "Últimos movimientos",
+  "dashboardNoTransactions": "Aún no registras movimientos.",
+  "dashboardDebtsLoadError": "No se pudieron cargar las deudas.",
+  "dashboardDebtsEmpty": "Registra lo que debes o te deben",
+  "dashboardYouOwe": "Debes",
+  "dashboardOwedToYou": "Te deben",
+  "dashboardSummaryTooltip": "Resumen mensual",
+  "settingsTitle": "Ajustes",
+  "settingsLanguage": "Idioma",
+  "settingsLanguageSystem": "Idioma del teléfono",
+  "settingsLanguageSpanish": "Español",
+  "@settingsLanguageSpanish": {
+    "description": "El nombre de cada idioma se escribe en ese idioma"
+  },
+  "settingsLanguageEnglish": "English",
+  "@settingsLanguageEnglish": {
+    "description": "El nombre de cada idioma se escribe en ese idioma"
+  },
+  "settingsSession": "Sesión",
+  "settingsSignedInAs": "Sesión iniciada como {email}",
+  "@settingsSignedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSignOut": "Cerrar sesión",
+  "budgetsTitle": "Presupuestos",
+  "budgetsStatusOk": "Quedan {amount}",
+  "@budgetsStatusOk": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsStatusAtLimit": "Llegaste al límite",
+  "budgetsStatusNear": "Cerca del límite: quedan {amount}",
+  "@budgetsStatusNear": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsStatusOver": "Te pasaste por {amount}",
+  "@budgetsStatusOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertOver": "Superaste el presupuesto de {category}: {spent} de {limit}.",
+  "@budgetsAlertOver": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertNear": "Vas en {percent} % del presupuesto de {category} ({spent} de {limit}).",
+  "@budgetsAlertNear": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "category": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsThisCategory": "esta categoría",
+  "budgetsOverCount": "{count, plural, one{{count} categoría superada} other{{count} categorías superadas}}",
+  "@budgetsOverCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsNearCount": "{count} cerca del límite",
+  "@budgetsNearCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsOfLimit": "de {limit}",
+  "@budgetsOfLimit": {
+    "description": "Va después de lo gastado: \"$300.000 de $500.000\"",
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsTitle": "Cuentas",
+  "accountsNew": "Nueva cuenta",
+  "accountsEdit": "Editar cuenta",
+  "accountsCreateButton": "Crear cuenta",
+  "accountsEmpty": "Aún no tienes cuentas.\nCrea la primera para empezar.",
+  "accountsAllArchived": "Todas tus cuentas están archivadas.",
+  "accountsArchivedMessage": "Cuenta archivada",
+  "accountsRestoredMessage": "Cuenta restaurada",
+  "accountsArchivedTag": "Archivada",
+  "accountsArchivedName": "{name} (archivada)",
+  "@accountsArchivedName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsNameLabel": "Nombre",
+  "accountsNameHint": "Ej: Bancolombia ahorros",
+  "accountsTypeLabel": "Tipo",
+  "accountsInitialBalanceLabel": "Saldo inicial",
+  "accountsInitialBalanceHint": "Ej: 1.500.000",
+  "accountsInitialBalanceHelper": "Déjalo vacío si empieza en cero",
+  "accountsChoose": "Elige una cuenta",
+  "accountTypeCash": "Efectivo",
+  "accountTypeBank": "Banco",
+  "accountTypeWallet": "Billetera digital",
+  "accountTypeCard": "Tarjeta",
+  "accountsNameRequired": "Ponle un nombre a la cuenta",
+  "accountsErrorDuplicateName": "Ya tienes una cuenta activa con ese nombre.",
+  "accountsErrorInvalidData": "Revisa los datos: el nombre no puede estar vacío.",
+  "accountsErrorAmountTooLarge": "El monto es demasiado grande.",
+  "commonArchivedTag": "Archivada",
+  "categoriesTitle": "Categorías",
+  "categoriesNew": "Nueva categoría",
+  "categoriesCreateButton": "Crear categoría",
+  "categoriesArchivedMessage": "Categoría archivada",
+  "categoriesRestoredMessage": "Categoría restaurada",
+  "categoriesNewOfType": "{type, select, expense{Nueva categoría de gasto} income{Nueva categoría de ingreso} other{Nueva categoría}}",
+  "@categoriesNewOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesEditOfType": "{type, select, expense{Editar categoría de gasto} income{Editar categoría de ingreso} other{Editar categoría}}",
+  "@categoriesEditOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesEmptyOfType": "{type, select, expense{Aún no tienes categorías de gasto.} income{Aún no tienes categorías de ingreso.} other{Aún no tienes categorías.}}",
+  "@categoriesEmptyOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesAllArchivedOfType": "{type, select, expense{Todas tus categorías de gasto están archivadas.} income{Todas tus categorías de ingreso están archivadas.} other{Todas tus categorías están archivadas.}}",
+  "@categoriesAllArchivedOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesNameLabel": "Nombre",
+  "categoriesNameHint": "Ej: Mascotas",
+  "categoriesNameRequired": "Ponle un nombre a la categoría",
+  "categoriesErrorDuplicateName": "Ya tienes una categoría activa con ese nombre.",
+  "categoriesErrorInvalidData": "Revisa los datos: el nombre no puede estar vacío.",
+  "commonAccount": "Cuenta",
+  "commonCategory": "Categoría",
+  "commonAmount": "Monto",
+  "commonDate": "Fecha",
+  "commonAll": "Todos",
+  "commonTransfers": "Transferencias",
+  "commonClear": "Limpiar",
+  "commonApply": "Aplicar",
+  "transactionTypeIncome": "Ingreso",
+  "transactionTypeExpense": "Gasto",
+  "transactionTypeTransfer": "Transferencia",
+  "transactionsTitle": "Movimientos",
+  "transactionsNew": "Nuevo movimiento",
+  "transactionsEdit": "Editar movimiento",
+  "transactionsRecord": "Registrar",
+  "transactionsRecordOne": "Registrar movimiento",
+  "transactionsEmpty": "Aún no registras movimientos.\nAnota el primero.",
+  "transactionsNoMatches": "No hay movimientos con estos filtros.",
+  "transactionsClearFilters": "Limpiar filtros",
+  "transactionsSearch": "Buscar",
+  "transactionsSearchHint": "Buscar en la descripción",
+  "transactionsSearchClose": "Cerrar búsqueda",
+  "transactionsFilter": "Filtrar",
+  "transactionsRemoveFilter": "Quitar filtro: {label}",
+  "@transactionsRemoveFilter": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsLoadMoreError": "No se pudieron cargar más movimientos.",
+  "transactionsDateHelp": "Fecha del movimiento",
+  "transactionsAmountHint": "Ej: 150.000",
+  "transactionsFrom": "Desde",
+  "transactionsTo": "Hacia",
+  "transactionsNeedAnotherAccount": "Necesitas otra cuenta para transferir",
+  "transactionsChooseDestination": "Elige la cuenta de destino",
+  "transactionsNeedAccountFirst": "Primero crea una cuenta para registrar movimientos.",
+  "transactionsDescriptionLabel": "Descripción (opcional)",
+  "transactionsDescriptionHint": "Ej: Mercado de la semana",
+  "transactionsDeleteTooltip": "Eliminar movimiento",
+  "transactionsDeleteTitle": "¿Eliminar este movimiento?",
+  "transactionsDeleteBody": "El saldo de tus cuentas se recalculará sin este movimiento.",
+  "transactionsDeleteBodyWithWarning": "El saldo de tus cuentas se recalculará sin este movimiento.\n\nAtención:\n{warnings}",
+  "@transactionsDeleteBodyWithWarning": {
+    "placeholders": {
+      "warnings": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDeleted": "Movimiento eliminado",
+  "negativeBalanceMessage": "{account} quedará en {balance}.",
+  "@negativeBalanceMessage": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "negativeBalanceAdvice": "Si el monto es correcto, puedes continuar.",
+  "negativeBalanceFix": "Corregir",
+  "negativeBalanceRecordTitle": "¿Registrar de todos modos?",
+  "negativeBalanceSaveTitle": "¿Guardar de todos modos?",
+  "negativeBalanceRecordAnyway": "Registrar igual",
+  "negativeBalanceSaveAnyway": "Guardar igual",
+  "transactionsFilterTitle": "Filtrar movimientos",
+  "transactionsFilterAllAccounts": "Todas las cuentas",
+  "transactionsFilterAllCategories": "Todas las categorías",
+  "transactionsFilterDates": "Fechas",
+  "transactionsFilterRemoveDates": "Quitar las fechas",
+  "transactionsFilterAnyDate": "Cualquier fecha",
+  "transactionsFilterRangeHelp": "Rango de fechas",
+  "transactionsRangeBetween": "del {from} al {to}",
+  "@transactionsRangeBetween": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsRangeSince": "desde el {from}",
+  "@transactionsRangeSince": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsRangeUntil": "hasta el {to}",
+  "@transactionsRangeUntil": {
+    "placeholders": {
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsAmountRequired": "Ingresa el monto",
+  "transactionsAmountNegative": "El monto no puede ser negativo",
+  "transactionsAmountZero": "El monto debe ser mayor que cero",
+  "transactionsErrorInvalid": "Revisa los datos del movimiento: el monto, las cuentas y la categoría.",
+  "transactionsErrorMissingReference": "La cuenta o la categoría ya no existe. Vuelve a abrir el formulario.",
+  "commonBack": "Volver",
+  "debtsTitle": "Deudas",
+  "debtsTabOwe": "Debo",
+  "debtsTabOwed": "Me deben",
+  "debtsNew": "Nueva deuda",
+  "debtsEdit": "Editar deuda",
+  "debtsRegister": "Registrar deuda",
+  "debtsEmptyPayable": "Aún no registras deudas que debas.",
+  "debtsEmptyReceivable": "Aún no registras deudas que te deban.",
+  "debtsAllArchived": "Todas tus deudas de esta lista están archivadas.",
+  "debtsTotalPayable": "Debes en total",
+  "debtsTotalReceivable": "Te deben en total",
+  "debtsOfAmount": "de {amount}",
+  "@debtsOfAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtStatusSettled": "Saldada",
+  "debtStatusNoDueDate": "Sin fecha de vencimiento",
+  "debtStatusOverdue": "{days, plural, one{Vencida hace {days} día} other{Vencida hace {days} días}}",
+  "@debtStatusOverdue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "debtStatusDueToday": "Vence hoy",
+  "debtStatusDueTomorrow": "Vence mañana",
+  "debtStatusDueInDays": "Vence en {days} días",
+  "@debtStatusDueInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "debtStatusDueOn": "Vence el {date}",
+  "@debtStatusDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPickStartHelp": "Fecha de inicio",
+  "debtsPickDueHelp": "Fecha de vencimiento",
+  "debtsCounterpartyPayable": "A quién le debes",
+  "debtsCounterpartyReceivable": "Quién te debe",
+  "debtsCounterpartyHint": "Ej: Juan",
+  "debtsAmountLabel": "Monto total",
+  "debtsAmountHint": "Ej: 500.000",
+  "debtsStartLabel": "Inicio",
+  "debtsDueLabel": "Vencimiento (opcional)",
+  "debtsNoDate": "Sin fecha",
+  "debtsRemoveDue": "Quitar la fecha de vencimiento",
+  "debtsNotesLabel": "Notas (opcional)",
+  "debtsRegisterMoney": "Registrar el dinero en una cuenta",
+  "debtsRegisterMoneyNeedAccount": "Primero crea una cuenta.",
+  "debtsRegisterMoneyPayable": "El dinero que te prestaron entra a la cuenta.",
+  "debtsRegisterMoneyReceivable": "El dinero que prestaste sale de la cuenta.",
+  "debtsReceiveIn": "Recibir en",
+  "debtsTakeFrom": "Sacar de",
+  "debtsCreate": "Crear deuda",
+  "debtsLockedNote": "El sentido y el inicio no se pueden cambiar. El monto no puede ser menor a lo ya pagado.",
+  "debtsCounterpartyRequired": "Escribe el nombre de la persona",
+  "debtsDueBeforeStart": "El vencimiento no puede ser anterior al inicio",
+  "debtsPaymentExceeds": "No puede superar lo pendiente ({remaining})",
+  "@debtsPaymentExceeds": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsAmountBelowPaid": "No puede ser menor a lo ya pagado ({paid})",
+  "@debtsAmountBelowPaid": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsArchivedMessage": "Deuda archivada",
+  "debtsRestoredMessage": "Deuda restaurada",
+  "debtsGone": "Esta deuda ya no existe.",
+  "debtsRecordPayment": "Registrar abono",
+  "debtsIsSettledNote": "Esta deuda ya está saldada.",
+  "debtsIsArchivedNote": "Está archivada: restáurala para registrar abonos.",
+  "debtsPaymentsTitle": "Abonos",
+  "debtsYouOweTo": "Le debes a {name}",
+  "@debtsYouOweTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsOwesYou": "{name} te debe",
+  "@debtsOwesYou": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsRemainingWord": "pendiente",
+  "debtsPaidAmount": "Pagado {amount}",
+  "@debtsPaidAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsTotalAmount": "Total {amount}",
+  "@debtsTotalAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsSince": "Desde el {date}",
+  "@debtsSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPaymentDeleteTitle": "¿Eliminar este abono?",
+  "debtsPaymentDeleteBody": "Se elimina también su movimiento y el saldo de la cuenta se recalcula.",
+  "debtsPaymentDeleted": "Abono eliminado",
+  "debtsPaymentsEmpty": "Aún no hay abonos.",
+  "debtsPaymentDeleteTooltip": "Eliminar abono",
+  "debtsPaySheetTitlePayable": "Abonar a {name}",
+  "@debtsPaySheetTitlePayable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPaymentDescriptionPayable": "Abono a {name}",
+  "@debtsPaymentDescriptionPayable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPaymentDescriptionReceivable": "Abono de {name}",
+  "@debtsPaymentDescriptionReceivable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPendingAmount": "Pendiente: {amount}",
+  "@debtsPendingAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPaymentAmountLabel": "Monto del abono",
+  "debtsPaymentAmountHint": "Ej: 100.000",
+  "debtsPayAll": "Pagar todo",
+  "debtsCollectAll": "Cobrar todo",
+  "debtsNeedCurrencyAccount": "Primero crea una cuenta en {currency} para registrar el abono.",
+  "@debtsNeedCurrencyAccount": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPayFrom": "Pagar desde",
+  "debtsPaymentDateHelp": "Fecha del abono",
+  "debtsErrorInvalid": "Revisa los datos de la deuda: el monto y las fechas.",
+  "debtsErrorMissingReference": "La cuenta o la deuda ya no existe. Vuelve a abrir la pantalla.",
+  "commonPercent": "{percent} %",
+  "@commonPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "commonPercentUnderOne": "<1 %",
+  "summaryTitle": "Resumen mensual",
+  "summaryNoData": "Aún no hay movimientos para resumir.\nRegistra ingresos y gastos para ver tu resumen.",
+  "summaryPreviousMonth": "Mes anterior",
+  "summaryNextMonth": "Mes siguiente",
+  "summaryBalanceOfMonth": "Balance del mes",
+  "summaryBalanceUp": "Ingresaste más de lo que gastaste",
+  "summaryBalanceDown": "Gastaste más de lo que ingresaste",
+  "summaryBalanceEven": "Ingresos y gastos iguales",
+  "summaryWhereMoneyGoes": "¿En qué se va el dinero?",
+  "summaryWhereMoneyComes": "¿De dónde viene?",
+  "summaryNoExpensesMonth": "No hay gastos en este mes.",
+  "summaryNoIncomeMonth": "No hay ingresos en este mes.",
+  "summaryOtherCategories": "Otras",
+  "summaryBudgetsLink": "Cuánto llevas gastado de lo que planeaste",
+  "summaryHistoryError": "No se pudo cargar la evolución del dinero.",
+  "summaryLoadError": "No se pudo cargar el resumen. Revisa tu conexión e intenta de nuevo.",
+  "summarySameAs": "Igual que en {month}",
+  "@summarySameAs": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryZeroIn": "$0 en {month}",
+  "@summaryZeroIn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryNoExpensesIn": "Sin gastos en {month}",
+  "@summaryNoExpensesIn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryNoIncomeIn": "Sin ingresos en {month}",
+  "@summaryNoIncomeIn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryMoreThan": "{amount} más que en {month}",
+  "@summaryMoreThan": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryLessThan": "{amount} menos que en {month}",
+  "@summaryLessThan": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryPaceTitle": "Ritmo de gasto",
+  "summaryDailyAverage": "Promedio por día",
+  "summaryProjectedClose": "A este ritmo, el mes cerrará en",
+  "summaryProjection": "Proyección: {comparison}",
+  "@summaryProjection": {
+    "placeholders": {
+      "comparison": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryCalculatedPartial": "Calculado sobre {counted} de {total} días del mes.",
+  "@summaryCalculatedPartial": {
+    "placeholders": {
+      "counted": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryCalculatedFull": "Calculado sobre los {total} días del mes.",
+  "@summaryCalculatedFull": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryTrendTitle": "Ingresos vs. gastos",
+  "summaryLastMonths": "Últimos {count} meses",
+  "@summaryLastMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryTrendSemantics": "Gráfico de barras con los ingresos y los gastos de los últimos {count} meses. La misma información está disponible como tabla.",
+  "@summaryTrendSemantics": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryTrendTooltip": "{month}\n{series}: {amount}",
+  "@summaryTrendTooltip": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "series": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryHideTable": "Ocultar tabla",
+  "summaryShowTable": "Ver como tabla",
+  "summaryTableMonth": "Mes",
+  "summaryHistorySubtitle": "Al cierre de cada mes",
+  "summaryHistorySemantics": "Gráfico de línea con el dinero total al cierre de cada uno de los últimos {count} meses. La misma información está disponible como tabla.",
+  "@summaryHistorySemantics": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryHistoryHideTable": "Ocultar tabla de saldos",
+  "summaryHistoryShowTable": "Ver saldos como tabla",
+  "summaryHistoryTableClosing": "Cierre de",
+  "summarySincePrevious": "el mes anterior",
+  "summarySinceMonths": "hace {months} meses",
+  "@summarySinceMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryDeltaUp": "{amount} más que {since}",
+  "@summaryDeltaUp": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "since": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryDeltaDown": "{amount} menos que {since}",
+  "@summaryDeltaDown": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "since": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryDeltaSame": "Igual que {since}",
+  "@summaryDeltaSame": {
+    "placeholders": {
+      "since": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsNew": "Nuevo presupuesto",
+  "budgetsEmptyEditable": "Define cuánto quieres gastar al mes en cada categoría y ve cómo vas.",
+  "budgetsEmptyPast": "No había presupuestos ni gastos en este mes.",
+  "budgetsDefine": "Definir un presupuesto",
+  "budgetsGoToCurrentMonth": "Ir al mes actual",
+  "budgetsWithBudget": "Con presupuesto",
+  "budgetsWithoutBudget": "Gastos sin presupuesto",
+  "budgetsTapToDefine": "Toca para definir un presupuesto",
+  "budgetsTotalTitle": "Presupuesto total",
+  "budgetsTotalOf": "de {amount} presupuestados",
+  "@budgetsTotalOf": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsFormTitleFixed": "Presupuesto de {name}",
+  "@budgetsFormTitleFixed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsFormTheCategory": "la categoría",
+  "budgetsFormAppliesFrom": "Rige desde {month} de {year} en adelante, hasta que lo cambies. Los meses anteriores no se tocan.",
+  "@budgetsFormAppliesFrom": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsFormAllBudgeted": "Todas tus categorías de gasto ya tienen presupuesto.",
+  "budgetsFormChooseCategory": "Elige una categoría",
+  "budgetsFormCategoryLabel": "Categoría de gasto",
+  "budgetsFormAmountLabel": "Monto mensual",
+  "budgetsFormAmountHint": "Ej: 800.000",
+  "budgetsFormRemove": "Quitar el presupuesto",
+  "budgetsErrorInvalid": "Revisa el monto del presupuesto.",
+  "budgetsErrorMissingCategory": "La categoría ya no existe. Vuelve a abrir la pantalla.",
+  "budgetsPercent": "{percent} %",
+  "@budgetsPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
+}

@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mi_plata/core/format/date_format.dart';
+import 'package:mi_plata/core/format/formats.dart';
 import 'package:mi_plata/features/accounts/domain/account.dart';
 import 'package:mi_plata/features/categories/domain/category.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
 import 'package:mi_plata/features/transactions/domain/transaction.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
+import 'package:mi_plata/l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../support/fake_account_repository.dart';
@@ -78,8 +79,16 @@ Finder tile(String label) => find.ancestor(
   matching: find.byType(Card),
 );
 
+late AppLocalizations l10n;
+late Formats formats;
+
 void main() {
-  setUpAll(initDates);
+  setUpAll(() async {
+    l10n = await loadL10n();
+    formats = Formats(l10n);
+    await initDates();
+  });
+
 
   group('totales del mes', () {
     final october = [
@@ -94,7 +103,7 @@ void main() {
       await openSummary(tester, transactions: october);
 
       expect(find.widgetWithText(AppBar, 'Resumen mensual'), findsOneWidget);
-      expect(find.text(formatMonth(_now)), findsWidgets);
+      expect(find.text(formats.month(_now)), findsWidgets);
       expect(find.byType(BarChart), findsOneWidget);
     });
 
@@ -299,7 +308,7 @@ void main() {
       await tester.tap(find.byTooltip('Mes anterior'));
       await tester.pumpAndSettle();
 
-      expect(find.text(formatMonth(monthsAgo(1))), findsOneWidget);
+      expect(find.text(formats.month(monthsAgo(1))), findsOneWidget);
       expect(
         find.descendant(of: tile('Gastos').first, matching: textLike(r'$250.000')),
         findsOneWidget,
@@ -371,14 +380,14 @@ void main() {
     testWidgets('la tabla tiene las mismas cifras que el gráfico', (tester) async {
       await openSummary(tester, transactions: data);
 
-      expect(find.text(formatMonth(monthsAgo(5, 1))), findsNothing);
+      expect(find.text(formats.month(monthsAgo(5, 1))), findsNothing);
 
       await tester.tap(find.text('Ver como tabla'));
       await tester.pumpAndSettle();
 
       // Los seis meses, del más viejo al actual.
       for (var i = 5; i >= 0; i--) {
-        expect(find.text(formatMonth(monthsAgo(i, 1))), findsWidgets);
+        expect(find.text(formats.month(monthsAgo(i, 1))), findsWidgets);
       }
       expect(find.text('Ocultar tabla'), findsOneWidget);
       expect(textLike(r'$400.000'), findsOneWidget); // el gasto de hace 3 meses
@@ -417,7 +426,7 @@ void main() {
   group('comparación con el mes anterior', () {
     // Perezoso: los datos de fecha se inicializan en setUpAll, después de
     // declarar el grupo.
-    late final previousName = formatMonthName(monthsAgo(1));
+    late final previousName = formats.monthName(monthsAgo(1));
 
     // Este mes: ingresos 3.000.000 y gastos 161.000 (Mercado 111.000).
     // Mes anterior: ingresos 2.000.000 y gastos 150.000 (Mercado 100.000).

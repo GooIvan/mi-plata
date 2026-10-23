@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../l10n/l10n.dart';
+
 class PasswordField extends StatefulWidget {
   const PasswordField({
     super.key,
@@ -41,7 +43,9 @@ class _PasswordFieldState extends State<PasswordField> {
         labelText: widget.label,
         border: const OutlineInputBorder(),
         suffixIcon: IconButton(
-          tooltip: _obscured ? 'Mostrar contraseña' : 'Ocultar contraseña',
+          tooltip: _obscured
+              ? context.l10n.authShowPassword
+              : context.l10n.authHidePassword,
           icon: Icon(
             _obscured
                 ? Icons.visibility_outlined

@@ -32,7 +32,7 @@ Future<void> pump(
   required MonthSummary previous,
   required DateTime today,
 }) => tester.pumpWidget(
-  MaterialApp(
+  localizedApp(
     home: Scaffold(
       body: PaceCard(summary: summary, previous: previous, today: today),
     ),

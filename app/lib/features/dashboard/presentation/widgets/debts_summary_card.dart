@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/format/money_format.dart';
+import '../../../../core/format/formats.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../debts/domain/debt.dart';
 import '../../../debts/domain/debt_direction.dart';
 import '../../../debts/domain/debt_totals.dart';
@@ -29,7 +30,7 @@ class DebtsSummaryCard extends StatelessWidget {
               height: 40,
               child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
             ),
-            error: (error, _) => const Text('No se pudieron cargar las deudas.'),
+            error: (error, _) => Text(context.l10n.dashboardDebtsLoadError),
             data: (all) {
               if (all.every((debt) => debt.isArchived)) {
                 return Row(
@@ -39,9 +40,7 @@ class DebtsSummaryCard extends StatelessWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text('Registra lo que debes o te deben'),
-                    ),
+                    Expanded(child: Text(context.l10n.dashboardDebtsEmpty)),
                     const Icon(Icons.chevron_right),
                   ],
                 );
@@ -51,13 +50,13 @@ class DebtsSummaryCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _Amount(
-                      label: 'Debes',
+                      label: context.l10n.dashboardYouOwe,
                       cents: DebtTotals.remainingCents(all, DebtDirection.payable),
                     ),
                   ),
                   Expanded(
                     child: _Amount(
-                      label: 'Te deben',
+                      label: context.l10n.dashboardOwedToYou,
                       cents: DebtTotals.remainingCents(
                         all,
                         DebtDirection.receivable,
@@ -94,7 +93,7 @@ class _Amount extends StatelessWidget {
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
           child: Text(
-            formatMoney(cents / 100),
+            context.formats.money(cents / 100),
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),

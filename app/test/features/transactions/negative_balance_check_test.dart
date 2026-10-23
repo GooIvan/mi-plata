@@ -6,6 +6,9 @@ import 'package:mi_plata/features/transactions/domain/transaction.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_draft.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 import 'package:mi_plata/features/transactions/presentation/negative_balance_message.dart';
+import 'package:mi_plata/l10n/l10n.dart';
+
+import '../../support/test_app.dart';
 
 import '../../support/fake_account_repository.dart';
 import '../../support/fake_backend.dart';
@@ -37,7 +40,14 @@ List<NegativeBalance> check(
   previous: previous,
 );
 
+late AppLocalizations l10n;
+
 void main() {
+  setUpAll(() async {
+    l10n = await loadL10n();
+    await initDates();
+  });
+
   group('al crear', () {
     test('un gasto mayor al saldo deja la cuenta en negativo', () {
       final result = check([nequi], draft: draft(TransactionType.expense, nequi, '6000'));
@@ -224,7 +234,7 @@ void main() {
     final a = testAccount('A', balance: 1000);
     final b = testAccount('B', balance: 1000);
 
-    final message = negativeBalanceMessage([
+    final message = negativeBalanceMessage(l10n, [
       NegativeBalance(account: a, balance: -4000),
       NegativeBalance(account: b, balance: -1500.5),
     ]);

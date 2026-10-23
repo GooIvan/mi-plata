@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/format/formats.dart';
 import '../../../../core/widgets/error_banner.dart';
+import '../../../../l10n/l10n.dart';
 import '../../domain/account.dart';
 import '../../domain/account_type.dart';
 import '../../domain/account_validators.dart';
@@ -33,16 +35,30 @@ class AccountFormSheet extends ConsumerStatefulWidget {
 class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
   final _formKey = GlobalKey<FormState>();
   late final _name = TextEditingController(text: widget.account?.name);
-  late final _balance = TextEditingController(
-    text: widget.account == null
-        ? ''
-        : AmountParser.toInput(widget.account!.initialBalance),
-  );
+  late final _balance = TextEditingController();
   late AccountType _type = widget.account?.type ?? AccountType.bank;
   bool _saving = false;
+  bool _balanceReady = false;
   String? _error;
 
   bool get _isEditing => widget.account != null;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // El saldo se escribe según el idioma, así que el texto inicial espera a
+    // tener el contexto.
+    if (!_balanceReady) {
+      _balanceReady = true;
+      final account = widget.account;
+      if (account != null) {
+        _balance.text = AmountParser.toInput(
+          account.initialBalance,
+          context.formats,
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -61,7 +77,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
 
     final accounts = ref.read(accountsProvider.notifier);
     final name = _name.text.trim();
-    final initialBalance = AmountParser.parse(_balance.text)!;
+    final initialBalance = AmountParser.parse(_balance.text, context.formats)!;
 
     try {
       if (_isEditing) {
@@ -83,7 +99,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _error = accountErrorMessage(error);
+        _error = accountErrorMessage(context.l10n, error);
       });
     }
   }
@@ -91,6 +107,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
@@ -106,7 +123,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              _isEditing ? 'Editar cuenta' : 'Nueva cuenta',
+              _isEditing ? l10n.accountsEdit : l10n.accountsNew,
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 20),
@@ -116,15 +133,15 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
               autofocus: !_isEditing,
               textCapitalization: TextCapitalization.sentences,
               textInputAction: TextInputAction.next,
-              validator: AccountValidators.name,
-              decoration: const InputDecoration(
-                labelText: 'Nombre',
-                hintText: 'Ej: Bancolombia ahorros',
-                border: OutlineInputBorder(),
+              validator: (value) => AccountValidators.name(l10n, value),
+              decoration: InputDecoration(
+                labelText: l10n.accountsNameLabel,
+                hintText: l10n.accountsNameHint,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
-            Text('Tipo', style: theme.textTheme.labelLarge),
+            Text(l10n.accountsTypeLabel, style: theme.textTheme.labelLarge),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -133,7 +150,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 for (final type in AccountType.values)
                   ChoiceChip(
                     avatar: Icon(type.icon, size: 18),
-                    label: Text(type.label),
+                    label: Text(type.label(l10n)),
                     selected: _type == type,
                     onSelected: _saving
                         ? null
@@ -150,14 +167,14 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 signed: true,
               ),
               textInputAction: TextInputAction.done,
-              validator: AccountValidators.initialBalance,
+              validator: (value) => AccountValidators.initialBalance(l10n, value),
               onFieldSubmitted: (_) => _submit(),
-              decoration: const InputDecoration(
-                labelText: 'Saldo inicial',
-                hintText: 'Ej: 1.500.000',
+              decoration: InputDecoration(
+                labelText: l10n.accountsInitialBalanceLabel,
+                hintText: l10n.accountsInitialBalanceHint,
                 prefixText: r'$ ',
-                helperText: 'Déjalo vacío si empieza en cero',
-                border: OutlineInputBorder(),
+                helperText: l10n.accountsInitialBalanceHelper,
+                border: const OutlineInputBorder(),
               ),
             ),
             if (_error != null) ...[
@@ -173,7 +190,11 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_isEditing ? 'Guardar' : 'Crear cuenta'),
+                  : Text(
+                      _isEditing
+                          ? l10n.commonSave
+                          : l10n.accountsCreateButton,
+                    ),
             ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/format/money_format.dart';
+import '../../../../core/format/formats.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../budgets/domain/budget_calculator.dart';
 import '../../../budgets/presentation/budget_ui.dart';
 
@@ -18,9 +19,11 @@ class BudgetSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
     final status = overview.status;
     final color = budgetStatusColor(status);
-    final attention = budgetAttentionText(overview);
+    final attention = budgetAttentionText(l10n, overview);
 
     return Card(
       margin: EdgeInsets.zero,
@@ -40,14 +43,14 @@ class BudgetSummaryCard extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text.rich(
                         TextSpan(
-                          text: formatMoney(overview.totalSpentCents / 100),
+                          text: formats.money(overview.totalSpentCents / 100),
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                           children: [
                             TextSpan(
                               text:
-                                  ' de ${formatMoney(overview.totalLimitCents / 100)}',
+                                  ' ${l10n.budgetsOfLimit(formats.money(overview.totalLimitCents / 100))}',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.normal,
@@ -78,7 +81,11 @@ class BudgetSummaryCard extends StatelessWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      budgetStatusText(status, overview.totalRemainingCents),
+                      budgetStatusText(
+                        l10n,
+                        status,
+                        overview.totalRemainingCents,
+                      ),
                       style: theme.textTheme.bodySmall,
                     ),
                   ),

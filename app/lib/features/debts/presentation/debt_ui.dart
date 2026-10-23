@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/format/date_format.dart';
+import '../../../core/format/formats.dart';
+import '../../../l10n/l10n.dart';
 import '../domain/debt.dart';
 import '../domain/debt_direction.dart';
 
 extension DebtDirectionUi on DebtDirection {
   /// La pestaña y el selector: "Debo" / "Me deben".
-  String get label => switch (this) {
-    DebtDirection.payable => 'Debo',
-    DebtDirection.receivable => 'Me deben',
+  String label(AppLocalizations l10n) => switch (this) {
+    DebtDirection.payable => l10n.debtsTabOwe,
+    DebtDirection.receivable => l10n.debtsTabOwed,
   };
 
   IconData get icon => switch (this) {
@@ -18,18 +19,16 @@ extension DebtDirectionUi on DebtDirection {
 }
 
 /// Cómo está una deuda en una frase: "Vence mañana", "Vencida hace 3 días"...
-String debtStatusText(Debt debt, DateTime today) {
-  if (debt.isSettled) return 'Saldada';
+String debtStatusText(AppLocalizations l10n, Debt debt, DateTime today) {
+  if (debt.isSettled) return l10n.debtStatusSettled;
 
   final days = debt.daysUntilDue(today);
-  if (days == null) return 'Sin fecha de vencimiento';
-  if (days < 0) {
-    return days == -1 ? 'Vencida hace 1 día' : 'Vencida hace ${-days} días';
-  }
-  if (days == 0) return 'Vence hoy';
-  if (days == 1) return 'Vence mañana';
-  if (days <= Debt.dueSoonDays) return 'Vence en $days días';
-  return 'Vence el ${formatDayMonth(debt.dueDate!)}';
+  if (days == null) return l10n.debtStatusNoDueDate;
+  if (days < 0) return l10n.debtStatusOverdue(-days);
+  if (days == 0) return l10n.debtStatusDueToday;
+  if (days == 1) return l10n.debtStatusDueTomorrow;
+  if (days <= Debt.dueSoonDays) return l10n.debtStatusDueInDays(days);
+  return l10n.debtStatusDueOn(Formats(l10n).dayMonth(debt.dueDate!));
 }
 
 /// El ícono que acompaña al estado: la urgencia no se dice solo con color.

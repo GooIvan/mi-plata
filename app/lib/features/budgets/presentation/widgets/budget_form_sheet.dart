@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/format/date_format.dart';
+import '../../../../core/format/formats.dart';
 import '../../../../core/widgets/error_banner.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../accounts/domain/amount_parser.dart';
 import '../../../categories/domain/category.dart';
 import '../../../categories/domain/category_type.dart';
@@ -60,16 +61,27 @@ class BudgetFormSheet extends ConsumerStatefulWidget {
 
 class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   final _formKey = GlobalKey<FormState>();
-  late final _amount = TextEditingController(
-    text: widget.currentCents == null
-        ? ''
-        : AmountParser.toInput(widget.currentCents! / 100),
-  );
+  final _amount = TextEditingController();
   late String? _categoryId = widget.categoryId;
   bool _saving = false;
+  bool _amountReady = false;
   String? _error;
 
   bool get _isEditing => widget.currentCents != null;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // El monto se escribe según el idioma, así que el texto inicial espera a
+    // tener el contexto.
+    if (!_amountReady) {
+      _amountReady = true;
+      final cents = widget.currentCents;
+      if (cents != null) {
+        _amount.text = AmountParser.toInput(cents / 100, context.formats);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -89,7 +101,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _error = budgetErrorMessage(error);
+        _error = budgetErrorMessage(context.l10n, error);
       });
     }
   }
@@ -101,7 +113,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
       () => budgets.setBudget(
         categoryId: _categoryId!,
         month: widget.month,
-        amount: AmountParser.parse(_amount.text)!,
+        amount: AmountParser.parse(_amount.text, context.formats)!,
       ),
     );
   }
@@ -116,6 +128,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final categories =
         ref.watch(categoriesProvider).value ?? const <Category>[];
     final fixed = widget.categoryId != null;
@@ -148,15 +161,18 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
           children: [
             Text(
               fixed
-                  ? 'Presupuesto de ${name ?? 'la categoría'}'
-                  : 'Nuevo presupuesto',
+                  ? l10n.budgetsFormTitleFixed(
+                      name ?? l10n.budgetsFormTheCategory,
+                    )
+                  : l10n.budgetsNew,
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 4),
             Text(
-              'Rige desde ${formatMonthName(widget.month)} de '
-              '${widget.month.year} en adelante, hasta que lo cambies. Los '
-              'meses anteriores no se tocan.',
+              l10n.budgetsFormAppliesFrom(
+                context.formats.monthName(widget.month),
+                widget.month.year,
+              ),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -165,7 +181,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
             if (!fixed) ...[
               if (options.isEmpty)
                 Text(
-                  'Todas tus categorías de gasto ya tienen presupuesto.',
+                  l10n.budgetsFormAllBudgeted,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.error,
                   ),
@@ -187,10 +203,11 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                   onChanged: _saving
                       ? null
                       : (id) => setState(() => _categoryId = id),
-                  validator: (id) => id == null ? 'Elige una categoría' : null,
-                  decoration: const InputDecoration(
-                    labelText: 'Categoría de gasto',
-                    border: OutlineInputBorder(),
+                  validator: (id) =>
+                      id == null ? l10n.budgetsFormChooseCategory : null,
+                  decoration: InputDecoration(
+                    labelText: l10n.budgetsFormCategoryLabel,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               const SizedBox(height: 16),
@@ -203,13 +220,13 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                 decimal: true,
               ),
               textInputAction: TextInputAction.done,
-              validator: TransactionValidators.amount,
+              validator: (value) => TransactionValidators.amount(l10n, value),
               onFieldSubmitted: (_) => _save(),
-              decoration: const InputDecoration(
-                labelText: 'Monto mensual',
-                hintText: 'Ej: 800.000',
+              decoration: InputDecoration(
+                labelText: l10n.budgetsFormAmountLabel,
+                hintText: l10n.budgetsFormAmountHint,
                 prefixText: r'$ ',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
             ),
             if (_error != null) ...[
@@ -225,14 +242,14 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Guardar'),
+                  : Text(l10n.commonSave),
             ),
             if (_isEditing) ...[
               const SizedBox(height: 8),
               TextButton(
                 onPressed: _saving ? null : _remove,
                 child: Text(
-                  'Quitar el presupuesto',
+                  l10n.budgetsFormRemove,
                   style: TextStyle(color: theme.colorScheme.error),
                 ),
               ),

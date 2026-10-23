@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/format/money_format.dart';
+import '../../../../core/format/formats.dart';
+import '../../../../l10n/l10n.dart';
 import '../../domain/debt.dart';
 import '../debt_ui.dart';
 
@@ -20,6 +21,8 @@ class DebtTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
     final status = debt.statusOn(today);
     final statusColor =
         debtStatusColor(status, theme.colorScheme) ??
@@ -47,7 +50,7 @@ class DebtTile extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    formatMoney(debt.remaining, currency: debt.currency),
+                    formats.money(debt.remaining, currency: debt.currency),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -64,8 +67,8 @@ class DebtTile extends StatelessWidget {
                   Expanded(
                     child: Text(
                       [
-                        debtStatusText(debt, today),
-                        if (debt.isArchived) 'Archivada',
+                        debtStatusText(l10n, debt, today),
+                        if (debt.isArchived) l10n.commonArchivedTag,
                       ].join(' · '),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: statusColor,
@@ -73,7 +76,9 @@ class DebtTile extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'de ${formatMoney(debt.amount, currency: debt.currency)}',
+                    l10n.debtsOfAmount(
+                      formats.money(debt.amount, currency: debt.currency),
+                    ),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

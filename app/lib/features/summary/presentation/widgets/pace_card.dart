@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/format/date_format.dart';
-import '../../../../core/format/money_format.dart';
+import '../../../../core/format/formats.dart';
+import '../../../../l10n/l10n.dart';
+import '../../../transactions/domain/transaction_type.dart';
 import '../../domain/month_summary.dart';
 import '../summary_comparison.dart';
 
@@ -24,6 +25,8 @@ class PaceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
     final pace = SummaryCalculator.pace(summary, today);
     final isCurrentMonth = summary.month == SummaryCalculator.monthStart(today);
     final projected = pace.projectedCents;
@@ -31,11 +34,12 @@ class PaceCard extends StatelessWidget {
     final comparison = projected == null
         ? null
         : compareWithPrevious(
+            l10n,
             current: projected,
             previous: previous.expenseCents,
             previousHasData: !previous.isEmpty,
-            previousMonthName: formatMonthName(previous.month),
-            noneNoun: 'gastos',
+            previousMonthName: formats.monthName(previous.month),
+            noneKind: TransactionType.expense,
           );
 
     return Card(
@@ -45,19 +49,21 @@ class PaceCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Ritmo de gasto', style: theme.textTheme.titleMedium),
+            Text(l10n.summaryPaceTitle, style: theme.textTheme.titleMedium),
             const SizedBox(height: 12),
             // Son estimaciones: en pesos enteros, sin centavos que aparentan
             // una precisión que no tienen.
             _Row(
-              label: 'Promedio por día',
-              value: formatMoney((pace.dailyAverageCents / 100).roundToDouble()),
+              label: l10n.summaryDailyAverage,
+              value: formats.money(
+                (pace.dailyAverageCents / 100).roundToDouble(),
+              ),
             ),
             if (projected != null) ...[
               const SizedBox(height: 8),
               _Row(
-                label: 'A este ritmo, el mes cerrará en',
-                value: formatMoney((projected / 100).roundToDouble()),
+                label: l10n.summaryProjectedClose,
+                value: formats.money((projected / 100).roundToDouble()),
               ),
             ],
             if (comparison != null) ...[
@@ -72,7 +78,7 @@ class PaceCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Flexible(
                     child: Text(
-                      'Proyección: ${comparison.text}',
+                      l10n.summaryProjection(comparison.text),
                       style: theme.textTheme.bodySmall,
                     ),
                   ),
@@ -82,9 +88,11 @@ class PaceCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               isCurrentMonth
-                  ? 'Calculado sobre ${pace.daysCounted} de ${pace.daysInMonth} '
-                        'días del mes.'
-                  : 'Calculado sobre los ${pace.daysInMonth} días del mes.',
+                  ? l10n.summaryCalculatedPartial(
+                      pace.daysCounted,
+                      pace.daysInMonth,
+                    )
+                  : l10n.summaryCalculatedFull(pace.daysInMonth),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

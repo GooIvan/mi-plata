@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/format/money_format.dart';
+import '../../../core/format/formats.dart';
 import '../../../core/widgets/state_message.dart';
+import '../../../l10n/l10n.dart';
 import '../../summary/domain/month_summary.dart';
 import '../../summary/presentation/summary_providers.dart';
 import '../../summary/presentation/widgets/month_navigator.dart';
@@ -49,7 +50,7 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
     final failed = overview.hasError && !overview.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Presupuestos')),
+      appBar: AppBar(title: Text(context.l10n.budgetsTitle)),
       body: Column(
         children: [
           Padding(
@@ -82,18 +83,19 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                 },
               ),
               icon: const Icon(Icons.add),
-              label: const Text('Nuevo presupuesto'),
+              label: Text(context.l10n.budgetsNew),
             )
           : null,
     );
   }
 
   Widget _body(AsyncValue<BudgetOverview> overview, bool failed) {
+    final l10n = context.l10n;
     if (failed) {
       return StateMessage(
         icon: Icons.cloud_off_outlined,
-        text: budgetErrorMessage(overview.error!),
-        actionLabel: 'Reintentar',
+        text: budgetErrorMessage(l10n, overview.error!),
+        actionLabel: l10n.commonRetry,
         onAction: () {
           // El presupuesto junta dos consultas: se repiten las dos, porque la
           // que falló se queda con su error mientras alguien la esté mirando.
@@ -110,11 +112,10 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
     if (!data.hasBudgets && data.unbudgeted.isEmpty) {
       return StateMessage(
         icon: Icons.savings_outlined,
-        text: _canEdit
-            ? 'Define cuánto quieres gastar al mes en cada categoría y '
-                  've cómo vas.'
-            : 'No había presupuestos ni gastos en este mes.',
-        actionLabel: _canEdit ? 'Definir un presupuesto' : 'Ir al mes actual',
+        text: _canEdit ? l10n.budgetsEmptyEditable : l10n.budgetsEmptyPast,
+        actionLabel: _canEdit
+            ? l10n.budgetsDefine
+            : l10n.budgetsGoToCurrentMonth,
         onAction: _canEdit
             ? () => showBudgetForm(context, month: _month)
             : () => setState(() => _month = _currentMonth),
@@ -142,11 +143,12 @@ class _Content extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final names = ref.watch(categoryNamesProvider);
     final budgetedIds = {for (final b in overview.budgeted) b.categoryId};
 
     String nameOf(String? id) =>
-        id == null ? 'Sin categoría' : names[id] ?? 'Categoría';
+        id == null ? l10n.commonNoCategory : names[id] ?? l10n.commonCategory;
 
     return ListView(
       padding: const EdgeInsets.only(bottom: 96),
@@ -155,7 +157,10 @@ class _Content extends ConsumerWidget {
         if (overview.hasBudgets) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Text('Con presupuesto', style: theme.textTheme.titleMedium),
+            child: Text(
+              l10n.budgetsWithBudget,
+              style: theme.textTheme.titleMedium,
+            ),
           ),
           for (final progress in overview.budgeted) ...[
             BudgetProgressTile(
@@ -178,7 +183,7 @@ class _Content extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
             child: Text(
-              'Gastos sin presupuesto',
+              l10n.budgetsWithoutBudget,
               style: theme.textTheme.titleMedium,
             ),
           ),
@@ -186,10 +191,10 @@ class _Content extends ConsumerWidget {
             ListTile(
               title: Text(nameOf(spending.categoryId)),
               subtitle: canEdit && spending.categoryId != null
-                  ? const Text('Toca para definir un presupuesto')
+                  ? Text(l10n.budgetsTapToDefine)
                   : null,
               trailing: Text(
-                formatMoney(spending.spentCents / 100),
+                context.formats.money(spending.spentCents / 100),
                 style: theme.textTheme.titleMedium,
               ),
               // "Sin categoría" no tiene a quién ponerle un presupuesto.
@@ -217,9 +222,11 @@ class _OverviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
     final status = overview.status;
     final color = budgetStatusColor(status);
-    final attention = budgetAttentionText(overview);
+    final attention = budgetAttentionText(l10n, overview);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -230,16 +237,16 @@ class _OverviewCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Presupuesto total', style: theme.textTheme.labelLarge),
+              Text(l10n.budgetsTotalTitle, style: theme.textTheme.labelLarge),
               const SizedBox(height: 4),
               Text(
-                formatMoney(overview.totalSpentCents / 100),
+                formats.money(overview.totalSpentCents / 100),
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                'de ${formatMoney(overview.totalLimitCents / 100)} presupuestados',
+                l10n.budgetsTotalOf(formats.money(overview.totalLimitCents / 100)),
                 style: theme.textTheme.bodySmall,
               ),
               const SizedBox(height: 12),
@@ -259,11 +266,15 @@ class _OverviewCard extends StatelessWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      budgetStatusText(status, overview.totalRemainingCents),
+                      budgetStatusText(
+                        l10n,
+                        status,
+                        overview.totalRemainingCents,
+                      ),
                       style: theme.textTheme.bodyMedium,
                     ),
                   ),
-                  Text('${(overview.fraction * 100).round()} %'),
+                  Text(l10n.commonPercent((overview.fraction * 100).round())),
                 ],
               ),
               if (attention != null)

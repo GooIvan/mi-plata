@@ -13,7 +13,7 @@ List<BalancePoint> months(List<int> pesos) => [
 ];
 
 Future<void> pump(WidgetTester tester, List<int> pesos) => tester.pumpWidget(
-  MaterialApp(
+  localizedApp(
     home: Scaffold(
       body: SingleChildScrollView(
         child: BalanceHistoryCard(

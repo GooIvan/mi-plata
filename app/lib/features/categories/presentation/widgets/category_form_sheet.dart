@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/error_banner.dart';
+import '../../../../l10n/l10n.dart';
 import '../../domain/category.dart';
 import '../../domain/category_type.dart';
 import '../../domain/category_validators.dart';
 import '../categories_providers.dart';
 import '../category_error_message.dart';
-import '../category_type_ui.dart';
 
 /// Abre el formulario para crear una categoría de [type], o para renombrar
 /// [category] (el tipo de una categoría existente no se puede cambiar).
@@ -73,7 +73,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _error = categoryErrorMessage(error);
+        _error = categoryErrorMessage(context.l10n, error);
       });
     }
   }
@@ -81,6 +81,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
@@ -97,8 +98,8 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
           children: [
             Text(
               _isEditing
-                  ? 'Editar categoría de ${_type.label}'
-                  : 'Nueva categoría de ${_type.label}',
+                  ? l10n.categoriesEditOfType(_type.name)
+                  : l10n.categoriesNewOfType(_type.name),
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 20),
@@ -108,12 +109,12 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
               autofocus: true,
               textCapitalization: TextCapitalization.sentences,
               textInputAction: TextInputAction.done,
-              validator: CategoryValidators.name,
+              validator: (value) => CategoryValidators.name(l10n, value),
               onFieldSubmitted: (_) => _submit(),
-              decoration: const InputDecoration(
-                labelText: 'Nombre',
-                hintText: 'Ej: Mascotas',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.categoriesNameLabel,
+                hintText: l10n.categoriesNameHint,
+                border: const OutlineInputBorder(),
               ),
             ),
             if (_error != null) ...[
@@ -129,7 +130,11 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_isEditing ? 'Guardar' : 'Crear categoría'),
+                  : Text(
+                      _isEditing
+                          ? l10n.commonSave
+                          : l10n.categoriesCreateButton,
+                    ),
             ),
           ],
         ),

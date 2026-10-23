@@ -36,7 +36,10 @@ void main() {
       final repository = FakeAuthRepository(signedInAs: 'ana@correo.com');
       await pumpApp(tester, repository);
 
-      await tester.tap(find.byTooltip('Cerrar sesión'));
+      // Cerrar sesión vive en los ajustes.
+      await tester.tap(find.byTooltip('Ajustes'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cerrar sesión'));
       await tester.pumpAndSettle();
 
       expect(repository.calls, ['signOut']);

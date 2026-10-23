@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/format/date_format.dart';
-import '../../../../core/format/money_format.dart';
+import '../../../../core/format/formats.dart';
 import '../../../../core/widgets/error_banner.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../accounts/domain/account.dart';
 import '../../../accounts/domain/amount_parser.dart';
 import '../../../accounts/presentation/accounts_providers.dart';
@@ -14,6 +14,7 @@ import '../../../transactions/domain/transaction_type.dart';
 import '../../../transactions/presentation/negative_balance_dialog.dart';
 import '../../domain/debt.dart';
 import '../../domain/debt_direction.dart';
+import '../../../transactions/domain/transaction_validators.dart';
 import '../../domain/debt_validators.dart';
 import '../debt_error_message.dart';
 import '../debts_providers.dart';
@@ -62,7 +63,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
       initialDate: _date,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      helpText: 'Fecha del abono',
+      helpText: context.l10n.debtsPaymentDateHelp,
     );
     if (picked != null) setState(() => _date = picked);
   }
@@ -70,7 +71,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final amount = AmountParser.parse(_amount.text)!;
+    final amount = AmountParser.parse(_amount.text, context.formats)!;
 
     // Si yo pago, el dinero sale de la cuenta: se avisa si la deja en negativo.
     if (_isPayable) {
@@ -87,8 +88,8 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
           !await confirmNegativeBalance(
             context,
             warnings,
-            title: '¿Registrar de todos modos?',
-            confirmLabel: 'Registrar igual',
+            title: context.l10n.negativeBalanceRecordTitle,
+            confirmLabel: context.l10n.negativeBalanceRecordAnyway,
           )) {
         return;
       }
@@ -116,7 +117,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _error = debtErrorMessage(error);
+        _error = debtErrorMessage(context.l10n, error);
       });
     }
   }
@@ -124,6 +125,8 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
     final debt = widget.debt;
 
     final accounts = (ref.watch(accountsProvider).value ?? const <Account>[])
@@ -149,13 +152,15 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
           children: [
             Text(
               _isPayable
-                  ? 'Abonar a ${debt.counterparty}'
-                  : 'Abono de ${debt.counterparty}',
+                  ? l10n.debtsPaySheetTitlePayable(debt.counterparty)
+                  : l10n.debtsPaymentDescriptionReceivable(debt.counterparty),
               style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 4),
             Text(
-              'Pendiente: ${formatMoney(debt.remaining, currency: debt.currency)}',
+              l10n.debtsPendingAmount(
+                formats.money(debt.remaining, currency: debt.currency),
+              ),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -167,25 +172,33 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
               autofocus: true,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               textInputAction: TextInputAction.next,
-              validator: (value) =>
-                  DebtValidators.paymentAmount(value, remaining: debt.remaining),
+              validator: (value) => DebtValidators.paymentAmount(
+                l10n,
+                value,
+                remaining: debt.remaining,
+              ),
               decoration: InputDecoration(
-                labelText: 'Monto del abono',
-                hintText: 'Ej: 100.000',
+                labelText: l10n.debtsPaymentAmountLabel,
+                hintText: l10n.debtsPaymentAmountHint,
                 prefixText: r'$ ',
                 border: const OutlineInputBorder(),
                 suffixIcon: TextButton(
                   onPressed: _saving
                       ? null
-                      : () => _amount.text = AmountParser.toInput(debt.remaining),
-                  child: Text(_isPayable ? 'Pagar todo' : 'Cobrar todo'),
+                      : () => _amount.text = AmountParser.toInput(
+                          debt.remaining,
+                          formats,
+                        ),
+                  child: Text(
+                    _isPayable ? l10n.debtsPayAll : l10n.debtsCollectAll,
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 16),
             if (accounts.isEmpty)
               Text(
-                'Primero crea una cuenta en ${debt.currency} para registrar el abono.',
+                l10n.debtsNeedCurrencyAccount(debt.currency),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.error,
                 ),
@@ -194,7 +207,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
               AccountDropdown(
                 accounts: accounts,
                 value: _accountId,
-                label: _isPayable ? 'Pagar desde' : 'Recibir en',
+                label: _isPayable ? l10n.debtsPayFrom : l10n.debtsReceiveIn,
                 enabled: !_saving,
                 onChanged: (id) => setState(() => _accountId = id),
               ),
@@ -203,12 +216,12 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
               onTap: _saving ? null : _pickDate,
               borderRadius: BorderRadius.circular(4),
               child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Fecha',
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.calendar_today_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.commonDate,
+                  border: const OutlineInputBorder(),
+                  suffixIcon: const Icon(Icons.calendar_today_outlined),
                 ),
-                child: Text(formatFullDate(_date)),
+                child: Text(formats.fullDate(_date)),
               ),
             ),
             const SizedBox(height: 16),
@@ -216,14 +229,13 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
               controller: _description,
               enabled: !_saving,
               textCapitalization: TextCapitalization.sentences,
-              validator: (value) => (value?.trim().length ?? 0) > 200
-                  ? 'Usa 200 caracteres o menos'
-                  : null,
+              validator: (value) =>
+                  TransactionValidators.description(l10n, value),
               decoration: InputDecoration(
-                labelText: 'Descripción (opcional)',
+                labelText: l10n.transactionsDescriptionLabel,
                 hintText: _isPayable
-                    ? 'Abono a ${debt.counterparty}'
-                    : 'Abono de ${debt.counterparty}',
+                    ? l10n.debtsPaymentDescriptionPayable(debt.counterparty)
+                    : l10n.debtsPaymentDescriptionReceivable(debt.counterparty),
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -240,7 +252,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Registrar abono'),
+                  : Text(l10n.debtsRecordPayment),
             ),
           ],
         ),
