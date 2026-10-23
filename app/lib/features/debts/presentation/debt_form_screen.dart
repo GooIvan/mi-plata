@@ -145,6 +145,9 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
         dueDate: _due,
         notes: notes,
         accountId: _registerMoney ? _accountId : null,
+        description: _isPayable
+            ? context.l10n.debtsLoanDescriptionPayable(counterparty)
+            : context.l10n.debtsLoanDescriptionReceivable(counterparty),
       );
 
       // Si presté dinero, sale de la cuenta: se avisa si la deja en negativo.

@@ -12,6 +12,7 @@ class DebtDraft {
     this.dueDate,
     this.notes,
     this.accountId,
+    this.description,
   });
 
   final DebtDirection direction;
@@ -24,6 +25,10 @@ class DebtDraft {
   final String? notes;
   final String? accountId;
 
+  /// Cómo se llamará el movimiento del dinero (si se registra en una cuenta):
+  /// lo escribe la app en el idioma del usuario. Sin él, la base usa el suyo.
+  final String? description;
+
   /// Los parámetros de la función `create_debt`.
   Map<String, dynamic> toRpcParams() => {
     'p_direction': direction.dbValue,
@@ -33,5 +38,6 @@ class DebtDraft {
     'p_due_date': dueDate == null ? null : toDbDate(dueDate!),
     'p_notes': notes,
     'p_account_id': accountId,
+    'p_description': description,
   };
 }

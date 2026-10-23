@@ -35,6 +35,7 @@ class AuthController extends AsyncNotifier<void> {
   Future<SignUpOutcome> signUp({
     required String email,
     required String password,
+    required String language,
   }) async {
     state = const AsyncLoading();
     var confirmationRequired = false;
@@ -42,6 +43,7 @@ class AuthController extends AsyncNotifier<void> {
       confirmationRequired = await _repository.signUp(
         email: email,
         password: password,
+        language: language,
       );
     });
     if (ref.mounted) state = result;

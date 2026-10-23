@@ -1186,4 +1186,54 @@ class AppLocalizationsEs extends AppLocalizations {
   String budgetsPercent(int percent) {
     return '$percent %';
   }
+
+  @override
+  String get dbErrorTransactionCategoryMismatch =>
+      'La categoría elegida no corresponde a este tipo de movimiento';
+
+  @override
+  String get dbErrorTransferCurrencyMismatch =>
+      'Una transferencia requiere cuentas de la misma moneda';
+
+  @override
+  String get dbErrorBudgetExpenseOnly =>
+      'Solo las categorías de gasto pueden tener presupuesto';
+
+  @override
+  String get dbErrorPaymentDirectionMismatch =>
+      'El abono no corresponde al tipo de deuda';
+
+  @override
+  String get dbErrorPaymentCurrencyMismatch =>
+      'El abono debe ser de una cuenta en la moneda de la deuda';
+
+  @override
+  String get dbErrorPaymentExceedsRemaining =>
+      'El abono supera lo que falta por pagar';
+
+  @override
+  String get dbErrorDebtAmountBelowPaid =>
+      'El monto no puede ser menor a lo que ya se ha pagado';
+
+  @override
+  String get dbErrorDebtDirectionLocked =>
+      'No se puede cambiar el sentido de una deuda que ya tiene abonos';
+
+  @override
+  String get dbErrorPaymentTypeLocked =>
+      'Este movimiento es el abono de una deuda: no se puede cambiar su tipo';
+
+  @override
+  String get dbErrorDebtArchived =>
+      'La deuda está archivada: restáurala para registrar abonos';
+
+  @override
+  String debtsLoanDescriptionPayable(String name) {
+    return 'Préstamo de $name';
+  }
+
+  @override
+  String debtsLoanDescriptionReceivable(String name) {
+    return 'Préstamo a $name';
+  }
 }

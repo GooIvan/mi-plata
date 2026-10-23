@@ -15,8 +15,19 @@ class AuthRepository {
   }
 
   /// Devuelve `true` si hay que confirmar el correo antes de poder entrar.
-  Future<bool> signUp({required String email, required String password}) async {
-    final response = await _auth.signUp(email: email, password: password);
+  ///
+  /// [language] ("es" o "en") viaja en los metadatos del usuario: la base lo usa
+  /// para crear sus categorías por defecto en ese idioma.
+  Future<bool> signUp({
+    required String email,
+    required String password,
+    required String language,
+  }) async {
+    final response = await _auth.signUp(
+      email: email,
+      password: password,
+      data: {'language': language},
+    );
     return response.session == null;
   }
 

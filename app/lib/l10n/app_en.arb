@@ -796,5 +796,31 @@
         "type": "int"
       }
     }
+  },
+  "dbErrorTransactionCategoryMismatch": "The chosen category does not match this type of transaction",
+  "dbErrorTransferCurrencyMismatch": "A transfer requires accounts in the same currency",
+  "dbErrorBudgetExpenseOnly": "Only expense categories can have a budget",
+  "dbErrorPaymentDirectionMismatch": "The payment doesn't match the type of debt",
+  "dbErrorPaymentCurrencyMismatch": "The payment must come from an account in the debt's currency",
+  "dbErrorPaymentExceedsRemaining": "The payment exceeds what is left to pay",
+  "dbErrorDebtAmountBelowPaid": "The amount can't be less than what has already been paid",
+  "dbErrorDebtDirectionLocked": "A debt's direction can't be changed once it has payments",
+  "dbErrorPaymentTypeLocked": "This transaction is a debt payment: its type can't be changed",
+  "dbErrorDebtArchived": "The debt is archived: restore it to record payments",
+  "debtsLoanDescriptionPayable": "Loan from {name}",
+  "@debtsLoanDescriptionPayable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsLoanDescriptionReceivable": "Loan to {name}",
+  "@debtsLoanDescriptionReceivable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

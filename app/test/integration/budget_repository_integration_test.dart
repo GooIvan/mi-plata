@@ -175,6 +175,7 @@ void main() {
               budgets.set(categoryId: incomeId, month: march, amount: '1000'),
             );
             expect(error.code, '23514');
+            expect(error.details, 'budget_expense_only');
             expect(
               error.message,
               'Solo las categorías de gasto pueden tener presupuesto',

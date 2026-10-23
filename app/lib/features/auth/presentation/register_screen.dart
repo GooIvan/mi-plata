@@ -37,7 +37,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     final outcome = await ref
         .read(authControllerProvider.notifier)
-        .signUp(email: _email.text.trim(), password: _password.text);
+        .signUp(
+          email: _email.text.trim(),
+          password: _password.text,
+          // Las categorías con que empieza se crean en el idioma que se ve.
+          language: Localizations.localeOf(context).languageCode,
+        );
     if (!mounted) return;
 
     // Si no hace falta confirmar el correo, la sesión ya está abierta y el

@@ -63,6 +63,55 @@ void main() {
         expect(all.every((c) => !c.isArchived), isTrue);
       });
 
+      group('las categorías por defecto salen en el idioma del registro', () {
+        Future<List<String>> namesFor({String? language}) async {
+          final client = await harness.signedUpClient('idioma', language: language);
+          final all = await CategoryRepository(client).fetchAll();
+          expect(all, hasLength(13));
+          return [for (final category in all) category.name]..sort();
+        }
+
+        test('sin idioma, en español', () async {
+          final names = await namesFor();
+          expect(names, containsAll(['Mercado', 'Salario', 'Otros gastos']));
+        });
+
+        test('en español', () async {
+          final names = await namesFor(language: 'es');
+          expect(names, containsAll(['Alimentación', 'Transporte', 'Ingresos extra']));
+        });
+
+        test('en inglés', () async {
+          final names = await namesFor(language: 'en');
+          expect(
+            names,
+            unorderedEquals([
+              'Clothing', 'Education', 'Entertainment', 'Extra income', 'Food',
+              'Groceries', 'Health', 'Housing', 'Other expenses', 'Other income',
+              'Salary', 'Transport', 'Utilities',
+            ]),
+          );
+        });
+
+        test('un idioma que no tenemos cae en español', () async {
+          final names = await namesFor(language: 'fr');
+          expect(names, contains('Mercado'));
+          expect(names, isNot(contains('Groceries')));
+        });
+
+        test('el tipo de cada una es el correcto en inglés', () async {
+          final client = await harness.signedUpClient('tipos', language: 'en');
+          final all = await CategoryRepository(client).fetchAll();
+          final byName = {for (final c in all) c.name: c.type};
+          expect(byName['Groceries'], CategoryType.expense);
+          expect(byName['Salary'], CategoryType.income);
+          expect(
+            all.where((c) => c.type == CategoryType.income).map((c) => c.name),
+            unorderedEquals(['Salary', 'Extra income', 'Other income']),
+          );
+        });
+      });
+
       test('crear, renombrar y archivar', () async {
         await categories.create(name: 'Mascotas', type: CategoryType.expense);
         var mascotas = await named('Mascotas');

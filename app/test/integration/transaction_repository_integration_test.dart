@@ -225,6 +225,7 @@ void main() {
             throwsA(
               isA<PostgrestException>()
                   .having((e) => e.code, 'code', '23514')
+                  .having((e) => e.details, 'detalle', 'transaction_category_mismatch')
                   .having(
                     (e) => transactionErrorMessage(l10n, e),
                     'mensaje',

@@ -426,8 +426,10 @@ class FakeDebtRepository implements DebtRepository {
     return id;
   }
 
-  Never _fail(String message, String code) =>
-      throw PostgrestException(message: message, code: code);
+  /// Falla como la base de datos: con su código y, si lo trae, el código
+  /// estable de la validación en `details`.
+  Never _fail(String message, String code, [String? details]) =>
+      throw PostgrestException(message: message, code: code, details: details);
 
   @override
   Future<List<Debt>> fetchAll() async {
@@ -477,7 +479,7 @@ class FakeDebtRepository implements DebtRepository {
 
     final accountId = draft.accountId;
     if (accountId != null && !_accounts.accounts.any((a) => a.id == accountId)) {
-      _fail('La cuenta no existe', '23503');
+      _fail('La cuenta no existe', '23503', 'account_not_found');
     }
 
     final debt = _StoredDebt(
@@ -500,7 +502,9 @@ class FakeDebtRepository implements DebtRepository {
           accountId: accountId,
           amount: debt.amount,
           date: draft.startDate,
-          description: '${payable ? 'Préstamo de' : 'Préstamo a'} ${debt.counterparty}',
+          description:
+              draft.description ??
+              '${payable ? 'Préstamo de' : 'Préstamo a'} ${debt.counterparty}',
         ),
       );
     }
@@ -519,7 +523,11 @@ class FakeDebtRepository implements DebtRepository {
     final debt = _debts.firstWhere((d) => d.id == id);
     final newAmount = double.parse(amount);
     if (newAmount < _paid(debt)) {
-      _fail('El monto no puede ser menor a lo que ya se ha pagado', '23514');
+      _fail(
+        'El monto no puede ser menor a lo que ya se ha pagado',
+        '23514',
+        'debt_amount_below_paid',
+      );
     }
     debt
       ..counterparty = counterparty
@@ -547,13 +555,21 @@ class FakeDebtRepository implements DebtRepository {
     if (error != null) throw error!;
 
     final debt = _debts.where((d) => d.id == debtId).firstOrNull;
-    if (debt == null) _fail('La deuda no existe', '23503');
+    if (debt == null) _fail('La deuda no existe', '23503', 'debt_not_found');
     if (debt.isArchived) {
-      _fail('La deuda está archivada: restáurala para registrar abonos', '23514');
+      _fail(
+        'La deuda está archivada: restáurala para registrar abonos',
+        '23514',
+        'debt_archived',
+      );
     }
     final value = double.parse(amount);
     if (_paid(debt) + value > debt.amount) {
-      _fail('El abono supera lo que falta por pagar', '23514');
+      _fail(
+        'El abono supera lo que falta por pagar',
+        '23514',
+        'payment_exceeds_remaining',
+      );
     }
 
     final id = _addPayment(debt, accountId, value, date);

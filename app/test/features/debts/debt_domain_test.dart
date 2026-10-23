@@ -332,6 +332,7 @@ void main() {
         'p_due_date': null,
         'p_notes': null,
         'p_account_id': null,
+        'p_description': null,
       });
     });
 
@@ -344,11 +345,13 @@ void main() {
         dueDate: DateTime(2026, 12, 1),
         notes: 'Para el carro',
         accountId: 'cuenta-1',
+        description: 'Loan from Juan',
       ).toRpcParams();
 
       expect(params['p_due_date'], '2026-12-01');
       expect(params['p_notes'], 'Para el carro');
       expect(params['p_account_id'], 'cuenta-1');
+      expect(params['p_description'], 'Loan from Juan');
     });
   });
 
@@ -356,9 +359,18 @@ void main() {
     String message(String? code, [String text = 'x']) =>
         debtErrorMessage(l10n, PostgrestException(message: text, code: code));
 
-    test('muestra tal cual los mensajes en español de nuestras reglas', () {
+    test('muestra tal cual el mensaje de la base si no trae un código', () {
       const own = 'El abono supera lo que falta por pagar';
       expect(message('23514', own), own);
+    });
+
+    test('con código, lo traduce al idioma de la app', () {
+      final error = PostgrestException(
+        message: 'El abono supera lo que falta por pagar',
+        code: '23514',
+        details: 'payment_exceeds_remaining',
+      );
+      expect(debtErrorMessage(l10n, error), 'El abono supera lo que falta por pagar');
     });
 
     test('oculta el mensaje técnico de una restricción CHECK', () {

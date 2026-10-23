@@ -186,6 +186,31 @@ void main() {
       expect(find.text('ana@correo.com'), findsOneWidget);
     });
 
+    testWidgets('el registro manda el idioma de la app', (tester) async {
+      final repository = FakeAuthRepository();
+      await pumpApp(tester, repository);
+      await openRegister(tester);
+
+      await fillRegister(tester);
+      await tester.tap(button('Crear cuenta'));
+      await tester.pumpAndSettle();
+
+      expect(repository.signedUpWithLanguage, 'es');
+    });
+
+    testWidgets('y en inglés, el inglés', (tester) async {
+      final repository = FakeAuthRepository();
+      await pumpMiPlata(tester, auth: repository, language: 'en');
+      await tester.tap(find.text("Don't have an account? Sign up"));
+      await tester.pumpAndSettle();
+
+      await fillRegister(tester);
+      await tester.tap(button('Create account'));
+      await tester.pumpAndSettle();
+
+      expect(repository.signedUpWithLanguage, 'en');
+    });
+
     testWidgets('si falta confirmar el correo vuelve al login con aviso', (
       tester,
     ) async {

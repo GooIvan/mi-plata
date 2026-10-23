@@ -1188,4 +1188,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String budgetsPercent(int percent) {
     return '$percent%';
   }
+
+  @override
+  String get dbErrorTransactionCategoryMismatch =>
+      'The chosen category does not match this type of transaction';
+
+  @override
+  String get dbErrorTransferCurrencyMismatch =>
+      'A transfer requires accounts in the same currency';
+
+  @override
+  String get dbErrorBudgetExpenseOnly =>
+      'Only expense categories can have a budget';
+
+  @override
+  String get dbErrorPaymentDirectionMismatch =>
+      'The payment doesn\'t match the type of debt';
+
+  @override
+  String get dbErrorPaymentCurrencyMismatch =>
+      'The payment must come from an account in the debt\'s currency';
+
+  @override
+  String get dbErrorPaymentExceedsRemaining =>
+      'The payment exceeds what is left to pay';
+
+  @override
+  String get dbErrorDebtAmountBelowPaid =>
+      'The amount can\'t be less than what has already been paid';
+
+  @override
+  String get dbErrorDebtDirectionLocked =>
+      'A debt\'s direction can\'t be changed once it has payments';
+
+  @override
+  String get dbErrorPaymentTypeLocked =>
+      'This transaction is a debt payment: its type can\'t be changed';
+
+  @override
+  String get dbErrorDebtArchived =>
+      'The debt is archived: restore it to record payments';
+
+  @override
+  String debtsLoanDescriptionPayable(String name) {
+    return 'Loan from $name';
+  }
+
+  @override
+  String debtsLoanDescriptionReceivable(String name) {
+    return 'Loan to $name';
+  }
 }

@@ -2052,6 +2052,78 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{percent} %'**
   String budgetsPercent(int percent);
+
+  /// No description provided for @dbErrorTransactionCategoryMismatch.
+  ///
+  /// In es, this message translates to:
+  /// **'La categoría elegida no corresponde a este tipo de movimiento'**
+  String get dbErrorTransactionCategoryMismatch;
+
+  /// No description provided for @dbErrorTransferCurrencyMismatch.
+  ///
+  /// In es, this message translates to:
+  /// **'Una transferencia requiere cuentas de la misma moneda'**
+  String get dbErrorTransferCurrencyMismatch;
+
+  /// No description provided for @dbErrorBudgetExpenseOnly.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo las categorías de gasto pueden tener presupuesto'**
+  String get dbErrorBudgetExpenseOnly;
+
+  /// No description provided for @dbErrorPaymentDirectionMismatch.
+  ///
+  /// In es, this message translates to:
+  /// **'El abono no corresponde al tipo de deuda'**
+  String get dbErrorPaymentDirectionMismatch;
+
+  /// No description provided for @dbErrorPaymentCurrencyMismatch.
+  ///
+  /// In es, this message translates to:
+  /// **'El abono debe ser de una cuenta en la moneda de la deuda'**
+  String get dbErrorPaymentCurrencyMismatch;
+
+  /// No description provided for @dbErrorPaymentExceedsRemaining.
+  ///
+  /// In es, this message translates to:
+  /// **'El abono supera lo que falta por pagar'**
+  String get dbErrorPaymentExceedsRemaining;
+
+  /// No description provided for @dbErrorDebtAmountBelowPaid.
+  ///
+  /// In es, this message translates to:
+  /// **'El monto no puede ser menor a lo que ya se ha pagado'**
+  String get dbErrorDebtAmountBelowPaid;
+
+  /// No description provided for @dbErrorDebtDirectionLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'No se puede cambiar el sentido de una deuda que ya tiene abonos'**
+  String get dbErrorDebtDirectionLocked;
+
+  /// No description provided for @dbErrorPaymentTypeLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'Este movimiento es el abono de una deuda: no se puede cambiar su tipo'**
+  String get dbErrorPaymentTypeLocked;
+
+  /// No description provided for @dbErrorDebtArchived.
+  ///
+  /// In es, this message translates to:
+  /// **'La deuda está archivada: restáurala para registrar abonos'**
+  String get dbErrorDebtArchived;
+
+  /// Descripción del movimiento cuando me prestan dinero
+  ///
+  /// In es, this message translates to:
+  /// **'Préstamo de {name}'**
+  String debtsLoanDescriptionPayable(String name);
+
+  /// Descripción del movimiento cuando presto dinero
+  ///
+  /// In es, this message translates to:
+  /// **'Préstamo a {name}'**
+  String debtsLoanDescriptionReceivable(String name);
 }
 
 class _AppLocalizationsDelegate

@@ -50,6 +50,14 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
 
   bool get _isPayable => widget.debt.direction == DebtDirection.payable;
 
+  /// Cómo se llama el movimiento si no se escribe una descripción: en el
+  /// idioma del usuario, no en el de la base.
+  String get _defaultDescription => _isPayable
+      ? context.l10n.debtsPaymentDescriptionPayable(widget.debt.counterparty)
+      : context.l10n.debtsPaymentDescriptionReceivable(
+          widget.debt.counterparty,
+        );
+
   @override
   void dispose() {
     _amount.dispose();
@@ -110,7 +118,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
             accountId: _accountId!,
             amount: amount,
             date: _date,
-            description: description.isEmpty ? null : description,
+            description: description.isEmpty ? _defaultDescription : description,
           );
       if (mounted) Navigator.of(context).pop();
     } catch (error) {

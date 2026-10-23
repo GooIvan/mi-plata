@@ -21,7 +21,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 - [x] **Presupuestos por categoría**: cuánto quiero gastar al mes en cada categoría de gasto y cómo voy (bien, cerca del límite desde el 80 %, o pasado). Un presupuesto rige desde el mes en que se define hasta que se cambie, así que subirlo no reescribe los meses anteriores, que solo se consultan. Aparece en el panel y avisa, sin bloquear, al registrar un gasto que llega al 80 % o supera el presupuesto.
 
 ### Fase 3 — Idiomas, monedas, recurrentes y ahorro
-- [ ] **Internacionalización**: español e inglés, con el idioma del teléfono por defecto y opción de cambiarlo dentro de la app.
+- [x] **Internacionalización**: español e inglés. La app sigue el idioma del teléfono (español si no lo tiene) y se puede cambiar en Ajustes. Montos, fechas, errores de la base de datos y categorías por defecto también se adaptan (ver [Idiomas](#-idiomas)).
 - [ ] **Soporte multimoneda**: moneda base, tasas de cambio y totales convertidos.
 - [ ] **Gastos recurrentes** (suscripciones, arriendo), generados por el servidor sin duplicarse.
 - [ ] **Metas de ahorro** con monto objetivo, fecha límite y progreso.
@@ -61,6 +61,7 @@ mi-plata/
 │           ├── summary/
 │           ├── debts/
 │           ├── budgets/
+│           ├── settings/
 │           └── dashboard/
 ├── supabase/           # Migraciones SQL, vistas y políticas de seguridad
 │   └── migrations/
@@ -168,11 +169,23 @@ Las de integración necesitan `supabase start` y crean usuarios de prueba que se
 
 ---
 
+## 🌐 Idiomas
+
+La app está en español e inglés. Los textos viven en `app/lib/l10n/app_es.arb` (plantilla) y `app_en.arb`; las clases que los usan las genera `flutter gen-l10n` (dentro de `app/`) y se guardan en el repositorio.
+
+- **Agregar o cambiar un texto**: se edita en los dos `.arb` y se corre `flutter gen-l10n`. Una prueba falla si a un idioma le falta una clave, usa otros `{placeholders}` o si las clases generadas quedaron desactualizadas.
+- **Montos y fechas** (`$1.500.000` / `$1,500,000`, `Lunes 12 de octubre` / `Monday, October 12`) salen de `core/format/formats.dart`; los campos de monto aceptan el formato del idioma activo.
+- **Errores de la base de datos**: las validaciones de Postgres mandan un código estable en `detail` (por ejemplo `payment_exceeds_remaining`) y la app lo traduce con `core/errors/database_error.dart`. El mensaje en español se conserva como respaldo.
+- **Categorías por defecto**: el idioma viaja en los metadatos del registro (`language`) y la base crea las 13 categorías en ese idioma. Lo que cada usuario escribe (nombres, descripciones) no se traduce.
+- **Agregar un idioma**: un `app_xx.arb` nuevo, el código en `supportedLanguages` (`core/l10n/locale_controller.dart`), su opción en Ajustes, sus formatos en `Formats` y sus categorías en `create_default_categories()` (una migración nueva).
+
+---
+
 ## 📌 Convenciones
 
 - **Commits**: [Conventional Commits](https://www.conventionalcommits.org/es/) (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`).
 - **Ramas**: `main` estable; nuevas funcionalidades en `feat/<nombre>`.
-- **Idioma**: el código, las tablas y las columnas van en inglés; los textos que ve el usuario (interfaz, mensajes, categorías por defecto), en español.
+- **Idioma**: el código, las tablas y las columnas van en inglés. Los textos que ve el usuario nunca se escriben en el código: van en `app/lib/l10n/*.arb`, uno por idioma.
 - **Base de datos**: todo cambio de esquema se hace mediante una migración en `supabase/migrations/`, nunca a mano desde el panel.
 
 ---

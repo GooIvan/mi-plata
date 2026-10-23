@@ -47,6 +47,15 @@ void main() {
     }
   });
 
+  test('las clases generadas están al día (se corrió flutter gen-l10n)', () {
+    final generated = File('lib/l10n/app_localizations.dart').readAsStringSync();
+    final missing = [
+      for (final key in es.keys)
+        if (!RegExp('\\b$key\\b').hasMatch(generated)) key,
+    ];
+    expect(missing, isEmpty, reason: 'corre `flutter gen-l10n` en app/');
+  });
+
   test('el inglés no se quedó con el texto en español', () {
     // Salvo lo que es igual en los dos idiomas (nombres propios, números).
     const sameInBoth = {

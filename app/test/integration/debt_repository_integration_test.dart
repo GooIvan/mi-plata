@@ -58,6 +58,7 @@ void main() {
         Account? account,
         DateTime? due,
         String? notes,
+        String? description,
       }) => debts.create(
         DebtDraft(
           direction: direction,
@@ -67,18 +68,27 @@ void main() {
           dueDate: due,
           notes: notes,
           accountId: account?.id,
+          description: description,
         ),
       );
 
-      Matcher failsWith(String code, [String? fragment]) => throwsA(
-        isA<PostgrestException>()
-            .having((e) => e.code, 'code', code)
-            .having(
-              (e) => e.message,
-              'mensaje',
-              fragment == null ? anything : contains(fragment),
-            ),
-      );
+      /// Falla con ese código, un fragmento del mensaje (en español, como lo
+      /// manda la base) y, si se pide, el código estable que la app traduce.
+      Matcher failsWith(String code, [String? fragment, String? details]) =>
+          throwsA(
+            isA<PostgrestException>()
+                .having((e) => e.code, 'code', code)
+                .having(
+                  (e) => e.message,
+                  'mensaje',
+                  fragment == null ? anything : contains(fragment),
+                )
+                .having(
+                  (e) => e.details,
+                  'detalle',
+                  details ?? anything,
+                ),
+          );
 
       setUpAll(() async {
         harness = IntegrationHarness();
@@ -127,6 +137,22 @@ void main() {
           expect(movement.date, start);
         });
 
+        test('el movimiento lleva la descripción que manda la app', () async {
+          // La app la escribe en el idioma del usuario ("Loan from ...").
+          await create('Carolina', amount: '20000', account: cash, description: 'Loan from Carolina');
+
+          final recent = await transactions.fetchRecent();
+          expect(recent.any((t) => t.description == 'Loan from Carolina'), isTrue);
+          expect(recent.any((t) => t.description == 'Préstamo de Carolina'), isFalse);
+        });
+
+        test('una descripción en blanco vuelve al texto de la base', () async {
+          await create('Rosa', amount: '10000', account: cash, description: '   ');
+
+          final recent = await transactions.fetchRecent();
+          expect(recent.any((t) => t.description == 'Préstamo de Rosa'), isTrue);
+        });
+
         test('si presté y lo registro, el dinero sale de la cuenta', () async {
           final before = await balanceOf(cash);
           await create('María', direction: DebtDirection.receivable, amount: '30000', account: cash);
@@ -151,7 +177,7 @@ void main() {
                 accountId: '99999999-9999-9999-9999-999999999999',
               ),
             ),
-            failsWith('23503', 'cuenta no existe'),
+            failsWith('23503', 'cuenta no existe', 'account_not_found'),
           );
           expect((await debts.fetchAll()).length, total);
         });
@@ -262,7 +288,7 @@ void main() {
               amount: '1',
               date: DateTime(2026, 10, 21),
             ),
-            failsWith('23514', 'supera lo que falta'),
+            failsWith('23514', 'supera lo que falta', 'payment_exceeds_remaining'),
           );
         });
 
@@ -279,7 +305,7 @@ void main() {
               amount: '1000',
               date: DateTime(2026, 10, 21),
             ),
-            failsWith('23514', 'archivada'),
+            failsWith('23514', 'archivada', 'debt_archived'),
           );
 
           await debts.setArchived(debt.id, isArchived: false);
@@ -335,7 +361,11 @@ void main() {
 
           await expectLater(
             debts.update(debt.id, counterparty: 'Elena', amount: '59999.99'),
-            failsWith('23514', 'menor a lo que ya se ha pagado'),
+            failsWith(
+              '23514',
+              'menor a lo que ya se ha pagado',
+              'debt_amount_below_paid',
+            ),
           );
           // Igual a lo pagado sí se puede.
           await debts.update(debt.id, counterparty: 'Elena', amount: '60000');
@@ -387,7 +417,7 @@ void main() {
                 date: DateTime(2026, 10, 15),
               ),
             ),
-            failsWith('23514', 'abono de una deuda'),
+            failsWith('23514', 'abono de una deuda', 'payment_type_locked'),
           );
         });
 
@@ -423,7 +453,7 @@ void main() {
               amount: '100',
               date: DateTime(2026, 10, 21),
             ),
-            failsWith('23503', 'deuda no existe'),
+            failsWith('23503', 'deuda no existe', 'debt_not_found'),
           );
         });
 
@@ -438,7 +468,7 @@ void main() {
                 accountId: bank.id,
               ),
             ),
-            failsWith('23503', 'cuenta no existe'),
+            failsWith('23503', 'cuenta no existe', 'account_not_found'),
           );
         });
 
