@@ -67,7 +67,14 @@ void main() {
         await tester.pumpAndSettle();
         await tester.enterText(_field(0), 'Luis');
         await tester.enterText(_field(1), language == 'es' ? '250.000' : '250,000');
-        await tester.tap(find.byType(SwitchListTile));
+        await tester.tap(
+          find.widgetWithText(
+            SwitchListTile,
+            language == 'es'
+                ? 'Registrar el dinero en una cuenta'
+                : 'Record the money in an account',
+          ),
+        );
         await tester.pumpAndSettle();
         await _pickAccount(tester, 'Bancolombia');
         await tester.tap(_button(owe));
@@ -86,7 +93,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(_field(0), 'Luis');
       await tester.enterText(_field(1), '250,000');
-      await tester.tap(find.byType(SwitchListTile));
+      await tester.tap(
+        find.widgetWithText(SwitchListTile, 'Record the money in an account'),
+      );
       await tester.pumpAndSettle();
       await _pickAccount(tester, 'Bancolombia');
       await tester.tap(_button('Create debt'));

@@ -17,6 +17,7 @@ import 'package:mi_plata/features/debts/domain/debt.dart';
 import 'package:mi_plata/features/debts/domain/debt_direction.dart';
 import 'package:mi_plata/features/debts/domain/debt_draft.dart';
 import 'package:mi_plata/features/debts/domain/debt_payment.dart';
+import 'package:mi_plata/features/debts/domain/installment_plan_draft.dart';
 import 'package:mi_plata/features/summary/data/summary_repository.dart';
 import 'package:mi_plata/features/summary/domain/balance_history.dart';
 import 'package:mi_plata/features/summary/domain/monthly_total.dart';
@@ -397,10 +398,23 @@ class FakeDebtRepository implements DebtRepository {
   final _links = <({String debtId, String transactionId})>[];
   var _next = 1;
 
+  /// Los pagos recurrentes: un plan de cuotas se crea junto con su deuda.
+  late FakeRecurringRepository recurring;
+
   /// Error que lanzarán todas las operaciones mientras no sea null.
   Object? error;
 
   final calls = <String>[];
+
+  /// Lo que falta por pagar de una deuda (null si no existe).
+  double? remainingOf(String debtId) {
+    final debt = _debts.where((d) => d.id == debtId).firstOrNull;
+    return debt == null ? null : debt.amount - _paid(debt);
+  }
+
+  /// Cuántos abonos lleva una deuda.
+  int paymentsOf(String debtId) =>
+      _links.where((link) => link.debtId == debtId).length;
 
   /// Agrega una deuda ya hecha, con sus abonos, sin pasar por la interfaz.
   /// Devuelve su id.
@@ -589,6 +603,23 @@ class FakeDebtRepository implements DebtRepository {
     required DateTime date,
     String? description,
   }) async {
+    await _registerPayment(
+      debtId: debtId,
+      accountId: accountId,
+      amount: amount,
+      date: date,
+      description: description,
+    );
+  }
+
+  /// Registra el abono y devuelve el id de su movimiento.
+  Future<String> _registerPayment({
+    required String debtId,
+    required String accountId,
+    required String amount,
+    required DateTime date,
+    String? description,
+  }) async {
     calls.add('registerPayment:$debtId:$accountId:$amount');
     if (error != null) throw error!;
 
@@ -623,6 +654,43 @@ class FakeDebtRepository implements DebtRepository {
         description: description,
       );
     }
+    return id;
+  }
+
+  @override
+  Future<void> createWithInstallments(InstallmentPlanDraft draft) async {
+    calls.add(
+      'createInstallments:${draft.counterparty}:${draft.amount}:'
+      '${draft.installments}x${draft.installmentAmount}',
+    );
+    if (error != null) throw error!;
+
+    final account = _accounts.accounts
+        .where((a) => a.id == draft.accountId)
+        .firstOrNull;
+    if (account == null) {
+      _fail('La cuenta no existe', '23503', 'account_not_found');
+    }
+    final debt = _StoredDebt(
+      id: 'debt-${_next++}',
+      direction: DebtDirection.payable,
+      counterparty: draft.counterparty,
+      amount: double.parse(draft.amount),
+      startDate: draft.startDate,
+      currency: account.currency,
+      notes: draft.notes,
+    );
+    _debts.add(debt);
+    recurring.seed(
+      name: draft.counterparty,
+      amount: double.parse(draft.installmentAmount),
+      accountId: draft.accountId,
+      categoryId: draft.categoryId,
+      recurrence: draft.recurrence,
+      nextDueDate: draft.firstDue,
+      debtId: debt.id,
+      installments: draft.installments,
+    );
   }
 }
 
@@ -695,6 +763,9 @@ class FakeRecurringRepository implements RecurringRepository {
   FakeRecurringRepository(this._transactions);
 
   final List<Transaction> _transactions;
+
+  /// Las deudas de los planes de cuotas.
+  late FakeDebtRepository debts;
   final _payments = <RecurringPayment>[];
   final _links = <String, String>{}; // id del movimiento -> id de la regla
   var _next = 1;
@@ -719,6 +790,8 @@ class FakeRecurringRepository implements RecurringRepository {
     DateTime? nextDueDate,
     DateTime? endDate,
     bool paused = false,
+    String? debtId,
+    int? installments,
   }) {
     final due = nextDueDate ?? DateTime(2026, 11, 5);
     final payment = RecurringPayment(
@@ -732,6 +805,8 @@ class FakeRecurringRepository implements RecurringRepository {
       anchorDay: due.day,
       endDate: endDate,
       isPaused: paused,
+      debtId: debtId,
+      installments: installments,
     );
     _payments.add(payment);
     return payment.id;
@@ -754,6 +829,36 @@ class FakeRecurringRepository implements RecurringRepository {
     return payment;
   }
 
+  /// Como la vista `v_recurring_payments`: con lo que falta de la deuda de un
+  /// plan y los abonos que lleva.
+  RecurringPayment _view(RecurringPayment payment) {
+    final debtId = payment.debtId;
+    if (debtId == null) return payment;
+    return RecurringPayment(
+      id: payment.id,
+      name: payment.name,
+      amount: payment.amount,
+      accountId: payment.accountId,
+      categoryId: payment.categoryId,
+      recurrence: payment.recurrence,
+      nextDueDate: payment.nextDueDate,
+      anchorDay: payment.anchorDay,
+      endDate: payment.endDate,
+      isPaused: payment.isPaused,
+      debtId: debtId,
+      installments: payment.installments,
+      installmentsPaid: debts.paymentsOf(debtId),
+      debtRemaining: debts.remainingOf(debtId),
+    );
+  }
+
+  /// Si la deuda del plan ya quedó saldada, no hay más cuotas.
+  bool _settled(RecurringPayment payment) {
+    final debtId = payment.debtId;
+    if (debtId == null) return false;
+    return (debts.remainingOf(debtId) ?? 0) <= 0;
+  }
+
   void _replace(RecurringPayment payment, {DateTime? nextDueDate, bool? paused, bool clearNext = false}) {
     final index = _payments.indexWhere((p) => p.id == payment.id);
     _payments[index] = RecurringPayment(
@@ -767,6 +872,8 @@ class FakeRecurringRepository implements RecurringRepository {
       anchorDay: payment.anchorDay,
       endDate: payment.endDate,
       isPaused: paused ?? payment.isPaused,
+      debtId: payment.debtId,
+      installments: payment.installments,
     );
   }
 
@@ -785,7 +892,7 @@ class FakeRecurringRepository implements RecurringRepository {
     calls.add('fetchAll');
     await gate?.future;
     if (error != null) throw error!;
-    return [..._payments]..sort((a, b) {
+    return [for (final p in _payments) _view(p)]..sort((a, b) {
       final dueA = a.nextDueDate;
       final dueB = b.nextDueDate;
       if (dueA == null || dueB == null) {
@@ -854,21 +961,45 @@ class FakeRecurringRepository implements RecurringRepository {
       _fail('Este pago recurrente ya terminó', '23514', 'recurring_finished');
     }
 
-    final transactionId = 'rec-tx-${_next++}';
-    _transactions.add(
-      Transaction(
-        id: transactionId,
-        type: TransactionType.expense,
+    final String transactionId;
+    if (payment.debtId == null) {
+      transactionId = 'rec-tx-${_next++}';
+      _transactions.add(
+        Transaction(
+          id: transactionId,
+          type: TransactionType.expense,
+          accountId: accountId,
+          categoryId: payment.categoryId,
+          amount: double.parse(amount),
+          date: date,
+          description: description ?? payment.name,
+        ),
+      );
+    } else {
+      // Un plan de cuotas registra un abono a su deuda (con sus validaciones) y
+      // después le pone la categoría del plan.
+      transactionId = await debts._registerPayment(
+        debtId: payment.debtId!,
         accountId: accountId,
-        categoryId: payment.categoryId,
-        amount: double.parse(amount),
+        amount: amount,
         date: date,
         description: description ?? payment.name,
-      ),
-    );
+      );
+      final index = _transactions.indexWhere((t) => t.id == transactionId);
+      final t = _transactions[index];
+      _transactions[index] = Transaction(
+        id: t.id,
+        type: t.type,
+        accountId: t.accountId,
+        categoryId: payment.categoryId,
+        amount: t.amount,
+        date: t.date,
+        description: t.description,
+      );
+    }
     _links[transactionId] = id;
 
-    final following = _following(payment);
+    final following = _settled(payment) ? null : _following(payment);
     _replace(payment, nextDueDate: following, clearNext: following == null);
   }
 
@@ -880,7 +1011,7 @@ class FakeRecurringRepository implements RecurringRepository {
     if (payment.nextDueDate == null) {
       _fail('Este pago recurrente ya terminó', '23514', 'recurring_finished');
     }
-    final following = _following(payment);
+    final following = _settled(payment) ? null : _following(payment);
     _replace(payment, nextDueDate: following, clearNext: following == null);
   }
 
@@ -1017,6 +1148,10 @@ class FakeBackend {
     final shared = [...transactions];
     final accountsRepository = FakeAccountRepository(accounts, shared);
     final budgetsRepository = FakeBudgetRepository(budgets);
+    final debtsRepository = FakeDebtRepository(shared, accountsRepository);
+    final recurringRepository = FakeRecurringRepository(shared);
+    debtsRepository.recurring = recurringRepository;
+    recurringRepository.debts = debtsRepository;
     return FakeBackend._(
       accountsRepository,
       FakeTransactionRepository(shared),
@@ -1030,9 +1165,9 @@ class FakeBackend {
                 .firstOrNull ??
             'COP',
       ),
-      FakeDebtRepository(shared, accountsRepository),
+      debtsRepository,
       budgetsRepository,
-      FakeRecurringRepository(shared),
+      recurringRepository,
       FakeCurrencyRepository(
         base: baseCurrency,
         rates: rates,

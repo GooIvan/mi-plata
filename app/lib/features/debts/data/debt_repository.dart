@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/format/date_format.dart';
 import '../domain/debt.dart';
 import '../domain/debt_draft.dart';
+import '../domain/installment_plan_draft.dart';
 import '../domain/debt_payment.dart';
 
 /// Acceso a las deudas en Supabase.
@@ -35,6 +36,14 @@ class DebtRepository {
 
   Future<void> create(DebtDraft draft) async {
     await _client.rpc<dynamic>('create_debt', params: draft.toRpcParams());
+  }
+
+  /// Crea una compra a cuotas: la deuda y su plan de pagos, todo o nada.
+  Future<void> createWithInstallments(InstallmentPlanDraft draft) async {
+    await _client.rpc<dynamic>(
+      'create_installment_debt',
+      params: draft.toRpcParams(),
+    );
   }
 
   /// El monto, la persona, el vencimiento y las notas. El sentido (debo / me

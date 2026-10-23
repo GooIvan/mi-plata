@@ -153,6 +153,27 @@ FakeBackend _recurringBackend() {
   return backend;
 }
 
+/// Una compra a cuotas ya empezada: la deuda y su plan.
+FakeBackend _installmentBackend() {
+  final backend = FakeBackend(
+    accounts: [testAccount('Bancolombia', balance: 10000000)],
+    categories: [testCategory('Hogar', CategoryType.expense)],
+  );
+  final debtId = backend.debts.seedDebt(
+    counterparty: 'Nevera',
+    amount: 2400000,
+    payments: [200000, 200000],
+  );
+  backend.recurring.seed(
+    name: 'Nevera',
+    amount: 200000,
+    nextDueDate: DateTime(_now.year, _now.month, _now.day + 2),
+    debtId: debtId,
+    installments: 12,
+  );
+  return backend;
+}
+
 Future<void> _open(WidgetTester tester, [String? route]) async {
   tester.view.physicalSize = const Size(900, 3600);
   tester.view.devicePixelRatio = 1;
@@ -603,6 +624,57 @@ void main() {
     });
   });
 
+  group('deudas en cuotas', () {
+    Future<void> openPlan(WidgetTester tester, [String? route]) async {
+      tester.view.physicalSize = const Size(900, 3600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await pumpMiPlata(tester, backend: _installmentBackend(), language: 'en');
+      if (route != null) await goTo(tester, route);
+    }
+
+    testWidgets('el detalle de la deuda trae su plan', (tester) async {
+      await openPlan(tester, AppRoutes.debts);
+
+      await tester.tap(find.text('Nevera'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Installment plan'), findsOneWidget);
+      expect(find.text('Installment 3 of 12 · Every month'), findsOneWidget);
+      expect(find.text('Upcoming payment: due in 2 days'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('la hoja de confirmar una cuota', (tester) async {
+      await openPlan(tester);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'I paid'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Installment 3 of 12'), findsWidgets);
+      expect(find.textContaining('Left to pay: \$2,000,000'), findsOneWidget);
+      expect(find.text('Confirm payment'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('el formulario de una compra a cuotas', (tester) async {
+      await openPlan(tester, AppRoutes.debts);
+
+      await tester.tap(find.widgetWithText(FloatingActionButton, 'New debt'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(SwitchListTile, 'Pay in installments'));
+      await tester.pumpAndSettle();
+
+      expect(find.text("We'll remind you when each installment is due, and you record it as a payment on the debt."), findsOneWidget);
+      expect(find.text('Usually the total divided by the number of installments.'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Create debt'));
+      await tester.pump();
+      expect(find.text('Enter how many installments (1 to 360)'), findsOneWidget);
+    });
+  });
+
   group('acceso', () {
     testWidgets('inicio de sesión y registro', (tester) async {
       await pumpMiPlata(tester, auth: FakeAuthRepository(), language: 'en');
@@ -783,6 +855,43 @@ void main() {
         await tester.tap(find.byTooltip(language == 'en' ? 'Edit recurring payment' : 'Editar pago recurrente'));
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextFormField).at(0), '');
+        await tester.tap(find.byType(FilledButton).last);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('$language: compra a cuotas, plan, hoja y formulario', (
+        tester,
+      ) async {
+        tester.view.physicalSize = const Size(360, 740);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await pumpMiPlata(
+          tester,
+          backend: _installmentBackend(),
+          language: language,
+        );
+
+        // La hoja de confirmar la cuota, con la cuota y lo que falta.
+        await tester.tap(find.byType(FilledButton).first);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        await tester.tapAt(const Offset(10, 10));
+        await tester.pumpAndSettle();
+
+        // El detalle de la deuda con su plan.
+        await goTo(tester, AppRoutes.debts);
+        await tester.tap(find.text('Nevera'));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        Navigator.of(tester.element(find.byType(Scaffold).last)).pop();
+        await tester.pumpAndSettle();
+
+        // El formulario con el plan abierto y los errores a la vista.
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(SwitchListTile).first);
+        await tester.pumpAndSettle();
         await tester.tap(find.byType(FilledButton).last);
         await tester.pump();
         expect(tester.takeException(), isNull);

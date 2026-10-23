@@ -30,6 +30,8 @@ String? databaseErrorMessage(AppLocalizations l10n, PostgrestException error) {
     'recurring_category_mismatch' => l10n.dbErrorRecurringCategory,
     'recurring_end_before_due' => l10n.recurringEndBeforeNext,
     'recurring_not_found' => l10n.recurringErrorGone,
+    'installment_debt_direction' => l10n.dbErrorInstallmentDirection,
+    'installment_account_currency' => l10n.dbErrorInstallmentCurrency,
     'transfer_destination_amount_unexpected' =>
       l10n.dbErrorTransferDestinationUnexpected,
     'debt_not_found' => l10n.debtsErrorMissingReference,

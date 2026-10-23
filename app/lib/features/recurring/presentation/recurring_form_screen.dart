@@ -169,8 +169,20 @@ class _RecurringFormScreenState extends ConsumerState<RecurringFormScreen> {
     final l10n = context.l10n;
 
     // Una cuenta archivada solo se ofrece si la regla que se edita ya la usa.
+    // Las cuotas de una deuda se pagan en la moneda de la deuda, que es la de la
+    // cuenta del plan.
+    final planCurrency = widget.payment?.isInstallmentPlan == true
+        ? allAccounts
+              .where((a) => a.id == widget.payment!.accountId)
+              .map((a) => a.currency)
+              .firstOrNull
+        : null;
     final accounts = allAccounts
-        .where((a) => !a.isArchived || a.id == widget.payment?.accountId)
+        .where(
+          (a) =>
+              (!a.isArchived || a.id == widget.payment?.accountId) &&
+              (planCurrency == null || a.currency == planCurrency),
+        )
         .toList();
     if (accounts.isEmpty) {
       return StateMessage(

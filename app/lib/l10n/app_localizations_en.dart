@@ -1662,4 +1662,65 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dbErrorRecurringCategory =>
       'Only expense categories can be used in a recurring payment';
+
+  @override
+  String get debtsInstallmentsSwitch => 'Pay in installments';
+
+  @override
+  String get debtsInstallmentsSwitchHelp =>
+      'We\'ll remind you when each installment is due, and you record it as a payment on the debt.';
+
+  @override
+  String get debtsInstallmentsCount => 'Number of installments';
+
+  @override
+  String get debtsInstallmentsCountHint => 'e.g. 12';
+
+  @override
+  String get debtsInstallmentsCountInvalid =>
+      'Enter how many installments (1 to 360)';
+
+  @override
+  String get debtsInstallmentsAmount => 'Installment amount';
+
+  @override
+  String get debtsInstallmentsAmountHelp =>
+      'Usually the total divided by the number of installments.';
+
+  @override
+  String get debtsInstallmentsFrequency => 'How often';
+
+  @override
+  String get debtsInstallmentsFirst => 'First installment';
+
+  @override
+  String get debtsInstallmentsFirstHelp => 'First installment date';
+
+  @override
+  String get debtsInstallmentsPayFrom => 'Pay installments from';
+
+  @override
+  String installmentNumber(int number, int total) {
+    return 'Installment $number of $total';
+  }
+
+  @override
+  String get debtsPlanTitle => 'Installment plan';
+
+  @override
+  String recurringDebtRemaining(String amount) {
+    return 'Left to pay: $amount';
+  }
+
+  @override
+  String get recurringDeletePlanBody =>
+      'The debt and the payments you already recorded are kept.';
+
+  @override
+  String get dbErrorInstallmentDirection =>
+      'Only debts you owe can be paid in installments';
+
+  @override
+  String get dbErrorInstallmentCurrency =>
+      'The installments\' account must be in the debt\'s currency';
 }

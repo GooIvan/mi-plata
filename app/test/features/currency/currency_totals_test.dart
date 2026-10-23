@@ -586,7 +586,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(field(0), 'Luis');
       await tester.enterText(field(1), '50');
-      await tester.tap(find.byType(SwitchListTile));
+      await tester.tap(find.widgetWithText(SwitchListTile, 'Registrar el dinero en una cuenta'));
       await tester.pumpAndSettle();
       // Ya no se ofrece elegir la moneda: sale de la cuenta.
       expect(find.text('COP · Peso colombiano'), findsNothing);

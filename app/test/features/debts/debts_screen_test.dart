@@ -242,7 +242,7 @@ void main() {
       await tester.tap(newDebtButton());
       await tester.pumpAndSettle();
       await fill(tester);
-      await tester.tap(find.byType(SwitchListTile));
+      await tester.tap(find.widgetWithText(SwitchListTile, 'Registrar el dinero en una cuenta'));
       await tester.pumpAndSettle();
       expect(find.text('El dinero que te prestaron entra a la cuenta.'), findsOneWidget);
       await pick(tester, dropdown(), 'Bancolombia');
@@ -264,7 +264,7 @@ void main() {
       await tester.tap(newDebtButton());
       await tester.pumpAndSettle();
       await fill(tester, who: 'Ana', amount: '100.000');
-      await tester.tap(find.byType(SwitchListTile));
+      await tester.tap(find.widgetWithText(SwitchListTile, 'Registrar el dinero en una cuenta'));
       await tester.pumpAndSettle();
       expect(find.text('El dinero que prestaste sale de la cuenta.'), findsOneWidget);
       await pick(tester, dropdown(), 'Nequi'); // tiene 50.000

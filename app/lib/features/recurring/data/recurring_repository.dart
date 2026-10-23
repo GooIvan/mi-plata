@@ -15,8 +15,9 @@ class RecurringRepository {
   /// Los que tienen fecha, del más próximo al más lejano; los terminados, al
   /// final.
   Future<List<RecurringPayment>> fetchAll() async {
+    // La vista trae además lo que falta de la deuda de un plan de cuotas.
     final rows = await _client
-        .from('recurring_payments')
+        .from('v_recurring_payments')
         .select()
         .order('next_due_date', ascending: true, nullsFirst: false)
         .order('name');

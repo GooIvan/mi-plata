@@ -64,8 +64,9 @@ class _ConfirmPaymentSheetState extends ConsumerState<ConfirmPaymentSheet> {
     // tener el contexto.
     if (!_filled) {
       _filled = true;
+      // En un plan de cuotas, la última puede ser menor: lo que falte.
       _amount.text = AmountParser.toInput(
-        widget.payment.amount,
+        widget.payment.nextAmount,
         context.formats,
       );
     }
@@ -192,8 +193,21 @@ class _ConfirmPaymentSheetState extends ConsumerState<ConfirmPaymentSheet> {
         recurringStatusColor(status, theme.colorScheme) ??
         theme.colorScheme.onSurfaceVariant;
 
-    final accounts = (ref.watch(accountsProvider).value ?? const <Account>[])
-        .where((account) => !account.isArchived)
+    final allAccounts = ref.watch(accountsProvider).value ?? const <Account>[];
+    // Las cuotas de una deuda se pagan en la moneda de la deuda, que es la de la
+    // cuenta del plan.
+    final planCurrency = payment.isInstallmentPlan
+        ? allAccounts
+              .where((account) => account.id == payment.accountId)
+              .map((account) => account.currency)
+              .firstOrNull
+        : null;
+    final accounts = allAccounts
+        .where(
+          (account) =>
+              !account.isArchived &&
+              (planCurrency == null || account.currency == planCurrency),
+        )
         .toList();
     // La cuenta de siempre, si sigue activa; si no, se elige otra.
     _accountId ??= accounts.any((a) => a.id == payment.accountId)
@@ -235,6 +249,27 @@ class _ConfirmPaymentSheetState extends ConsumerState<ConfirmPaymentSheet> {
                 ),
               ],
             ),
+            if (payment.currentInstallment != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                [
+                  l10n.installmentNumber(
+                    payment.currentInstallment!,
+                    payment.installments!,
+                  ),
+                  if (payment.debtRemaining != null)
+                    l10n.recurringDebtRemaining(
+                      context.formats.money(
+                        payment.debtRemaining!,
+                        currency: currency,
+                      ),
+                    ),
+                ].join(' · '),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
             TextFormField(
               controller: _amount,

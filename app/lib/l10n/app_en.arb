@@ -1128,5 +1128,39 @@
   "recurringErrorGone": "The recurring payment no longer exists. Reopen the screen.",
   "recurringErrorInvalid": "Check the payment data: the name, amount and dates.",
   "dbErrorRecurringFinished": "This recurring payment has already ended",
-  "dbErrorRecurringCategory": "Only expense categories can be used in a recurring payment"
+  "dbErrorRecurringCategory": "Only expense categories can be used in a recurring payment",
+  "debtsInstallmentsSwitch": "Pay in installments",
+  "debtsInstallmentsSwitchHelp": "We'll remind you when each installment is due, and you record it as a payment on the debt.",
+  "debtsInstallmentsCount": "Number of installments",
+  "debtsInstallmentsCountHint": "e.g. 12",
+  "debtsInstallmentsCountInvalid": "Enter how many installments (1 to 360)",
+  "debtsInstallmentsAmount": "Installment amount",
+  "debtsInstallmentsAmountHelp": "Usually the total divided by the number of installments.",
+  "debtsInstallmentsFrequency": "How often",
+  "debtsInstallmentsFirst": "First installment",
+  "debtsInstallmentsFirstHelp": "First installment date",
+  "debtsInstallmentsPayFrom": "Pay installments from",
+  "installmentNumber": "Installment {number} of {total}",
+  "@installmentNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsPlanTitle": "Installment plan",
+  "recurringDebtRemaining": "Left to pay: {amount}",
+  "@recurringDebtRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringDeletePlanBody": "The debt and the payments you already recorded are kept.",
+  "dbErrorInstallmentDirection": "Only debts you owe can be paid in installments",
+  "dbErrorInstallmentCurrency": "The installments' account must be in the debt's currency"
 }

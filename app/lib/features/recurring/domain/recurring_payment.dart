@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'recurrence.dart';
 
 /// Cómo está un pago recurrente respecto a su próxima fecha.
@@ -35,6 +37,10 @@ class RecurringPayment {
     required this.anchorDay,
     this.endDate,
     required this.isPaused,
+    this.debtId,
+    this.installments,
+    this.installmentsPaid = 0,
+    this.debtRemaining,
   });
 
   factory RecurringPayment.fromJson(Map<String, dynamic> json) =>
@@ -52,6 +58,10 @@ class RecurringPayment {
         anchorDay: (json['anchor_day'] as num).toInt(),
         endDate: _date(json['end_date']),
         isPaused: json['is_paused'] as bool,
+        debtId: json['debt_id'] as String?,
+        installments: (json['installments'] as num?)?.toInt(),
+        installmentsPaid: (json['installments_paid'] as num?)?.toInt() ?? 0,
+        debtRemaining: (json['debt_remaining'] as num?)?.toDouble(),
       );
 
   static DateTime? _date(Object? value) =>
@@ -78,7 +88,38 @@ class RecurringPayment {
   final DateTime? endDate;
   final bool isPaused;
 
-  bool get isFinished => nextDueDate == null;
+  /// La deuda a la que abona, si es un plan de cuotas (una compra que se paga de
+  /// a poco). Un pago normal no tiene.
+  final String? debtId;
+
+  /// Cuántas cuotas se pactaron; solo sirve para decir "cuota 4 de 12".
+  final int? installments;
+
+  /// Cuántos abonos lleva la deuda.
+  final int installmentsPaid;
+
+  /// Lo que falta por pagar de la deuda; null si no es un plan de cuotas.
+  final double? debtRemaining;
+
+  bool get isInstallmentPlan => debtId != null;
+
+  /// La deuda ya se pagó toda: el plan no tiene más cuotas.
+  bool get isSettled =>
+      debtRemaining != null && (debtRemaining! * 100).round() <= 0;
+
+  /// Qué cuota toca ("4" en "cuota 4 de 12"); null si no se pactó un número.
+  /// Si se llevan más abonos que cuotas, sigue siendo la última.
+  int? get currentInstallment => installments == null
+      ? null
+      : math.min(installmentsPaid + 1, installments!);
+
+  /// Lo que se propone pagar la próxima vez: la cuota, o lo que falte si es
+  /// menos (la última).
+  double get nextAmount => debtRemaining == null || amount <= debtRemaining!
+      ? amount
+      : debtRemaining!;
+
+  bool get isFinished => nextDueDate == null || isSettled;
 
   /// Los días que faltan para la fecha (negativo si ya pasó), contando días
   /// de calendario; null si ya terminó.
@@ -91,8 +132,8 @@ class RecurringPayment {
   }
 
   RecurringStatus statusOn(DateTime today) {
-    final days = daysUntilDue(today);
-    if (days == null) return RecurringStatus.finished;
+    if (isFinished) return RecurringStatus.finished;
+    final days = daysUntilDue(today)!;
     if (isPaused) return RecurringStatus.paused;
     if (days < 0) return RecurringStatus.overdue;
     if (days == 0) return RecurringStatus.today;

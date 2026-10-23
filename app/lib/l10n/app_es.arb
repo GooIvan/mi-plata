@@ -1143,5 +1143,39 @@
   "recurringErrorGone": "El pago recurrente ya no existe. Vuelve a abrir la pantalla.",
   "recurringErrorInvalid": "Revisa los datos del pago: el nombre, el monto y las fechas.",
   "dbErrorRecurringFinished": "Este pago recurrente ya terminó",
-  "dbErrorRecurringCategory": "Solo las categorías de gasto sirven en un pago recurrente"
+  "dbErrorRecurringCategory": "Solo las categorías de gasto sirven en un pago recurrente",
+  "debtsInstallmentsSwitch": "Pagar en cuotas",
+  "debtsInstallmentsSwitchHelp": "Te avisamos cuándo toca cada cuota y la registras como abono a la deuda.",
+  "debtsInstallmentsCount": "Número de cuotas",
+  "debtsInstallmentsCountHint": "Ej: 12",
+  "debtsInstallmentsCountInvalid": "Escribe cuántas cuotas son (de 1 a 360)",
+  "debtsInstallmentsAmount": "Valor de cada cuota",
+  "debtsInstallmentsAmountHelp": "Normalmente, el total dividido entre las cuotas.",
+  "debtsInstallmentsFrequency": "Cada cuánto",
+  "debtsInstallmentsFirst": "Primera cuota",
+  "debtsInstallmentsFirstHelp": "Fecha de la primera cuota",
+  "debtsInstallmentsPayFrom": "Pagar las cuotas desde",
+  "installmentNumber": "Cuota {number} de {total}",
+  "@installmentNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsPlanTitle": "Plan de cuotas",
+  "recurringDebtRemaining": "Falta por pagar: {amount}",
+  "@recurringDebtRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringDeletePlanBody": "La deuda y los abonos que ya registraste se conservan.",
+  "dbErrorInstallmentDirection": "Solo las deudas que debes pueden pagarse en cuotas",
+  "dbErrorInstallmentCurrency": "La cuenta de las cuotas tiene que ser de la moneda de la deuda"
 }

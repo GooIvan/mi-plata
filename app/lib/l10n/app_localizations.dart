@@ -2784,6 +2784,108 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Solo las categorías de gasto sirven en un pago recurrente'**
   String get dbErrorRecurringCategory;
+
+  /// No description provided for @debtsInstallmentsSwitch.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagar en cuotas'**
+  String get debtsInstallmentsSwitch;
+
+  /// No description provided for @debtsInstallmentsSwitchHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Te avisamos cuándo toca cada cuota y la registras como abono a la deuda.'**
+  String get debtsInstallmentsSwitchHelp;
+
+  /// No description provided for @debtsInstallmentsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'Número de cuotas'**
+  String get debtsInstallmentsCount;
+
+  /// No description provided for @debtsInstallmentsCountHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: 12'**
+  String get debtsInstallmentsCountHint;
+
+  /// No description provided for @debtsInstallmentsCountInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe cuántas cuotas son (de 1 a 360)'**
+  String get debtsInstallmentsCountInvalid;
+
+  /// No description provided for @debtsInstallmentsAmount.
+  ///
+  /// In es, this message translates to:
+  /// **'Valor de cada cuota'**
+  String get debtsInstallmentsAmount;
+
+  /// No description provided for @debtsInstallmentsAmountHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Normalmente, el total dividido entre las cuotas.'**
+  String get debtsInstallmentsAmountHelp;
+
+  /// No description provided for @debtsInstallmentsFrequency.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada cuánto'**
+  String get debtsInstallmentsFrequency;
+
+  /// No description provided for @debtsInstallmentsFirst.
+  ///
+  /// In es, this message translates to:
+  /// **'Primera cuota'**
+  String get debtsInstallmentsFirst;
+
+  /// No description provided for @debtsInstallmentsFirstHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha de la primera cuota'**
+  String get debtsInstallmentsFirstHelp;
+
+  /// No description provided for @debtsInstallmentsPayFrom.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagar las cuotas desde'**
+  String get debtsInstallmentsPayFrom;
+
+  /// No description provided for @installmentNumber.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuota {number} de {total}'**
+  String installmentNumber(int number, int total);
+
+  /// No description provided for @debtsPlanTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Plan de cuotas'**
+  String get debtsPlanTitle;
+
+  /// No description provided for @recurringDebtRemaining.
+  ///
+  /// In es, this message translates to:
+  /// **'Falta por pagar: {amount}'**
+  String recurringDebtRemaining(String amount);
+
+  /// No description provided for @recurringDeletePlanBody.
+  ///
+  /// In es, this message translates to:
+  /// **'La deuda y los abonos que ya registraste se conservan.'**
+  String get recurringDeletePlanBody;
+
+  /// No description provided for @dbErrorInstallmentDirection.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo las deudas que debes pueden pagarse en cuotas'**
+  String get dbErrorInstallmentDirection;
+
+  /// No description provided for @dbErrorInstallmentCurrency.
+  ///
+  /// In es, this message translates to:
+  /// **'La cuenta de las cuotas tiene que ser de la moneda de la deuda'**
+  String get dbErrorInstallmentCurrency;
 }
 
 class _AppLocalizationsDelegate

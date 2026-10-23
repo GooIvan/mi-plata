@@ -86,7 +86,7 @@ class RecurringTile extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 20),
                 child: Text(
-                  recurrenceLabel(l10n, payment.recurrence),
+                  recurrenceSummary(l10n, payment),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

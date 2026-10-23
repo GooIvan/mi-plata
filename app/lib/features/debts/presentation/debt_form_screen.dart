@@ -8,17 +8,24 @@ import '../../accounts/domain/account.dart';
 import '../../accounts/domain/amount_parser.dart';
 import '../../accounts/presentation/accounts_providers.dart';
 import '../../accounts/presentation/widgets/account_dropdown.dart';
+import '../../categories/domain/category.dart';
+import '../../categories/domain/category_type.dart';
+import '../../categories/presentation/categories_providers.dart';
+import '../../recurring/domain/recurrence.dart';
+import '../../recurring/presentation/recurring_ui.dart';
 import '../../currency/domain/currency.dart';
 import '../../currency/presentation/currency_providers.dart';
 import '../../currency/presentation/currency_ui.dart';
 import '../../transactions/domain/negative_balance_check.dart';
 import '../../transactions/domain/transaction_draft.dart';
 import '../../transactions/domain/transaction_type.dart';
+import '../../transactions/domain/transaction_validators.dart';
 import '../../transactions/presentation/negative_balance_dialog.dart';
 import '../domain/debt.dart';
 import '../domain/debt_direction.dart';
 import '../domain/debt_draft.dart';
 import '../domain/debt_validators.dart';
+import '../domain/installment_plan_draft.dart';
 import 'debt_error_message.dart';
 import 'debt_ui.dart';
 import 'debts_providers.dart';
@@ -69,6 +76,19 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
   bool _registerMoney = false;
   String? _accountId;
 
+  // Una compra a cuotas: la deuda y un plan de pagos.
+  bool _installments = false;
+  final _count = TextEditingController();
+  final _installmentAmount = TextEditingController();
+  bool _installmentAmountEdited = false;
+  Recurrence _recurrence = Recurrence.monthly;
+  late DateTime _firstDue = Recurrence.monthly.advance(
+    _start,
+    anchorDay: _start.day,
+  );
+  String? _planAccountId;
+  String? _planCategoryId;
+
   /// La moneda elegida para una deuda sin cuenta; null es la moneda base.
   String? _currency;
   bool _saving = false;
@@ -78,10 +98,18 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
   bool get _isEditing => widget.debt != null;
   bool get _isPayable => _direction == DebtDirection.payable;
 
+  /// Si se está armando un plan de cuotas (solo al crear una deuda que debo).
+  bool get _isPlan => _installments && !_isEditing && _isPayable;
+
   /// La moneda de la deuda según lo que se eligió: la de la cuenta si el dinero
   /// se registra en una; si no, la que se escogió (o la moneda base).
   String _currencyFor(List<Account> accounts) {
     if (_isEditing) return widget.debt!.currency;
+    // En cuotas, la deuda es en la moneda de la cuenta con la que se paga.
+    if (_isPlan) {
+      final account = accounts.where((a) => a.id == _planAccountId).firstOrNull;
+      if (account != null) return account.currency;
+    }
     if (_registerMoney) {
       final account = accounts.where((a) => a.id == _accountId).firstOrNull;
       if (account != null) return account.currency;
@@ -108,6 +136,8 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
   @override
   void dispose() {
     _counterparty.dispose();
+    _count.dispose();
+    _installmentAmount.dispose();
     _amount.dispose();
     _notes.dispose();
     super.dispose();
@@ -148,14 +178,63 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
     return null;
   }
 
+  /// Propone el valor de la cuota (el total entre las cuotas, redondeado hacia
+  /// arriba al centavo: la última cuota queda un poco menor) mientras no se
+  /// haya escrito otro.
+  void _suggestInstallmentAmount() {
+    if (_installmentAmountEdited) return;
+    final formats = context.formats;
+    final total = AmountParser.parse(_amount.text, formats);
+    final count = int.tryParse(_count.text.trim());
+    if (total == null || count == null || count < 1) return;
+
+    final cents = (double.parse(total) * 100).round();
+    if (cents <= 0) return;
+    _installmentAmount.text = AmountParser.toInput(
+      (cents / count).ceil() / 100,
+      formats,
+    );
+  }
+
+  Future<DateTime?> _pickFirstDue() => _pick(_firstDue, context.l10n.debtsInstallmentsFirstHelp);
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (DebtValidators.dueDate(context.l10n, _due, _start) != null) return;
+    if (!_isPlan && DebtValidators.dueDate(context.l10n, _due, _start) != null) {
+      return;
+    }
 
     final counterparty = _counterparty.text.trim();
     final amount = AmountParser.parse(_amount.text, context.formats)!;
     final notes = _notes.text.trim().isEmpty ? null : _notes.text.trim();
     final debts = ref.read(debtsProvider.notifier);
+
+    if (_isPlan) {
+      setState(() {
+        _saving = true;
+        _error = null;
+      });
+      await _run(
+        () => debts.createWithInstallments(
+          InstallmentPlanDraft(
+            counterparty: counterparty,
+            amount: amount,
+            installments: int.parse(_count.text.trim()),
+            installmentAmount: AmountParser.parse(
+              _installmentAmount.text,
+              context.formats,
+            )!,
+            recurrence: _recurrence,
+            firstDue: _firstDue,
+            accountId: _planAccountId!,
+            categoryId: _planCategoryId,
+            startDate: _start,
+            notes: notes,
+          ),
+        ),
+      );
+      return;
+    }
 
     if (!_isEditing) {
       final draft = DebtDraft(
@@ -245,7 +324,15 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
     if (_registerMoney && _accountId == null && accounts.length == 1) {
       _accountId = accounts.single.id;
     }
+    // Con una sola cuenta no hay nada que elegir al armar las cuotas.
+    if (_isPlan && _planAccountId == null && accounts.length == 1) {
+      _planAccountId = accounts.single.id;
+    }
     final currency = _currencyFor(accounts);
+    final planCategories =
+        (ref.watch(categoriesProvider).value ?? const <Category>[])
+            .where((c) => c.type == CategoryType.expense && !c.isArchived)
+            .toList();
 
     return Scaffold(
       appBar: AppBar(title: Text(_isEditing ? l10n.debtsEdit : l10n.debtsNew)),
@@ -287,7 +374,7 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (!_isEditing && !_registerMoney) ...[
+              if (!_isEditing && !_registerMoney && !_isPlan) ...[
                 DropdownButtonFormField<String>(
                   initialValue: currency,
                   isExpanded: true,
@@ -317,6 +404,9 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 textInputAction: TextInputAction.next,
                 validator: _amountError,
+                onChanged: _isPlan
+                    ? (_) => setState(_suggestInstallmentAmount)
+                    : null,
                 decoration: InputDecoration(
                   labelText: l10n.debtsAmountLabel,
                   hintText: l10n.debtsAmountHint,
@@ -338,32 +428,34 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                   child: Text(context.formats.fullDate(_start)),
                 ),
               ),
-              const SizedBox(height: 16),
-              InkWell(
-                onTap: _saving ? null : _pickDue,
-                borderRadius: BorderRadius.circular(4),
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    labelText: l10n.debtsDueLabel,
-                    border: const OutlineInputBorder(),
-                    errorText: dueError,
-                    suffixIcon: _due == null
-                        ? const Icon(Icons.event_outlined)
-                        : IconButton(
-                            tooltip: l10n.debtsRemoveDue,
-                            icon: const Icon(Icons.close),
-                            onPressed: _saving
-                                ? null
-                                : () => setState(() => _due = null),
-                          ),
-                  ),
-                  child: Text(
-                    _due == null
-                        ? l10n.debtsNoDate
-                        : context.formats.fullDate(_due!),
+              if (!_isPlan) ...[
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: _saving ? null : _pickDue,
+                  borderRadius: BorderRadius.circular(4),
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: l10n.debtsDueLabel,
+                      border: const OutlineInputBorder(),
+                      errorText: dueError,
+                      suffixIcon: _due == null
+                          ? const Icon(Icons.event_outlined)
+                          : IconButton(
+                              tooltip: l10n.debtsRemoveDue,
+                              icon: const Icon(Icons.close),
+                              onPressed: _saving
+                                  ? null
+                                  : () => setState(() => _due = null),
+                            ),
+                    ),
+                    child: Text(
+                      _due == null
+                          ? l10n.debtsNoDate
+                          : context.formats.fullDate(_due!),
+                    ),
                   ),
                 ),
-              ),
+              ],
               const SizedBox(height: 16),
               TextFormField(
                 controller: _notes,
@@ -377,7 +469,160 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                   border: const OutlineInputBorder(),
                 ),
               ),
-              if (!_isEditing) ...[
+              if (!_isEditing && _isPayable) ...[
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.debtsInstallmentsSwitch),
+                  subtitle: Text(
+                    accounts.isEmpty
+                        ? l10n.debtsRegisterMoneyNeedAccount
+                        : l10n.debtsInstallmentsSwitchHelp,
+                  ),
+                  value: _installments,
+                  onChanged: accounts.isEmpty || _saving
+                      ? null
+                      : (value) => setState(() {
+                          _installments = value;
+                          if (value) _registerMoney = false;
+                          _suggestInstallmentAmount();
+                        }),
+                ),
+              ],
+              if (_isPlan) ...[
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _count,
+                  enabled: !_saving,
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.next,
+                  validator: (value) {
+                    final count = int.tryParse(value?.trim() ?? '');
+                    return count == null || count < 1 || count > 360
+                        ? l10n.debtsInstallmentsCountInvalid
+                        : null;
+                  },
+                  onChanged: (_) => setState(_suggestInstallmentAmount),
+                  decoration: InputDecoration(
+                    labelText: l10n.debtsInstallmentsCount,
+                    hintText: l10n.debtsInstallmentsCountHint,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _installmentAmount,
+                  enabled: !_saving,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) => TransactionValidators.amount(l10n, value),
+                  onChanged: (_) => _installmentAmountEdited = true,
+                  decoration: InputDecoration(
+                    labelText: l10n.debtsInstallmentsAmount,
+                    helperText: l10n.debtsInstallmentsAmountHelp,
+                    helperMaxLines: 2,
+                    hintText: l10n.debtsAmountHint,
+                    prefixText: '${currencySymbol(currency)} ',
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<Recurrence>(
+                  initialValue: _recurrence,
+                  isExpanded: true,
+                  items: [
+                    for (final frequency in Recurrence.presets)
+                      DropdownMenuItem(
+                        value: frequency,
+                        child: Text(recurrenceLabel(l10n, frequency)),
+                      ),
+                  ],
+                  onChanged: _saving
+                      ? null
+                      : (value) {
+                          if (value != null) setState(() => _recurrence = value);
+                        },
+                  decoration: InputDecoration(
+                    labelText: l10n.debtsInstallmentsFrequency,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: _saving
+                      ? null
+                      : () async {
+                          final picked = await _pickFirstDue();
+                          if (picked != null) setState(() => _firstDue = picked);
+                        },
+                  borderRadius: BorderRadius.circular(4),
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: l10n.debtsInstallmentsFirst,
+                      border: const OutlineInputBorder(),
+                      suffixIcon: const Icon(Icons.calendar_today_outlined),
+                    ),
+                    child: Text(context.formats.fullDate(_firstDue)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                AccountDropdown(
+                  accounts: accounts,
+                  value: _planAccountId,
+                  label: l10n.debtsInstallmentsPayFrom,
+                  enabled: !_saving,
+                  onChanged: (id) => setState(() => _planAccountId = id),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String?>(
+                  initialValue: _planCategoryId,
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text(l10n.commonNoCategory),
+                    ),
+                    for (final category in planCategories)
+                      DropdownMenuItem<String?>(
+                        value: category.id,
+                        child: Text(
+                          category.name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: _saving
+                      ? null
+                      : (id) => setState(() => _planCategoryId = id),
+                  decoration: InputDecoration(
+                    labelText: l10n.commonCategory,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        l10n.recurringReminderNote,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              if (!_isEditing && !_isPlan) ...[
                 const SizedBox(height: 8),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,

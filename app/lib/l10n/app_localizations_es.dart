@@ -1660,4 +1660,65 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get dbErrorRecurringCategory =>
       'Solo las categorías de gasto sirven en un pago recurrente';
+
+  @override
+  String get debtsInstallmentsSwitch => 'Pagar en cuotas';
+
+  @override
+  String get debtsInstallmentsSwitchHelp =>
+      'Te avisamos cuándo toca cada cuota y la registras como abono a la deuda.';
+
+  @override
+  String get debtsInstallmentsCount => 'Número de cuotas';
+
+  @override
+  String get debtsInstallmentsCountHint => 'Ej: 12';
+
+  @override
+  String get debtsInstallmentsCountInvalid =>
+      'Escribe cuántas cuotas son (de 1 a 360)';
+
+  @override
+  String get debtsInstallmentsAmount => 'Valor de cada cuota';
+
+  @override
+  String get debtsInstallmentsAmountHelp =>
+      'Normalmente, el total dividido entre las cuotas.';
+
+  @override
+  String get debtsInstallmentsFrequency => 'Cada cuánto';
+
+  @override
+  String get debtsInstallmentsFirst => 'Primera cuota';
+
+  @override
+  String get debtsInstallmentsFirstHelp => 'Fecha de la primera cuota';
+
+  @override
+  String get debtsInstallmentsPayFrom => 'Pagar las cuotas desde';
+
+  @override
+  String installmentNumber(int number, int total) {
+    return 'Cuota $number de $total';
+  }
+
+  @override
+  String get debtsPlanTitle => 'Plan de cuotas';
+
+  @override
+  String recurringDebtRemaining(String amount) {
+    return 'Falta por pagar: $amount';
+  }
+
+  @override
+  String get recurringDeletePlanBody =>
+      'La deuda y los abonos que ya registraste se conservan.';
+
+  @override
+  String get dbErrorInstallmentDirection =>
+      'Solo las deudas que debes pueden pagarse en cuotas';
+
+  @override
+  String get dbErrorInstallmentCurrency =>
+      'La cuenta de las cuotas tiene que ser de la moneda de la deuda';
 }

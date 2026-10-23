@@ -61,7 +61,11 @@ class RecurringDetailScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.recurringDeleteTitle),
-        content: Text(l10n.recurringDeleteBody),
+        content: Text(
+          payment.isInstallmentPlan
+              ? l10n.recurringDeletePlanBody
+              : l10n.recurringDeleteBody,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -174,7 +178,7 @@ class RecurringDetailScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    recurrenceLabel(l10n, payment.recurrence),
+                    recurrenceSummary(l10n, payment),
                     style: theme.textTheme.labelLarge,
                   ),
                   const SizedBox(height: 4),
@@ -213,6 +217,13 @@ class RecurringDetailScreen extends ConsumerWidget {
                       style: theme.textTheme.bodySmall,
                     ),
                   ],
+                  if (payment.debtRemaining != null)
+                    Text(
+                      l10n.recurringDebtRemaining(
+                        formats.money(payment.debtRemaining!, currency: currency),
+                      ),
+                      style: theme.textTheme.bodySmall,
+                    ),
                   if (accountName != null)
                     Text(
                       '${l10n.recurringAccountLabel}: $accountName',

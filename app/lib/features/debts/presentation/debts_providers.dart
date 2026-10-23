@@ -7,6 +7,7 @@ import '../data/debt_repository.dart';
 import '../domain/debt.dart';
 import '../domain/debt_draft.dart';
 import '../domain/debt_payment.dart';
+import '../domain/installment_plan_draft.dart';
 
 final debtRepositoryProvider = Provider<DebtRepository>(
   (ref) => DebtRepository(ref.watch(supabaseClientProvider)),
@@ -32,6 +33,13 @@ class DebtsNotifier extends AsyncNotifier<List<Debt>> {
   /// Crea la deuda y, si trae cuenta, el movimiento del dinero.
   Future<void> create(DebtDraft draft) async {
     await _repository.create(draft);
+    _moneyMoved();
+  }
+
+  /// Crea una compra a cuotas: la deuda y su plan de pagos. No mueve dinero,
+  /// pero el plan se ve en los pagos recurrentes.
+  Future<void> createWithInstallments(InstallmentPlanDraft draft) async {
+    await _repository.createWithInstallments(draft);
     _moneyMoved();
   }
 

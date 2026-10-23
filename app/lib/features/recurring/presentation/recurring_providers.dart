@@ -23,7 +23,12 @@ class RecurringPaymentsNotifier extends AsyncNotifier<List<RecurringPayment>> {
   RecurringRepository get _repository => ref.read(recurringRepositoryProvider);
 
   @override
-  Future<List<RecurringPayment>> build() => _repository.fetchAll();
+  Future<List<RecurringPayment>> build() {
+    // Lo que falta de la deuda de un plan de cuotas sale de los abonos: se
+    // recarga cuando cambian los movimientos.
+    ref.watch(ledgerRevisionProvider);
+    return _repository.fetchAll();
+  }
 
   Future<void> create(RecurringDraft draft) async {
     await _repository.create(draft);
@@ -61,8 +66,8 @@ class RecurringPaymentsNotifier extends AsyncNotifier<List<RecurringPayment>> {
       date: date,
       description: description,
     );
+    // Recarga la lista, que depende de los movimientos.
     ref.read(ledgerRevisionProvider.notifier).bump();
-    ref.invalidateSelf();
   }
 
   Future<void> skip(String id) async {

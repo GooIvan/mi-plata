@@ -91,10 +91,11 @@ Cada módulo dentro de `features/` se organiza en capas:
 | `v_monthly_account_flows` | Vista con lo que entró y salió de cada cuenta cada mes; con el saldo inicial reconstruye el dinero al cierre de cualquier mes |
 | `user_settings` | Preferencias del usuario: la moneda base (`COP` por defecto, también si no hay fila) |
 | `exchange_rates` | Cuánto vale 1 unidad de cada moneda en la moneda base; una tasa por moneda, sin historial |
-| `recurring_payments` | Una regla de pago recurrente: nombre, monto, cuenta, categoría, cada cuánto (`every` + `unit`), próxima fecha, fecha final y pausa. No genera movimientos sola |
+| `recurring_payments` | Una regla de pago recurrente: nombre, monto, cuenta, categoría, cada cuánto (`every` + `unit`), próxima fecha, fecha final y pausa. No genera movimientos sola. Con `debt_id` es el plan de cuotas de una deuda |
+| `v_recurring_payments` | Vista con los pagos recurrentes más lo que falta de la deuda de un plan de cuotas y cuántas cuotas lleva pagadas |
 | `budgets` | Presupuesto mensual de una categoría de gasto, vigente desde un mes (monto 0 = sin presupuesto); solo se aceptan categorías de gasto |
 
-Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa. Lo mismo vale para `set_exchange_rate` y `set_base_currency`, que reexpresa las tasas y los presupuestos al cambiar la moneda base, y para `confirm_recurring_payment` y `skip_recurring_payment`.
+Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa. Lo mismo vale para `set_exchange_rate` y `set_base_currency`, que reexpresa las tasas y los presupuestos al cambiar la moneda base, y para `confirm_recurring_payment`, `skip_recurring_payment` y `create_installment_debt`.
 
 **Principios de diseño:**
 
@@ -182,6 +183,16 @@ Para lo que pagas cada cierto tiempo: suscripciones, arriendo, seguros. Cada pag
 - **En el panel** salen los tres que más urgen, cada uno con su botón; en la lista (`Pagos recurrentes`) están todos, y los pausados o terminados al final. Se pueden pausar, editar, ponerles fecha final y eliminar (los gastos ya registrados se quedan).
 - Borrar un gasto registrado desde un pago no devuelve el pago a su fecha anterior: si hace falta, se edita la fecha del próximo pago.
 - Todavía no hay notificaciones fuera de la app.
+
+### Compras a cuotas
+
+Una compra que se paga de a poco (un televisor en 12 cuotas, un crédito de una tienda) es una **deuda con un plan de cuotas**. Se crea en Deudas → Nueva deuda ("Debo") con el interruptor **Pagar en cuotas**: el total que vas a pagar (con intereses, si los hay), cuántas cuotas, el valor de cada una, cada cuánto, la fecha de la primera y la cuenta de la que las pagas.
+
+- El plan funciona como cualquier pago recurrente: avisa "Pago próximo" y tú confirmas. La diferencia es que confirmar **registra un abono a la deuda**, así que lo que falta por pagar va bajando y ves "Cuota 4 de 12".
+- La última cuota propone solo lo que falte. Cuando la deuda queda saldada —también si la saldas con un abono suelto— el plan termina solo.
+- Omitir una cuota no cambia lo que debes: el plan sigue hasta que se pague todo, aunque pase de las cuotas pactadas.
+- La deuda es en la moneda de la cuenta con que se pagan las cuotas. Crear la compra no mueve dinero; cada abono es un gasto del mes en que lo pagas.
+- Todavía solo sirve para deudas que *debes*, y no para préstamos en los que recibes el dinero (para esos, registra el préstamo como una deuda normal).
 
 ---
 

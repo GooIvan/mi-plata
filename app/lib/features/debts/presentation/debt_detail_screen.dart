@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/format/formats.dart';
 import '../../../core/widgets/state_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../recurring/domain/recurring_payment.dart';
+import '../../recurring/presentation/recurring_providers.dart';
+import '../../recurring/presentation/recurring_ui.dart';
+import '../../recurring/presentation/widgets/confirm_payment_sheet.dart';
 import '../../transactions/presentation/transactions_providers.dart';
 import '../domain/debt.dart';
 import '../domain/debt_direction.dart';
@@ -85,6 +89,12 @@ class DebtDetailScreen extends ConsumerWidget {
 
     final theme = Theme.of(context);
     final canPay = !debt.isSettled && !debt.isArchived;
+    // El plan de cuotas de esta deuda, si es una compra a cuotas.
+    final plan = ref
+        .watch(recurringPaymentsProvider)
+        .value
+        ?.where((payment) => payment.debtId == debt.id)
+        .firstOrNull;
 
     return Scaffold(
       appBar: AppBar(
@@ -114,6 +124,10 @@ class DebtDetailScreen extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           _SummaryCard(debt: debt),
+          if (plan != null) ...[
+            const SizedBox(height: 16),
+            _PlanCard(plan: plan),
+          ],
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: canPay ? () => showPaymentSheet(context, debt) : null,
@@ -137,6 +151,66 @@ class DebtDetailScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           _Payments(debt: debt),
         ],
+      ),
+    );
+  }
+}
+
+/// El plan de cuotas de una compra a cuotas: cuál toca, cuándo, y el botón para
+/// confirmar que se pagó.
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({required this.plan});
+
+  final RecurringPayment plan;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final today = DateTime.now();
+    final status = plan.statusOn(today);
+    final color =
+        recurringStatusColor(status, theme.colorScheme) ??
+        theme.colorScheme.onSurfaceVariant;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.debtsPlanTitle, style: theme.textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              recurrenceSummary(l10n, plan),
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(recurringStatusIcon(status), size: 16, color: color),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    recurringStatusText(l10n, plan, today),
+                    style: theme.textTheme.bodySmall?.copyWith(color: color),
+                  ),
+                ),
+              ],
+            ),
+            if (plan.canPay) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton.tonal(
+                  onPressed: () => showConfirmPaymentSheet(context, plan),
+                  child: Text(l10n.recurringPayAction),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

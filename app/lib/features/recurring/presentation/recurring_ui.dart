@@ -13,6 +13,16 @@ String recurrenceLabel(AppLocalizations l10n, Recurrence recurrence) =>
       RecurrenceUnit.year => l10n.recurrenceEveryYear(recurrence.every),
     };
 
+/// Cada cuánto, y en un plan de cuotas también cuál toca: "Cuota 4 de 12 ·
+/// Cada mes".
+String recurrenceSummary(AppLocalizations l10n, RecurringPayment payment) {
+  final every = recurrenceLabel(l10n, payment.recurrence);
+  final number = payment.currentInstallment;
+  return number == null
+      ? every
+      : '${l10n.installmentNumber(number, payment.installments!)} · $every';
+}
+
 /// Cómo está un pago en una frase: "Pago próximo: vence en 3 días",
 /// "Vencido hace 2 días", "Próximo pago el 5 nov"...
 String recurringStatusText(
