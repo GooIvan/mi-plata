@@ -126,7 +126,8 @@ void main() {
         backend: FakeBackend(accounts: [testAccount('Bancolombia')]),
       );
 
-      await tester.tap(find.widgetWithText(TextButton, 'Ver todas'));
+      // El primero es el de la sección de cuentas; el segundo, el de deudas.
+      await tester.tap(find.widgetWithText(TextButton, 'Ver todas').first);
       await tester.pumpAndSettle();
 
       expect(find.widgetWithText(AppBar, 'Cuentas'), findsOneWidget);

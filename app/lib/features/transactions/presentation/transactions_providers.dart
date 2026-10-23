@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers/ledger_revision.dart';
 import '../../../core/supabase/supabase_provider.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/accounts_providers.dart';
@@ -24,8 +25,15 @@ class TransactionsNotifier extends AsyncNotifier<List<Transaction>> {
   TransactionRepository get _repository =>
       ref.read(transactionRepositoryProvider);
 
+  /// Cuántos movimientos recientes se piden: los que muestra el panel. La
+  /// lista completa, con filtros y páginas, está en `transactionListProvider`.
+  static const recentCount = 20;
+
   @override
-  Future<List<Transaction>> build() => _repository.fetchRecent();
+  Future<List<Transaction>> build() {
+    ref.watch(ledgerRevisionProvider);
+    return _repository.fetchRecent(limit: recentCount);
+  }
 
   Future<void> create(TransactionDraft draft) async {
     await _repository.create(draft);
@@ -42,12 +50,9 @@ class TransactionsNotifier extends AsyncNotifier<List<Transaction>> {
     _refresh();
   }
 
-  /// Los saldos de las cuentas se calculan con los movimientos, así que
-  /// cualquier cambio obliga a recargarlos también.
-  void _refresh() {
-    ref.invalidateSelf();
-    ref.invalidate(accountsProvider);
-  }
+  /// Los saldos, el resumen y las deudas se calculan con los movimientos: al
+  /// cambiar uno, todos se recargan (ver [ledgerRevisionProvider]).
+  void _refresh() => ref.read(ledgerRevisionProvider.notifier).bump();
 }
 
 /// Nombres por id, para mostrar en las listas sin consultar cada vez.

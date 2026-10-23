@@ -9,6 +9,13 @@ extension TransactionTypeUi on TransactionType {
     TransactionType.transfer => 'Transferencia',
   };
 
+  /// Para filtros y listas: "Ingresos", "Gastos", "Transferencias".
+  String get pluralLabel => switch (this) {
+    TransactionType.income => 'Ingresos',
+    TransactionType.expense => 'Gastos',
+    TransactionType.transfer => 'Transferencias',
+  };
+
   IconData get icon => switch (this) {
     TransactionType.income => Icons.south_west,
     TransactionType.expense => Icons.north_east,
