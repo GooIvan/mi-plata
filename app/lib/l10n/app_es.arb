@@ -1019,5 +1019,129 @@
   "dbErrorRateForBaseCurrency": "La moneda base no necesita tasa de cambio",
   "dbErrorBaseRateRequired": "Hace falta la tasa de la moneda nueva para convertir tus tasas y presupuestos",
   "dbErrorTransferDestinationRequired": "Una transferencia entre monedas distintas necesita el monto que llega",
-  "dbErrorTransferDestinationUnexpected": "El monto que llega solo se indica en transferencias entre monedas distintas"
+  "dbErrorTransferDestinationUnexpected": "El monto que llega solo se indica en transferencias entre monedas distintas",
+  "recurringTitle": "Pagos recurrentes",
+  "recurringNew": "Nuevo pago recurrente",
+  "recurringEdit": "Editar pago recurrente",
+  "recurringCreateButton": "Crear pago recurrente",
+  "recurringEmpty": "Aún no registras pagos recurrentes.\nAnota tus suscripciones, el arriendo y lo que pagas cada cierto tiempo.",
+  "recurringEmptyAction": "Registrar pago recurrente",
+  "recurringDashboardEmpty": "Registra tus suscripciones y el arriendo",
+  "recurringNothingSoon": "No tienes pagos próximos.",
+  "recurringNextOne": "Siguiente: {name} · {date}",
+  "@recurringNextOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringSectionActive": "Activos",
+  "recurringSectionOther": "En pausa o terminados",
+  "recurringStatusOverdue": "{days, plural, one{Vencido hace {days} día} other{Vencido hace {days} días}}",
+  "@recurringStatusOverdue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringStatusToday": "Pago próximo: vence hoy",
+  "recurringStatusTomorrow": "Pago próximo: vence mañana",
+  "recurringStatusSoon": "Pago próximo: vence en {days} días",
+  "@recurringStatusSoon": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringStatusLater": "Próximo pago el {date}",
+  "@recurringStatusLater": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringStatusPaused": "En pausa",
+  "recurringStatusFinished": "Terminado",
+  "recurrenceEveryWeek": "{n, plural, one{Cada semana} other{Cada {n} semanas}}",
+  "@recurrenceEveryWeek": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceEveryMonth": "{n, plural, one{Cada mes} other{Cada {n} meses}}",
+  "@recurrenceEveryMonth": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceEveryYear": "{n, plural, one{Cada año} other{Cada {n} años}}",
+  "@recurrenceEveryYear": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringNameLabel": "Nombre",
+  "recurringNameHint": "Ej: Netflix, Arriendo",
+  "recurringNameRequired": "Ponle un nombre al pago",
+  "recurringAccountLabel": "Se paga desde",
+  "recurringFrequencyLabel": "Frecuencia",
+  "recurringNextLabel": "Próximo pago",
+  "recurringNextHelp": "La fecha en que toca pagarlo. Después se calcula sola.",
+  "recurringEndLabel": "Termina (opcional)",
+  "recurringNoEnd": "Sin fecha final",
+  "recurringRemoveEnd": "Quitar la fecha final",
+  "recurringPickNextHelp": "Fecha del próximo pago",
+  "recurringPickEndHelp": "Fecha final",
+  "recurringEndBeforeNext": "La fecha final no puede ser anterior al próximo pago",
+  "recurringReminderNote": "No se descuenta nada hasta que confirmes que pagaste.",
+  "recurringPayAction": "Ya pagué",
+  "recurringSkipAction": "Omitir este pago",
+  "recurringPause": "Pausar",
+  "recurringResume": "Reanudar",
+  "recurringDelete": "Eliminar",
+  "recurringDeleteTitle": "¿Eliminar este pago recurrente?",
+  "recurringDeleteBody": "Los pagos que ya registraste se conservan.",
+  "recurringPausedMessage": "Pago pausado",
+  "recurringResumedMessage": "Pago reanudado",
+  "recurringDeletedMessage": "Pago recurrente eliminado",
+  "recurringGone": "Este pago recurrente ya no existe.",
+  "recurringHistoryTitle": "Pagos registrados",
+  "recurringHistoryEmpty": "Aún no has registrado ningún pago.",
+  "recurringEndsOn": "Termina el {date}",
+  "@recurringEndsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringConfirmTitle": "Pago de {name}",
+  "@recurringConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringConfirmButton": "Confirmar pago",
+  "recurringConfirmDateHelp": "Fecha del pago",
+  "recurringConfirmedMessage": "Pago registrado",
+  "recurringSkippedMessage": "Pago omitido",
+  "recurringErrorGone": "El pago recurrente ya no existe. Vuelve a abrir la pantalla.",
+  "recurringErrorInvalid": "Revisa los datos del pago: el nombre, el monto y las fechas.",
+  "dbErrorRecurringFinished": "Este pago recurrente ya terminó",
+  "dbErrorRecurringCategory": "Solo las categorías de gasto sirven en un pago recurrente"
 }

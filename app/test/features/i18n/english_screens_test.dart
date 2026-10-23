@@ -127,6 +127,32 @@ FakeBackend _multiCurrencyBackend() => FakeBackend(
   ],
 );
 
+/// Un arriendo vencido, una suscripción próxima y un seguro lejano.
+FakeBackend _recurringBackend() {
+  final backend = FakeBackend(
+    accounts: [testAccount('Bancolombia', balance: 1000000)],
+    categories: [testCategory('Vivienda', CategoryType.expense)],
+  );
+  backend.recurring
+    ..seed(
+      name: 'Arriendo',
+      amount: 1500000,
+      categoryId: 'cat-Vivienda',
+      nextDueDate: DateTime(_now.year, _now.month, _now.day - 2),
+    )
+    ..seed(
+      name: 'Netflix',
+      amount: 30000,
+      nextDueDate: DateTime(_now.year, _now.month, _now.day + 3),
+    )
+    ..seed(
+      name: 'Seguro',
+      amount: 90000,
+      nextDueDate: DateTime(_now.year, _now.month, _now.day + 30),
+    );
+  return backend;
+}
+
 Future<void> _open(WidgetTester tester, [String? route]) async {
   tester.view.physicalSize = const Size(900, 3600);
   tester.view.devicePixelRatio = 1;
@@ -498,6 +524,85 @@ void main() {
     });
   });
 
+  group('pagos recurrentes', () {
+    Future<void> openRecurring(WidgetTester tester, [String? route]) async {
+      tester.view.physicalSize = const Size(900, 3600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await pumpMiPlata(tester, backend: _recurringBackend(), language: 'en');
+      if (route != null) await goTo(tester, route);
+    }
+
+    testWidgets('el panel avisa de lo que vence pronto', (tester) async {
+      await openRecurring(tester);
+
+      expect(find.text('Recurring payments'), findsOneWidget);
+      expect(find.text('Overdue by 2 days'), findsOneWidget);
+      expect(find.text('Upcoming payment: due in 3 days'), findsOneWidget);
+      expect(find.text('I paid'), findsNWidgets(2));
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('la lista', (tester) async {
+      await openRecurring(tester, AppRoutes.recurring);
+
+      expect(find.widgetWithText(AppBar, 'Recurring payments'), findsOneWidget);
+      expect(find.text('Active'), findsOneWidget);
+      expect(find.text('Every month'), findsNWidgets(3));
+      expect(find.textContaining('Next payment on'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('el detalle', (tester) async {
+      await openRecurring(tester, AppRoutes.recurring);
+
+      await tester.tap(find.text('Netflix'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Recorded payments'), findsOneWidget);
+      expect(find.text("You haven't recorded any payments yet."), findsOneWidget);
+      expect(find.text('Paid from: Bancolombia'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+
+      await tester.tap(find.byTooltip('Options'));
+      await tester.pumpAndSettle();
+      expect(find.text('Pause'), findsOneWidget);
+      expect(find.text('Delete'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('la hoja de confirmación', (tester) async {
+      await openRecurring(tester);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'I paid').first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Payment for Arriendo'), findsOneWidget);
+      expect(find.text('Confirm payment'), findsOneWidget);
+      expect(find.text('Skip this payment'), findsOneWidget);
+      expect(find.text('Paid from'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('el formulario', (tester) async {
+      await openRecurring(tester, AppRoutes.recurring);
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('New recurring payment'), findsOneWidget);
+      expect(find.text('Next payment'), findsOneWidget);
+      expect(find.text('Ends (optional)'), findsOneWidget);
+      expect(find.text('Nothing is deducted until you confirm you paid.'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Create recurring payment'));
+      await tester.pump();
+      expect(find.text('Give the payment a name'), findsOneWidget);
+      expect(find.text('Enter the amount'), findsOneWidget);
+    });
+  });
+
   group('acceso', () {
     testWidgets('inicio de sesión y registro', (tester) async {
       await pumpMiPlata(tester, auth: FakeAuthRepository(), language: 'en');
@@ -534,6 +639,7 @@ void main() {
       }
 
       for (final route in [
+        AppRoutes.recurring,
         AppRoutes.rates,
         AppRoutes.dashboard,
         AppRoutes.accounts,
@@ -645,6 +751,40 @@ void main() {
         await tester.enterText(find.byType(TextFormField).at(1), '99.5');
         await tester.pump();
 
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('$language: pagos recurrentes, detalle, hoja y formulario', (
+        tester,
+      ) async {
+        tester.view.physicalSize = const Size(360, 740);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await pumpMiPlata(
+          tester,
+          backend: _recurringBackend(),
+          language: language,
+        );
+
+        // La hoja de confirmar, con su aviso y sus botones.
+        await tester.tap(find.byType(FilledButton).first);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        await tester.tapAt(const Offset(10, 10));
+        await tester.pumpAndSettle();
+
+        // El detalle.
+        await goTo(tester, AppRoutes.recurring);
+        await tester.tap(find.text('Netflix'));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        // El formulario, con los errores de validación a la vista.
+        await tester.tap(find.byTooltip(language == 'en' ? 'Edit recurring payment' : 'Editar pago recurrente'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextFormField).at(0), '');
+        await tester.tap(find.byType(FilledButton).last);
+        await tester.pump();
         expect(tester.takeException(), isNull);
       });
 

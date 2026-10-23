@@ -26,6 +26,10 @@ String? databaseErrorMessage(AppLocalizations l10n, PostgrestException error) {
     'base_rate_required' => l10n.dbErrorBaseRateRequired,
     'transfer_destination_amount_required' =>
       l10n.dbErrorTransferDestinationRequired,
+    'recurring_finished' => l10n.dbErrorRecurringFinished,
+    'recurring_category_mismatch' => l10n.dbErrorRecurringCategory,
+    'recurring_end_before_due' => l10n.recurringEndBeforeNext,
+    'recurring_not_found' => l10n.recurringErrorGone,
     'transfer_destination_amount_unexpected' =>
       l10n.dbErrorTransferDestinationUnexpected,
     'debt_not_found' => l10n.debtsErrorMissingReference,

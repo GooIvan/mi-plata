@@ -527,6 +527,7 @@ void main() {
     });
 
     testWidgets('al tocarla abre los presupuestos', (tester) async {
+      tallView(tester);
       await pumpMiPlata(
         tester,
         backend: backendWith(rules: [rule('Mercado', 100000)]),

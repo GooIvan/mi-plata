@@ -23,7 +23,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 ### Fase 3 — Idiomas, monedas, recurrentes y ahorro
 - [x] **Internacionalización**: español e inglés. La app sigue el idioma del teléfono (español si no lo tiene) y se puede cambiar en Ajustes. Montos, fechas, errores de la base de datos y categorías por defecto también se adaptan (ver [Idiomas](#-idiomas)).
 - [x] **Soporte multimoneda**: cada cuenta tiene su moneda; todo se suma en una moneda base con tasas de cambio que defines tú, y las transferencias entre monedas dicen cuánto sale y cuánto llega (ver [Monedas](#-monedas)).
-- [ ] **Gastos recurrentes** (suscripciones, arriendo), generados por el servidor sin duplicarse.
+- [x] **Pagos recurrentes** (suscripciones, arriendo): se registra qué se paga, cuánto y cada cuánto; cuando se acerca la fecha la app avisa con "Pago próximo" y **no descuenta nada hasta que confirmas que pagaste** (o lo omites). Ver [Pagos recurrentes](#-pagos-recurrentes).
 - [ ] **Metas de ahorro** con monto objetivo, fecha límite y progreso.
 
 ### Futuro
@@ -82,7 +82,7 @@ Cada módulo dentro de `features/` se organiza en capas:
 |---|---|
 | `accounts` | Dónde está el dinero: nombre, tipo, saldo inicial, moneda (`COP` por defecto) |
 | `categories` | Clasificación de movimientos, de tipo ingreso (`income`) o gasto (`expense`) |
-| `transactions` | Ingresos, gastos y transferencias (`income`, `expense`, `transfer`) asociados a una cuenta; en una transferencia entre monedas, `destination_amount` es lo que llega |
+| `transactions` | Ingresos, gastos y transferencias (`income`, `expense`, `transfer`) asociados a una cuenta; en una transferencia entre monedas, `destination_amount` es lo que llega; `recurring_payment_id` dice de qué pago recurrente viene |
 | `v_account_balances` | Vista que calcula el saldo actual de cada cuenta |
 | `debts` | Lo que debo (`payable`) o me deben (`receivable`): persona, monto, fechas y notas |
 | `debt_payments` | Enlaza cada deuda con los movimientos que son sus abonos |
@@ -91,9 +91,10 @@ Cada módulo dentro de `features/` se organiza en capas:
 | `v_monthly_account_flows` | Vista con lo que entró y salió de cada cuenta cada mes; con el saldo inicial reconstruye el dinero al cierre de cualquier mes |
 | `user_settings` | Preferencias del usuario: la moneda base (`COP` por defecto, también si no hay fila) |
 | `exchange_rates` | Cuánto vale 1 unidad de cada moneda en la moneda base; una tasa por moneda, sin historial |
+| `recurring_payments` | Una regla de pago recurrente: nombre, monto, cuenta, categoría, cada cuánto (`every` + `unit`), próxima fecha, fecha final y pausa. No genera movimientos sola |
 | `budgets` | Presupuesto mensual de una categoría de gasto, vigente desde un mes (monto 0 = sin presupuesto); solo se aceptan categorías de gasto |
 
-Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa. Lo mismo vale para `set_exchange_rate` y `set_base_currency`, que reexpresa las tasas y los presupuestos al cambiar la moneda base.
+Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa. Lo mismo vale para `set_exchange_rate` y `set_base_currency`, que reexpresa las tasas y los presupuestos al cambiar la moneda base, y para `confirm_recurring_payment` y `skip_recurring_payment`.
 
 **Principios de diseño:**
 
@@ -168,6 +169,19 @@ flutter test test/integration --dart-define=INTEGRATION=true  # contra Supabase 
 ```
 
 Las de integración necesitan `supabase start` y crean usuarios de prueba que se borran con `supabase db reset`.
+
+---
+
+## 🔁 Pagos recurrentes
+
+Para lo que pagas cada cierto tiempo: suscripciones, arriendo, seguros. Cada pago dice cuánto es, desde qué cuenta suele salir, de qué categoría y cada cuánto (cada semana, 2 semanas, mes, 2, 3 o 6 meses, año).
+
+- **No descuenta nada solo.** La app guarda la fecha del próximo pago y, cuando falta una semana o menos, lo marca como **"Pago próximo"** (con ícono y texto, no solo color). Vencido se marca aparte.
+- **Tú confirmas.** "Ya pagué" abre una hoja con el monto, la cuenta y la fecha ya listos (puedes cambiarlos: el precio pudo subir, o pagaste desde otra cuenta). Al confirmar se crea el gasto de verdad —con el aviso de saldo negativo y el de presupuesto de siempre— y el pago pasa a la fecha siguiente. "Omitir este pago" pasa a la siguiente fecha sin crear nada.
+- **Las fechas**: un pago del 31 cae el último día de cada mes y vuelve al 31 (no se va corriendo hacia el 28). Un pago vencido varios meses se confirma u omite de a uno.
+- **En el panel** salen los tres que más urgen, cada uno con su botón; en la lista (`Pagos recurrentes`) están todos, y los pausados o terminados al final. Se pueden pausar, editar, ponerles fecha final y eliminar (los gastos ya registrados se quedan).
+- Borrar un gasto registrado desde un pago no devuelve el pago a su fecha anterior: si hace falta, se edita la fecha del próximo pago.
+- Todavía no hay notificaciones fuera de la app.
 
 ---
 

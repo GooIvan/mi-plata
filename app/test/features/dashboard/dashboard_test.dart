@@ -153,6 +153,7 @@ void main() {
     );
 
     testWidgets('muestra solo los cinco más recientes', (tester) async {
+      tallView(tester);
       await pumpMiPlata(tester, backend: backendWithSixMovements());
 
       // Los más recientes primero; el sexto (el más viejo) no aparece.
@@ -164,6 +165,7 @@ void main() {
     testWidgets('cada uno muestra su categoría, cuenta y monto con signo', (
       tester,
     ) async {
+      tallView(tester);
       await pumpMiPlata(tester, backend: backendWithSixMovements());
 
       expect(find.text('Mercado · Bancolombia'), findsNWidgets(5));
@@ -171,9 +173,11 @@ void main() {
     });
 
     testWidgets('"Ver todos" lista todos, agrupados por día', (tester) async {
+      tallView(tester);
       await pumpMiPlata(tester, backend: backendWithSixMovements());
 
-      await tester.tap(find.widgetWithText(TextButton, 'Ver todos'));
+      // El último "Ver todos" es el de los movimientos.
+      await tester.tap(find.widgetWithText(TextButton, 'Ver todos').last);
       await tester.pumpAndSettle();
 
       expect(find.widgetWithText(AppBar, 'Movimientos'), findsOneWidget);
@@ -186,6 +190,7 @@ void main() {
     });
 
     testWidgets('sin movimientos lo dice', (tester) async {
+      tallView(tester);
       await pumpMiPlata(
         tester,
         backend: FakeBackend(accounts: [testAccount('Bancolombia')]),
@@ -198,6 +203,7 @@ void main() {
   testWidgets('registrar un gasto desde el panel actualiza el total', (
     tester,
   ) async {
+    tallView(tester);
     final backend = FakeBackend(
       accounts: [testAccount('Bancolombia', balance: 1000000)],
     );

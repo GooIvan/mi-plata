@@ -11,6 +11,7 @@ import '../../accounts/presentation/accounts_providers.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../budgets/presentation/budget_providers_overview.dart';
 import '../../currency/presentation/currency_providers.dart';
+import '../../recurring/presentation/recurring_providers.dart';
 import '../../summary/domain/month_summary.dart';
 import '../../transactions/presentation/transaction_error_message.dart';
 import '../../transactions/presentation/transaction_form_screen.dart';
@@ -19,6 +20,7 @@ import '../../transactions/presentation/widgets/transaction_tile.dart';
 import '../../debts/presentation/debts_providers.dart';
 import 'widgets/budget_summary_card.dart';
 import 'widgets/debts_summary_card.dart';
+import 'widgets/recurring_summary_card.dart';
 import 'widgets/total_balance_card.dart';
 
 /// Vista principal: el dinero total, las cuentas y los últimos movimientos.
@@ -34,6 +36,7 @@ class DashboardScreen extends ConsumerWidget {
     final transactions = ref.watch(transactionsProvider);
     final debts = ref.watch(debtsProvider);
     final converter = ref.watch(currencyConverterProvider);
+    final recurring = ref.watch(recurringPaymentsProvider);
     // Es un extra: mientras carga o si falla, simplemente no aparece.
     final budgets = ref
         .watch(
@@ -131,6 +134,16 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ),
           ],
+          _SectionHeader(
+            title: l10n.recurringTitle,
+            actionLabel: l10n.commonSeeAllMasculine,
+            onAction: () => context.push(AppRoutes.recurring),
+          ),
+          RecurringSummaryCard(
+            payments: recurring,
+            accountCurrencies: accountCurrencies,
+            onOpenAll: () => context.push(AppRoutes.recurring),
+          ),
           if (budgets != null && budgets.hasBudgets) ...[
             _SectionHeader(
               title: l10n.budgetsTitle,

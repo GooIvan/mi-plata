@@ -1435,4 +1435,229 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get dbErrorTransferDestinationUnexpected =>
       'El monto que llega solo se indica en transferencias entre monedas distintas';
+
+  @override
+  String get recurringTitle => 'Pagos recurrentes';
+
+  @override
+  String get recurringNew => 'Nuevo pago recurrente';
+
+  @override
+  String get recurringEdit => 'Editar pago recurrente';
+
+  @override
+  String get recurringCreateButton => 'Crear pago recurrente';
+
+  @override
+  String get recurringEmpty =>
+      'Aún no registras pagos recurrentes.\nAnota tus suscripciones, el arriendo y lo que pagas cada cierto tiempo.';
+
+  @override
+  String get recurringEmptyAction => 'Registrar pago recurrente';
+
+  @override
+  String get recurringDashboardEmpty =>
+      'Registra tus suscripciones y el arriendo';
+
+  @override
+  String get recurringNothingSoon => 'No tienes pagos próximos.';
+
+  @override
+  String recurringNextOne(String name, String date) {
+    return 'Siguiente: $name · $date';
+  }
+
+  @override
+  String get recurringSectionActive => 'Activos';
+
+  @override
+  String get recurringSectionOther => 'En pausa o terminados';
+
+  @override
+  String recurringStatusOverdue(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Vencido hace $days días',
+      one: 'Vencido hace $days día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurringStatusToday => 'Pago próximo: vence hoy';
+
+  @override
+  String get recurringStatusTomorrow => 'Pago próximo: vence mañana';
+
+  @override
+  String recurringStatusSoon(int days) {
+    return 'Pago próximo: vence en $days días';
+  }
+
+  @override
+  String recurringStatusLater(String date) {
+    return 'Próximo pago el $date';
+  }
+
+  @override
+  String get recurringStatusPaused => 'En pausa';
+
+  @override
+  String get recurringStatusFinished => 'Terminado';
+
+  @override
+  String recurrenceEveryWeek(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Cada $n semanas',
+      one: 'Cada semana',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recurrenceEveryMonth(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Cada $n meses',
+      one: 'Cada mes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recurrenceEveryYear(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Cada $n años',
+      one: 'Cada año',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurringNameLabel => 'Nombre';
+
+  @override
+  String get recurringNameHint => 'Ej: Netflix, Arriendo';
+
+  @override
+  String get recurringNameRequired => 'Ponle un nombre al pago';
+
+  @override
+  String get recurringAccountLabel => 'Se paga desde';
+
+  @override
+  String get recurringFrequencyLabel => 'Frecuencia';
+
+  @override
+  String get recurringNextLabel => 'Próximo pago';
+
+  @override
+  String get recurringNextHelp =>
+      'La fecha en que toca pagarlo. Después se calcula sola.';
+
+  @override
+  String get recurringEndLabel => 'Termina (opcional)';
+
+  @override
+  String get recurringNoEnd => 'Sin fecha final';
+
+  @override
+  String get recurringRemoveEnd => 'Quitar la fecha final';
+
+  @override
+  String get recurringPickNextHelp => 'Fecha del próximo pago';
+
+  @override
+  String get recurringPickEndHelp => 'Fecha final';
+
+  @override
+  String get recurringEndBeforeNext =>
+      'La fecha final no puede ser anterior al próximo pago';
+
+  @override
+  String get recurringReminderNote =>
+      'No se descuenta nada hasta que confirmes que pagaste.';
+
+  @override
+  String get recurringPayAction => 'Ya pagué';
+
+  @override
+  String get recurringSkipAction => 'Omitir este pago';
+
+  @override
+  String get recurringPause => 'Pausar';
+
+  @override
+  String get recurringResume => 'Reanudar';
+
+  @override
+  String get recurringDelete => 'Eliminar';
+
+  @override
+  String get recurringDeleteTitle => '¿Eliminar este pago recurrente?';
+
+  @override
+  String get recurringDeleteBody =>
+      'Los pagos que ya registraste se conservan.';
+
+  @override
+  String get recurringPausedMessage => 'Pago pausado';
+
+  @override
+  String get recurringResumedMessage => 'Pago reanudado';
+
+  @override
+  String get recurringDeletedMessage => 'Pago recurrente eliminado';
+
+  @override
+  String get recurringGone => 'Este pago recurrente ya no existe.';
+
+  @override
+  String get recurringHistoryTitle => 'Pagos registrados';
+
+  @override
+  String get recurringHistoryEmpty => 'Aún no has registrado ningún pago.';
+
+  @override
+  String recurringEndsOn(String date) {
+    return 'Termina el $date';
+  }
+
+  @override
+  String recurringConfirmTitle(String name) {
+    return 'Pago de $name';
+  }
+
+  @override
+  String get recurringConfirmButton => 'Confirmar pago';
+
+  @override
+  String get recurringConfirmDateHelp => 'Fecha del pago';
+
+  @override
+  String get recurringConfirmedMessage => 'Pago registrado';
+
+  @override
+  String get recurringSkippedMessage => 'Pago omitido';
+
+  @override
+  String get recurringErrorGone =>
+      'El pago recurrente ya no existe. Vuelve a abrir la pantalla.';
+
+  @override
+  String get recurringErrorInvalid =>
+      'Revisa los datos del pago: el nombre, el monto y las fechas.';
+
+  @override
+  String get dbErrorRecurringFinished => 'Este pago recurrente ya terminó';
+
+  @override
+  String get dbErrorRecurringCategory =>
+      'Solo las categorías de gasto sirven en un pago recurrente';
 }

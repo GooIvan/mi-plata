@@ -1004,5 +1004,129 @@
   "dbErrorRateForBaseCurrency": "The base currency does not need an exchange rate",
   "dbErrorBaseRateRequired": "The new currency needs a rate to convert your rates and budgets",
   "dbErrorTransferDestinationRequired": "A transfer between different currencies needs the amount received",
-  "dbErrorTransferDestinationUnexpected": "The amount received is only given for transfers between different currencies"
+  "dbErrorTransferDestinationUnexpected": "The amount received is only given for transfers between different currencies",
+  "recurringTitle": "Recurring payments",
+  "recurringNew": "New recurring payment",
+  "recurringEdit": "Edit recurring payment",
+  "recurringCreateButton": "Create recurring payment",
+  "recurringEmpty": "You haven't recorded any recurring payments yet.\nAdd your subscriptions, rent and anything you pay regularly.",
+  "recurringEmptyAction": "Record a recurring payment",
+  "recurringDashboardEmpty": "Record your subscriptions and rent",
+  "recurringNothingSoon": "You have no upcoming payments.",
+  "recurringNextOne": "Next: {name} · {date}",
+  "@recurringNextOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringSectionActive": "Active",
+  "recurringSectionOther": "Paused or finished",
+  "recurringStatusOverdue": "{days, plural, one{Overdue by {days} day} other{Overdue by {days} days}}",
+  "@recurringStatusOverdue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringStatusToday": "Upcoming payment: due today",
+  "recurringStatusTomorrow": "Upcoming payment: due tomorrow",
+  "recurringStatusSoon": "Upcoming payment: due in {days} days",
+  "@recurringStatusSoon": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringStatusLater": "Next payment on {date}",
+  "@recurringStatusLater": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringStatusPaused": "Paused",
+  "recurringStatusFinished": "Finished",
+  "recurrenceEveryWeek": "{n, plural, one{Every week} other{Every {n} weeks}}",
+  "@recurrenceEveryWeek": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceEveryMonth": "{n, plural, one{Every month} other{Every {n} months}}",
+  "@recurrenceEveryMonth": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceEveryYear": "{n, plural, one{Every year} other{Every {n} years}}",
+  "@recurrenceEveryYear": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringNameLabel": "Name",
+  "recurringNameHint": "e.g. Netflix, Rent",
+  "recurringNameRequired": "Give the payment a name",
+  "recurringAccountLabel": "Paid from",
+  "recurringFrequencyLabel": "Frequency",
+  "recurringNextLabel": "Next payment",
+  "recurringNextHelp": "The date it's due. After that it's worked out for you.",
+  "recurringEndLabel": "Ends (optional)",
+  "recurringNoEnd": "No end date",
+  "recurringRemoveEnd": "Remove the end date",
+  "recurringPickNextHelp": "Next payment date",
+  "recurringPickEndHelp": "End date",
+  "recurringEndBeforeNext": "The end date cannot be before the next payment",
+  "recurringReminderNote": "Nothing is deducted until you confirm you paid.",
+  "recurringPayAction": "I paid",
+  "recurringSkipAction": "Skip this payment",
+  "recurringPause": "Pause",
+  "recurringResume": "Resume",
+  "recurringDelete": "Delete",
+  "recurringDeleteTitle": "Delete this recurring payment?",
+  "recurringDeleteBody": "The payments you already recorded are kept.",
+  "recurringPausedMessage": "Payment paused",
+  "recurringResumedMessage": "Payment resumed",
+  "recurringDeletedMessage": "Recurring payment deleted",
+  "recurringGone": "This recurring payment no longer exists.",
+  "recurringHistoryTitle": "Recorded payments",
+  "recurringHistoryEmpty": "You haven't recorded any payments yet.",
+  "recurringEndsOn": "Ends on {date}",
+  "@recurringEndsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringConfirmTitle": "Payment for {name}",
+  "@recurringConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringConfirmButton": "Confirm payment",
+  "recurringConfirmDateHelp": "Payment date",
+  "recurringConfirmedMessage": "Payment recorded",
+  "recurringSkippedMessage": "Payment skipped",
+  "recurringErrorGone": "The recurring payment no longer exists. Reopen the screen.",
+  "recurringErrorInvalid": "Check the payment data: the name, amount and dates.",
+  "dbErrorRecurringFinished": "This recurring payment has already ended",
+  "dbErrorRecurringCategory": "Only expense categories can be used in a recurring payment"
 }

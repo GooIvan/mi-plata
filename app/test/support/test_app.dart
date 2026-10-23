@@ -17,6 +17,7 @@ import 'package:mi_plata/features/budgets/presentation/budgets_providers.dart';
 import 'package:mi_plata/features/categories/presentation/categories_providers.dart';
 import 'package:mi_plata/features/currency/presentation/currency_providers.dart';
 import 'package:mi_plata/features/debts/presentation/debts_providers.dart';
+import 'package:mi_plata/features/recurring/presentation/recurring_providers.dart';
 import 'package:mi_plata/features/summary/presentation/summary_providers.dart';
 import 'package:mi_plata/features/transactions/presentation/transactions_providers.dart';
 import 'package:mi_plata/l10n/l10n.dart';
@@ -85,6 +86,14 @@ Future<bool> loadRealFonts() async {
   return true;
 }
 
+/// Una pantalla alta (900 × 3600): las listas se construyen bajo demanda y así
+/// todo lo que tengan abajo también está en el árbol.
+void tallView(WidgetTester tester) {
+  tester.view.physicalSize = const Size(900, 3600);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+}
+
 /// Una `MaterialApp` con los textos de la app, para probar widgets sueltos.
 Widget localizedApp({required Widget home, String language = 'es'}) {
   return MaterialApp(
@@ -127,6 +136,7 @@ Future<FakeBackend> pumpMiPlata(
         debtRepositoryProvider.overrideWithValue(fakes.debts),
         budgetRepositoryProvider.overrideWithValue(fakes.budgets),
         currencyRepositoryProvider.overrideWithValue(fakes.currency),
+        recurringRepositoryProvider.overrideWithValue(fakes.recurring),
       ],
       child: const MiPlataApp(),
     ),

@@ -2436,6 +2436,354 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'El monto que llega solo se indica en transferencias entre monedas distintas'**
   String get dbErrorTransferDestinationUnexpected;
+
+  /// No description provided for @recurringTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagos recurrentes'**
+  String get recurringTitle;
+
+  /// No description provided for @recurringNew.
+  ///
+  /// In es, this message translates to:
+  /// **'Nuevo pago recurrente'**
+  String get recurringNew;
+
+  /// No description provided for @recurringEdit.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar pago recurrente'**
+  String get recurringEdit;
+
+  /// No description provided for @recurringCreateButton.
+  ///
+  /// In es, this message translates to:
+  /// **'Crear pago recurrente'**
+  String get recurringCreateButton;
+
+  /// No description provided for @recurringEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no registras pagos recurrentes.\nAnota tus suscripciones, el arriendo y lo que pagas cada cierto tiempo.'**
+  String get recurringEmpty;
+
+  /// No description provided for @recurringEmptyAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Registrar pago recurrente'**
+  String get recurringEmptyAction;
+
+  /// No description provided for @recurringDashboardEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Registra tus suscripciones y el arriendo'**
+  String get recurringDashboardEmpty;
+
+  /// No description provided for @recurringNothingSoon.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes pagos próximos.'**
+  String get recurringNothingSoon;
+
+  /// No description provided for @recurringNextOne.
+  ///
+  /// In es, this message translates to:
+  /// **'Siguiente: {name} · {date}'**
+  String recurringNextOne(String name, String date);
+
+  /// No description provided for @recurringSectionActive.
+  ///
+  /// In es, this message translates to:
+  /// **'Activos'**
+  String get recurringSectionActive;
+
+  /// No description provided for @recurringSectionOther.
+  ///
+  /// In es, this message translates to:
+  /// **'En pausa o terminados'**
+  String get recurringSectionOther;
+
+  /// No description provided for @recurringStatusOverdue.
+  ///
+  /// In es, this message translates to:
+  /// **'{days, plural, one{Vencido hace {days} día} other{Vencido hace {days} días}}'**
+  String recurringStatusOverdue(int days);
+
+  /// No description provided for @recurringStatusToday.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago próximo: vence hoy'**
+  String get recurringStatusToday;
+
+  /// No description provided for @recurringStatusTomorrow.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago próximo: vence mañana'**
+  String get recurringStatusTomorrow;
+
+  /// No description provided for @recurringStatusSoon.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago próximo: vence en {days} días'**
+  String recurringStatusSoon(int days);
+
+  /// No description provided for @recurringStatusLater.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximo pago el {date}'**
+  String recurringStatusLater(String date);
+
+  /// No description provided for @recurringStatusPaused.
+  ///
+  /// In es, this message translates to:
+  /// **'En pausa'**
+  String get recurringStatusPaused;
+
+  /// No description provided for @recurringStatusFinished.
+  ///
+  /// In es, this message translates to:
+  /// **'Terminado'**
+  String get recurringStatusFinished;
+
+  /// No description provided for @recurrenceEveryWeek.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, one{Cada semana} other{Cada {n} semanas}}'**
+  String recurrenceEveryWeek(int n);
+
+  /// No description provided for @recurrenceEveryMonth.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, one{Cada mes} other{Cada {n} meses}}'**
+  String recurrenceEveryMonth(int n);
+
+  /// No description provided for @recurrenceEveryYear.
+  ///
+  /// In es, this message translates to:
+  /// **'{n, plural, one{Cada año} other{Cada {n} años}}'**
+  String recurrenceEveryYear(int n);
+
+  /// No description provided for @recurringNameLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombre'**
+  String get recurringNameLabel;
+
+  /// No description provided for @recurringNameHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: Netflix, Arriendo'**
+  String get recurringNameHint;
+
+  /// No description provided for @recurringNameRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Ponle un nombre al pago'**
+  String get recurringNameRequired;
+
+  /// No description provided for @recurringAccountLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Se paga desde'**
+  String get recurringAccountLabel;
+
+  /// No description provided for @recurringFrequencyLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Frecuencia'**
+  String get recurringFrequencyLabel;
+
+  /// No description provided for @recurringNextLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximo pago'**
+  String get recurringNextLabel;
+
+  /// No description provided for @recurringNextHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'La fecha en que toca pagarlo. Después se calcula sola.'**
+  String get recurringNextHelp;
+
+  /// No description provided for @recurringEndLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Termina (opcional)'**
+  String get recurringEndLabel;
+
+  /// No description provided for @recurringNoEnd.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin fecha final'**
+  String get recurringNoEnd;
+
+  /// No description provided for @recurringRemoveEnd.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar la fecha final'**
+  String get recurringRemoveEnd;
+
+  /// No description provided for @recurringPickNextHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha del próximo pago'**
+  String get recurringPickNextHelp;
+
+  /// No description provided for @recurringPickEndHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha final'**
+  String get recurringPickEndHelp;
+
+  /// No description provided for @recurringEndBeforeNext.
+  ///
+  /// In es, this message translates to:
+  /// **'La fecha final no puede ser anterior al próximo pago'**
+  String get recurringEndBeforeNext;
+
+  /// No description provided for @recurringReminderNote.
+  ///
+  /// In es, this message translates to:
+  /// **'No se descuenta nada hasta que confirmes que pagaste.'**
+  String get recurringReminderNote;
+
+  /// No description provided for @recurringPayAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya pagué'**
+  String get recurringPayAction;
+
+  /// No description provided for @recurringSkipAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Omitir este pago'**
+  String get recurringSkipAction;
+
+  /// No description provided for @recurringPause.
+  ///
+  /// In es, this message translates to:
+  /// **'Pausar'**
+  String get recurringPause;
+
+  /// No description provided for @recurringResume.
+  ///
+  /// In es, this message translates to:
+  /// **'Reanudar'**
+  String get recurringResume;
+
+  /// No description provided for @recurringDelete.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get recurringDelete;
+
+  /// No description provided for @recurringDeleteTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar este pago recurrente?'**
+  String get recurringDeleteTitle;
+
+  /// No description provided for @recurringDeleteBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Los pagos que ya registraste se conservan.'**
+  String get recurringDeleteBody;
+
+  /// No description provided for @recurringPausedMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago pausado'**
+  String get recurringPausedMessage;
+
+  /// No description provided for @recurringResumedMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago reanudado'**
+  String get recurringResumedMessage;
+
+  /// No description provided for @recurringDeletedMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago recurrente eliminado'**
+  String get recurringDeletedMessage;
+
+  /// No description provided for @recurringGone.
+  ///
+  /// In es, this message translates to:
+  /// **'Este pago recurrente ya no existe.'**
+  String get recurringGone;
+
+  /// No description provided for @recurringHistoryTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagos registrados'**
+  String get recurringHistoryTitle;
+
+  /// No description provided for @recurringHistoryEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no has registrado ningún pago.'**
+  String get recurringHistoryEmpty;
+
+  /// No description provided for @recurringEndsOn.
+  ///
+  /// In es, this message translates to:
+  /// **'Termina el {date}'**
+  String recurringEndsOn(String date);
+
+  /// No description provided for @recurringConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago de {name}'**
+  String recurringConfirmTitle(String name);
+
+  /// No description provided for @recurringConfirmButton.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar pago'**
+  String get recurringConfirmButton;
+
+  /// No description provided for @recurringConfirmDateHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha del pago'**
+  String get recurringConfirmDateHelp;
+
+  /// No description provided for @recurringConfirmedMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago registrado'**
+  String get recurringConfirmedMessage;
+
+  /// No description provided for @recurringSkippedMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago omitido'**
+  String get recurringSkippedMessage;
+
+  /// No description provided for @recurringErrorGone.
+  ///
+  /// In es, this message translates to:
+  /// **'El pago recurrente ya no existe. Vuelve a abrir la pantalla.'**
+  String get recurringErrorGone;
+
+  /// No description provided for @recurringErrorInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisa los datos del pago: el nombre, el monto y las fechas.'**
+  String get recurringErrorInvalid;
+
+  /// No description provided for @dbErrorRecurringFinished.
+  ///
+  /// In es, this message translates to:
+  /// **'Este pago recurrente ya terminó'**
+  String get dbErrorRecurringFinished;
+
+  /// No description provided for @dbErrorRecurringCategory.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo las categorías de gasto sirven en un pago recurrente'**
+  String get dbErrorRecurringCategory;
 }
 
 class _AppLocalizationsDelegate
