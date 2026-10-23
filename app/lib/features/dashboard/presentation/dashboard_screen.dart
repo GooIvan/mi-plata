@@ -10,6 +10,7 @@ import '../../accounts/presentation/account_type_ui.dart';
 import '../../accounts/presentation/accounts_providers.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../budgets/presentation/budget_providers_overview.dart';
+import '../../currency/presentation/currency_providers.dart';
 import '../../summary/domain/month_summary.dart';
 import '../../transactions/presentation/transaction_error_message.dart';
 import '../../transactions/presentation/transaction_form_screen.dart';
@@ -32,6 +33,7 @@ class DashboardScreen extends ConsumerWidget {
     final accounts = ref.watch(accountsProvider);
     final transactions = ref.watch(transactionsProvider);
     final debts = ref.watch(debtsProvider);
+    final converter = ref.watch(currencyConverterProvider);
     // Es un extra: mientras carga o si falla, simplemente no aparece.
     final budgets = ref
         .watch(
@@ -39,6 +41,7 @@ class DashboardScreen extends ConsumerWidget {
         )
         .value;
     final accountNames = ref.watch(accountNamesProvider);
+    final accountCurrencies = ref.watch(accountCurrenciesProvider);
     final categoryNames = ref.watch(categoryNamesProvider);
     final theme = Theme.of(context);
     final l10n = context.l10n;
@@ -86,7 +89,11 @@ class DashboardScreen extends ConsumerWidget {
         children: [
           TotalBalanceCard(
             accounts: accounts,
-            onRetry: () => ref.invalidate(accountsProvider),
+            converter: converter,
+            onRetry: () {
+              ref.invalidate(accountsProvider);
+              ref.invalidate(currencyConverterProvider);
+            },
             onCreateAccount: () => context.push(AppRoutes.accounts),
           ),
           if (activeAccounts.isNotEmpty) ...[
@@ -142,6 +149,7 @@ class DashboardScreen extends ConsumerWidget {
           ),
           DebtsSummaryCard(
             debts: debts,
+            converter: converter,
             onTap: () => context.push(AppRoutes.debts),
           ),
           _SectionHeader(
@@ -177,6 +185,7 @@ class DashboardScreen extends ConsumerWidget {
                           TransactionTile(
                             transaction: transaction,
                             accountNames: accountNames,
+                            accountCurrencies: accountCurrencies,
                             categoryNames: categoryNames,
                             onTap: () => showTransactionForm(
                               context,

@@ -2124,6 +2124,318 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Préstamo a {name}'**
   String debtsLoanDescriptionReceivable(String name);
+
+  /// No description provided for @currencyNameCop.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso colombiano'**
+  String get currencyNameCop;
+
+  /// No description provided for @currencyNameUsd.
+  ///
+  /// In es, this message translates to:
+  /// **'Dólar estadounidense'**
+  String get currencyNameUsd;
+
+  /// No description provided for @currencyNameEur.
+  ///
+  /// In es, this message translates to:
+  /// **'Euro'**
+  String get currencyNameEur;
+
+  /// No description provided for @currencyNameMxn.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso mexicano'**
+  String get currencyNameMxn;
+
+  /// No description provided for @currencyNameArs.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso argentino'**
+  String get currencyNameArs;
+
+  /// No description provided for @currencyNameBrl.
+  ///
+  /// In es, this message translates to:
+  /// **'Real brasileño'**
+  String get currencyNameBrl;
+
+  /// No description provided for @currencyNameClp.
+  ///
+  /// In es, this message translates to:
+  /// **'Peso chileno'**
+  String get currencyNameClp;
+
+  /// No description provided for @currencyNamePen.
+  ///
+  /// In es, this message translates to:
+  /// **'Sol peruano'**
+  String get currencyNamePen;
+
+  /// No description provided for @currencyNameGbp.
+  ///
+  /// In es, this message translates to:
+  /// **'Libra esterlina'**
+  String get currencyNameGbp;
+
+  /// No description provided for @currencyNameCad.
+  ///
+  /// In es, this message translates to:
+  /// **'Dólar canadiense'**
+  String get currencyNameCad;
+
+  /// No description provided for @currencyLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Moneda'**
+  String get currencyLabel;
+
+  /// No description provided for @currencyOption.
+  ///
+  /// In es, this message translates to:
+  /// **'{code} · {name}'**
+  String currencyOption(String code, String name);
+
+  /// No description provided for @currencyMissingRates.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin tasa de cambio para {currencies}: no se incluye en el total.'**
+  String currencyMissingRates(String currencies);
+
+  /// No description provided for @currencyMissingRatesAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Definir'**
+  String get currencyMissingRatesAction;
+
+  /// No description provided for @settingsCurrency.
+  ///
+  /// In es, this message translates to:
+  /// **'Moneda'**
+  String get settingsCurrency;
+
+  /// No description provided for @settingsBaseCurrency.
+  ///
+  /// In es, this message translates to:
+  /// **'Moneda base'**
+  String get settingsBaseCurrency;
+
+  /// No description provided for @settingsBaseCurrencyValue.
+  ///
+  /// In es, this message translates to:
+  /// **'{code} · {name}'**
+  String settingsBaseCurrencyValue(String code, String name);
+
+  /// No description provided for @settingsExchangeRates.
+  ///
+  /// In es, this message translates to:
+  /// **'Tasas de cambio'**
+  String get settingsExchangeRates;
+
+  /// No description provided for @settingsExchangeRatesHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuánto vale cada moneda en tu moneda base'**
+  String get settingsExchangeRatesHelp;
+
+  /// No description provided for @baseCurrencyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Moneda base'**
+  String get baseCurrencyTitle;
+
+  /// No description provided for @baseCurrencyIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Todo tu dinero, tus resúmenes y tus presupuestos se muestran en esta moneda.'**
+  String get baseCurrencyIntro;
+
+  /// No description provided for @baseCurrencyRateLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'1 {next} vale ({previous})'**
+  String baseCurrencyRateLabel(String next, String previous);
+
+  /// No description provided for @baseCurrencyRateHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace falta para pasar tus tasas y presupuestos a {next}.'**
+  String baseCurrencyRateHelp(String next);
+
+  /// No description provided for @baseCurrencyChangeButton.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar moneda base'**
+  String get baseCurrencyChangeButton;
+
+  /// No description provided for @ratesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tasas de cambio'**
+  String get ratesTitle;
+
+  /// No description provided for @ratesIntro.
+  ///
+  /// In es, this message translates to:
+  /// **'Para sumar el dinero de tus cuentas en otras monedas, define cuánto vale cada una en {base}. Los totales usan la tasa de hoy.'**
+  String ratesIntro(String base);
+
+  /// No description provided for @ratesEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes cuentas ni deudas en otras monedas.\nCuando las tengas, define aquí sus tasas.'**
+  String get ratesEmpty;
+
+  /// No description provided for @ratesNoRate.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin tasa'**
+  String get ratesNoRate;
+
+  /// No description provided for @ratesOneEquals.
+  ///
+  /// In es, this message translates to:
+  /// **'1 {currency} = {amount}'**
+  String ratesOneEquals(String currency, String amount);
+
+  /// No description provided for @ratesUpdatedToday.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizada hoy'**
+  String get ratesUpdatedToday;
+
+  /// No description provided for @ratesUpdatedYesterday.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizada ayer'**
+  String get ratesUpdatedYesterday;
+
+  /// No description provided for @ratesUpdatedDaysAgo.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizada hace {days} días'**
+  String ratesUpdatedDaysAgo(int days);
+
+  /// No description provided for @ratesAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar tasa'**
+  String get ratesAdd;
+
+  /// No description provided for @ratesFormTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tasa de {currency}'**
+  String ratesFormTitle(String currency);
+
+  /// No description provided for @ratesFormAmountLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'1 {currency} vale'**
+  String ratesFormAmountLabel(String currency);
+
+  /// No description provided for @ratesFormHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: 4.000'**
+  String get ratesFormHint;
+
+  /// No description provided for @ratesFormInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe una tasa mayor que cero. Ejemplo: 4.012,5'**
+  String get ratesFormInvalid;
+
+  /// No description provided for @ratesFormRemove.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar la tasa'**
+  String get ratesFormRemove;
+
+  /// No description provided for @ratesFormChooseCurrency.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige una moneda'**
+  String get ratesFormChooseCurrency;
+
+  /// No description provided for @ratesErrorInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisa la tasa: tiene que ser mayor que cero.'**
+  String get ratesErrorInvalid;
+
+  /// No description provided for @accountsCurrencyLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'La moneda de una cuenta no se puede cambiar.'**
+  String get accountsCurrencyLocked;
+
+  /// No description provided for @accountsRateLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'1 {currency} vale (opcional)'**
+  String accountsRateLabel(String currency);
+
+  /// No description provided for @accountsRateHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin tasa, esta cuenta no suma al dinero total.'**
+  String get accountsRateHelp;
+
+  /// No description provided for @transactionsAmountOut.
+  ///
+  /// In es, this message translates to:
+  /// **'Monto que sale ({currency})'**
+  String transactionsAmountOut(String currency);
+
+  /// No description provided for @transactionsAmountIn.
+  ///
+  /// In es, this message translates to:
+  /// **'Monto que llega ({currency})'**
+  String transactionsAmountIn(String currency);
+
+  /// No description provided for @transactionsImpliedRate.
+  ///
+  /// In es, this message translates to:
+  /// **'1 {from} = {rate} {to}'**
+  String transactionsImpliedRate(String from, String rate, String to);
+
+  /// No description provided for @transactionsReceives.
+  ///
+  /// In es, this message translates to:
+  /// **'recibe {amount}'**
+  String transactionsReceives(String amount);
+
+  /// No description provided for @summaryConvertedNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Los montos en otras monedas se pasan a {base} con la tasa de hoy.'**
+  String summaryConvertedNote(String base);
+
+  /// No description provided for @dbErrorRateForBaseCurrency.
+  ///
+  /// In es, this message translates to:
+  /// **'La moneda base no necesita tasa de cambio'**
+  String get dbErrorRateForBaseCurrency;
+
+  /// No description provided for @dbErrorBaseRateRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace falta la tasa de la moneda nueva para convertir tus tasas y presupuestos'**
+  String get dbErrorBaseRateRequired;
+
+  /// No description provided for @dbErrorTransferDestinationRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Una transferencia entre monedas distintas necesita el monto que llega'**
+  String get dbErrorTransferDestinationRequired;
+
+  /// No description provided for @dbErrorTransferDestinationUnexpected.
+  ///
+  /// In es, this message translates to:
+  /// **'El monto que llega solo se indica en transferencias entre monedas distintas'**
+  String get dbErrorTransferDestinationUnexpected;
 }
 
 class _AppLocalizationsDelegate

@@ -15,6 +15,7 @@ import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../support/integration_harness.dart';
+import '../support/test_app.dart';
 
 void main() {
   group(
@@ -35,9 +36,9 @@ void main() {
         accounts = AccountRepository(ana);
         final transactions = TransactionRepository(ana);
 
-        await accounts.create(name: 'Banco', type: AccountType.bank, initialBalance: '1000000');
-        await accounts.create(name: 'Efectivo', type: AccountType.cash, initialBalance: '50000');
-        await accounts.create(name: 'Vieja', type: AccountType.bank, initialBalance: '12345');
+        await accounts.create(name: 'Banco', type: AccountType.bank, initialBalance: '1000000', currency: 'COP');
+        await accounts.create(name: 'Efectivo', type: AccountType.cash, initialBalance: '50000', currency: 'COP');
+        await accounts.create(name: 'Vieja', type: AccountType.bank, initialBalance: '12345', currency: 'COP');
         final all = await accounts.fetchAll();
         bank = all.firstWhere((a) => a.name == 'Banco');
         cash = all.firstWhere((a) => a.name == 'Efectivo');
@@ -93,6 +94,7 @@ void main() {
           flows: await summary.fetchAccountFlows(),
           end: DateTime(2026, 3),
           months: 3,
+         converter: copConverter,
         );
 
         expect(points.map((p) => p.cents), [
@@ -109,6 +111,7 @@ void main() {
           flows: await summary.fetchAccountFlows(),
           end: DateTime(2026, 3),
           months: 3,
+         converter: copConverter,
         );
 
         final panelTotal = AccountTotals.centsByCurrency(
@@ -123,6 +126,7 @@ void main() {
           flows: await summary.fetchAccountFlows(),
           end: DateTime(2026, 1),
           months: 1,
+         converter: copConverter,
         );
 
         expect(points.single.cents, 142999950);

@@ -43,7 +43,7 @@ void main() {
         await repository.create(
           name: 'Bancolombia',
           type: AccountType.bank,
-          initialBalance: '1500000.50',
+          initialBalance: '1500000.50', currency: 'COP',
         );
         var accounts = await repository.fetchAll();
         expect(accounts, hasLength(1));
@@ -77,14 +77,14 @@ void main() {
         await repository.create(
           name: 'Duplicada',
           type: AccountType.cash,
-          initialBalance: '0',
+          initialBalance: '0', currency: 'COP',
         );
 
         await expectLater(
           repository.create(
             name: 'DUPLICADA',
             type: AccountType.cash,
-            initialBalance: '0',
+            initialBalance: '0', currency: 'COP',
           ),
           throwsA(
             isA<PostgrestException>()
@@ -105,7 +105,7 @@ void main() {
         await repository.create(
           name: 'Duplicada',
           type: AccountType.cash,
-          initialBalance: '0',
+          initialBalance: '0', currency: 'COP',
         );
       });
 
@@ -114,7 +114,7 @@ void main() {
           repository.create(
             name: '   ',
             type: AccountType.cash,
-            initialBalance: '0',
+            initialBalance: '0', currency: 'COP',
           ),
           throwsA(
             isA<PostgrestException>().having((e) => e.code, 'code', '23514'),
@@ -125,7 +125,7 @@ void main() {
           repository.create(
             name: 'Enorme',
             type: AccountType.cash,
-            initialBalance: '1000000000000',
+            initialBalance: '1000000000000', currency: 'COP',
           ),
           throwsA(
             isA<PostgrestException>().having((e) => e.code, 'code', '22003'),
@@ -137,7 +137,7 @@ void main() {
         await repository.create(
           name: 'Visa',
           type: AccountType.card,
-          initialBalance: '-350000.25',
+          initialBalance: '-350000.25', currency: 'COP',
         );
 
         final visa = (await repository.fetchAll()).firstWhere(
@@ -150,7 +150,7 @@ void main() {
         await repository.create(
           name: 'Solo de Ana',
           type: AccountType.bank,
-          initialBalance: '1',
+          initialBalance: '1', currency: 'COP',
         );
 
         expect(await AccountRepository(beto).fetchAll(), isEmpty);

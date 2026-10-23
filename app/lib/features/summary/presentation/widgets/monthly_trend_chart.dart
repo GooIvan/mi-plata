@@ -18,9 +18,13 @@ class MonthlyTrendChart extends StatefulWidget {
     super.key,
     required this.points,
     required this.selectedMonth,
+    required this.currency,
   });
 
   final List<MonthPoint> points;
+
+  /// La moneda de los montos (la base del usuario).
+  final String currency;
 
   /// El mes que se está mirando: su etiqueta va en negrita.
   final DateTime selectedMonth;
@@ -120,7 +124,7 @@ class _MonthlyTrendChartState extends State<MonthlyTrendChart> {
                           getTitlesWidget: (value, meta) => SideTitleWidget(
                             meta: meta,
                             child: Text(
-                              formats.compactMoney(value),
+                              formats.compactMoney(value, currency: widget.currency),
                               style: labelStyle,
                             ),
                           ),
@@ -160,7 +164,7 @@ class _MonthlyTrendChartState extends State<MonthlyTrendChart> {
                                 rodIndex == 0
                                     ? l10n.commonIncomes
                                     : l10n.commonExpenses,
-                                formats.money(rod.toY),
+                                formats.money(rod.toY, currency: widget.currency),
                               ),
                               TextStyle(
                                 color: theme.colorScheme.onInverseSurface,
@@ -194,7 +198,8 @@ class _MonthlyTrendChartState extends State<MonthlyTrendChart> {
                 ),
               ),
             ),
-            if (_showTable) _TrendTable(points: points),
+            if (_showTable)
+              _TrendTable(points: points, currency: widget.currency),
           ],
         ),
       ),
@@ -236,9 +241,10 @@ class _LegendItem extends StatelessWidget {
 }
 
 class _TrendTable extends StatelessWidget {
-  const _TrendTable({required this.points});
+  const _TrendTable({required this.points, required this.currency});
 
   final List<MonthPoint> points;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -257,7 +263,7 @@ class _TrendTable extends StatelessWidget {
     );
 
     Widget amount(int cents) => Text(
-      formats.money(cents / 100),
+      formats.money(cents / 100, currency: currency),
       textAlign: TextAlign.end,
       style: theme.textTheme.bodySmall?.copyWith(
         fontFeatures: const [FontFeature.tabularFigures()],

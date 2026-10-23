@@ -121,6 +121,8 @@ void main() {
     await pumpMiPlata(tester, auth: auth);
     await openSettings(tester);
 
+    await tester.ensureVisible(find.text('Cerrar sesión'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Cerrar sesión'));
     await tester.pumpAndSettle();
 

@@ -39,6 +39,8 @@ void main() {
       // Cerrar sesión vive en los ajustes.
       await tester.tap(find.byTooltip('Ajustes'));
       await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Cerrar sesión'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Cerrar sesión'));
       await tester.pumpAndSettle();
 

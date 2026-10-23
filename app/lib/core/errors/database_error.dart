@@ -22,6 +22,12 @@ String? databaseErrorMessage(AppLocalizations l10n, PostgrestException error) {
     'debt_amount_below_paid' => l10n.dbErrorDebtAmountBelowPaid,
     'debt_direction_locked' => l10n.dbErrorDebtDirectionLocked,
     'debt_archived' => l10n.dbErrorDebtArchived,
+    'rate_for_base_currency' => l10n.dbErrorRateForBaseCurrency,
+    'base_rate_required' => l10n.dbErrorBaseRateRequired,
+    'transfer_destination_amount_required' =>
+      l10n.dbErrorTransferDestinationRequired,
+    'transfer_destination_amount_unexpected' =>
+      l10n.dbErrorTransferDestinationUnexpected,
     'debt_not_found' => l10n.debtsErrorMissingReference,
     'account_not_found' => l10n.debtsErrorMissingReference,
     _ => null,

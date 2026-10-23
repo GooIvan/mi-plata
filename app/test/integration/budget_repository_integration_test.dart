@@ -17,6 +17,7 @@ import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../support/integration_harness.dart';
+import '../support/test_app.dart';
 
 void main() {
   group(
@@ -269,7 +270,7 @@ void main() {
         await accounts.create(
           name: 'Bancolombia',
           type: AccountType.bank,
-          initialBalance: '1000000',
+          initialBalance: '1000000', currency: 'COP',
         );
         final account = (await accounts.fetchAll()).single;
 
@@ -308,6 +309,7 @@ void main() {
           expenseCentsByCategory: SummaryCalculator.forMonth(
             totals,
             march,
+           copConverter,
           ).expenseCentsByCategory,
         );
 

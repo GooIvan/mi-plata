@@ -9,6 +9,7 @@ class Transaction {
     this.destinationAccountId,
     this.categoryId,
     required this.amount,
+    this.destinationAmount,
     required this.date,
     this.description,
   });
@@ -20,6 +21,7 @@ class Transaction {
     destinationAccountId: json['destination_account_id'] as String?,
     categoryId: json['category_id'] as String?,
     amount: (json['amount'] as num).toDouble(),
+    destinationAmount: (json['destination_amount'] as num?)?.toDouble(),
     date: DateTime.parse(json['transaction_date'] as String),
     description: json['description'] as String?,
   );
@@ -32,6 +34,10 @@ class Transaction {
   final String? destinationAccountId;
   final String? categoryId;
   final double amount;
+
+  /// Lo que llega a la cuenta de destino en una transferencia entre monedas
+  /// distintas. Null si llega lo mismo que sale.
+  final double? destinationAmount;
   final DateTime date;
   final String? description;
 }

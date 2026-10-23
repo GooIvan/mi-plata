@@ -7,6 +7,7 @@ import 'package:mi_plata/core/router/app_routes.dart';
 import 'package:mi_plata/features/accounts/domain/account_type.dart';
 import 'package:mi_plata/features/budgets/domain/budget_rule.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
+import 'package:mi_plata/features/currency/domain/exchange_rate.dart';
 import 'package:mi_plata/features/debts/domain/debt_direction.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 
@@ -112,6 +113,19 @@ FakeBackend _backend() {
     );
   return backend;
 }
+
+/// Pesos, dólares (con tasa) y euros (sin tasa), para ver todo lo de monedas.
+FakeBackend _multiCurrencyBackend() => FakeBackend(
+  accounts: [
+    testAccount('Bancolombia', balance: 1000000),
+    testAccount('Dólares', balance: 100, currency: 'USD'),
+    testAccount('Euros', balance: 50, currency: 'EUR'),
+  ],
+  categories: [testCategory('Mercado', CategoryType.expense)],
+  rates: [
+    ExchangeRate(currency: 'USD', rate: 4000, updatedAt: DateTime.now()),
+  ],
+);
 
 Future<void> _open(WidgetTester tester, [String? route]) async {
   tester.view.physicalSize = const Size(900, 3600);
@@ -369,6 +383,121 @@ void main() {
     });
   });
 
+  group('monedas', () {
+    Future<void> openMulti(WidgetTester tester, [String? route]) async {
+      tester.view.physicalSize = const Size(900, 3600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await pumpMiPlata(
+        tester,
+        backend: _multiCurrencyBackend(),
+        language: 'en',
+      );
+      if (route != null) await goTo(tester, route);
+    }
+
+    testWidgets('el panel, con el aviso de una moneda sin tasa', (tester) async {
+      await openMulti(tester);
+
+      expect(textLike(r'$1,400,000'), findsOneWidget);
+      expect(
+        find.text('No exchange rate for EUR: not included in the total. '),
+        findsNothing, // el aviso es un texto con enlace, no una sola cadena
+      );
+      expect(find.textContaining('No exchange rate for EUR'), findsOneWidget);
+      expect(find.text('Set rate'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('ajustes de moneda y la hoja de la moneda base', (tester) async {
+      await openMulti(tester, AppRoutes.settings);
+
+      expect(find.text('Currency'), findsOneWidget);
+      expect(find.text('Base currency'), findsOneWidget);
+      expect(find.text('COP · Colombian peso'), findsOneWidget);
+      expect(find.text('What each currency is worth in your base currency'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+
+      await tester.tap(find.text('Base currency'));
+      await tester.pumpAndSettle();
+      expect(find.text('All your money, summaries and budgets are shown in this currency.'), findsOneWidget);
+      expect(find.text('Change base currency'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('las tasas y su hoja', (tester) async {
+      await openMulti(tester, AppRoutes.rates);
+
+      expect(find.widgetWithText(AppBar, 'Exchange rates'), findsOneWidget);
+      expect(find.text('EUR · Euro'), findsOneWidget);
+      expect(find.text('USD · US dollar'), findsOneWidget);
+      expect(find.text('No rate'), findsOneWidget);
+      expect(find.textContaining(r'1 USD = $4,000'), findsOneWidget);
+      expect(find.textContaining('Updated today'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+
+      await tester.tap(find.text('USD · US dollar'));
+      await tester.pumpAndSettle();
+      expect(find.text('USD rate'), findsOneWidget);
+      expect(find.text('1 USD is worth'), findsOneWidget);
+      expect(find.text('Remove the rate'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('el formulario de cuenta con moneda y tasa', (tester) async {
+      await openMulti(tester, AppRoutes.accounts);
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('GBP · Pound sterling').last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Currency'), findsOneWidget);
+      expect(find.text('1 GBP is worth (optional)'), findsOneWidget);
+      expect(find.text("Without a rate, this account isn't added to your total money."), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('una transferencia entre monedas', (tester) async {
+      await openMulti(tester);
+
+      await tester.tap(find.widgetWithText(FloatingActionButton, 'New transaction'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.descendant(
+        of: find.byType(SegmentedButton<TransactionType>),
+        matching: find.text('Transfer'),
+      ));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField).at(0), '400,000');
+      for (final (index, option) in [(0, 'Bancolombia'), (1, 'Dólares · USD')]) {
+        await tester.tap(find.byType(DropdownButtonFormField<String>).at(index));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(option).last);
+        await tester.pumpAndSettle();
+      }
+      await tester.enterText(find.byType(TextFormField).at(1), '99.5');
+      await tester.pump();
+
+      expect(find.text('Amount sent (COP)'), findsOneWidget);
+      expect(find.text('Amount received (USD)'), findsOneWidget);
+      expect(find.text('1 COP = 0.000249 USD'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('el formulario de deuda con moneda', (tester) async {
+      await openMulti(tester, AppRoutes.debts);
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Currency'), findsOneWidget);
+      expect(find.text('COP · Colombian peso'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+  });
+
   group('acceso', () {
     testWidgets('inicio de sesión y registro', (tester) async {
       await pumpMiPlata(tester, auth: FakeAuthRepository(), language: 'en');
@@ -405,6 +534,7 @@ void main() {
       }
 
       for (final route in [
+        AppRoutes.rates,
         AppRoutes.dashboard,
         AppRoutes.accounts,
         AppRoutes.categories,
@@ -436,6 +566,84 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.filter_list));
         await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('$language: monedas, hojas y formularios', (tester) async {
+        tester.view.physicalSize = const Size(360, 740);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await pumpMiPlata(
+          tester,
+          backend: _multiCurrencyBackend(),
+          language: language,
+        );
+
+        // La hoja de la moneda base, con la tasa a la vista.
+        await goTo(tester, AppRoutes.settings);
+        await tester.tap(find.byIcon(Icons.payments_outlined));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(DropdownButtonFormField<String>));
+        await tester.pumpAndSettle();
+        await tester.tap(find.textContaining('EUR ·').last);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        await tester.tapAt(const Offset(10, 10));
+        await tester.pumpAndSettle();
+
+        // Una tasa, con un error de validación a la vista.
+        await goTo(tester, AppRoutes.rates);
+        await tester.tap(find.textContaining('USD ·'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextFormField).first, '0');
+        await tester.tap(find.byType(FilledButton).last);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        await tester.tapAt(const Offset(10, 10));
+        await tester.pumpAndSettle();
+
+        // Una cuenta en otra moneda, con el campo de la tasa.
+        await goTo(tester, AppRoutes.accounts);
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(DropdownButtonFormField<String>));
+        await tester.pumpAndSettle();
+        await tester.tap(find.textContaining('GBP ·').last);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(FilledButton).last);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('$language: transferencia entre monedas', (tester) async {
+        tester.view.physicalSize = const Size(360, 740);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await pumpMiPlata(
+          tester,
+          backend: _multiCurrencyBackend(),
+          language: language,
+        );
+        await goTo(tester, AppRoutes.transactions);
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
+        // Elige origen y destino de monedas distintas.
+        final transferLabel = language == 'en' ? 'Transfer' : 'Transferencia';
+        await tester.tap(find.descendant(
+          of: find.byType(SegmentedButton<TransactionType>),
+          matching: find.text(transferLabel),
+        ));
+        await tester.pumpAndSettle();
+        for (final (index, option) in [(0, 'Bancolombia'), (1, 'Dólares · USD')]) {
+          await tester.tap(find.byType(DropdownButtonFormField<String>).at(index));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text(option).last);
+          await tester.pumpAndSettle();
+        }
+        await tester.enterText(find.byType(TextFormField).at(0), '400000');
+        await tester.enterText(find.byType(TextFormField).at(1), '99.5');
+        await tester.pump();
 
         expect(tester.takeException(), isNull);
       });

@@ -63,6 +63,11 @@ void main() {
       'settingsLanguageEnglish',
       'debtsTotalAmount',
       'summaryTrendTooltip',
+      'currencyNameEur',
+      'currencyOption',
+      'settingsBaseCurrencyValue',
+      'ratesOneEquals',
+      'transactionsImpliedRate',
     };
     final untranslated = [
       for (final key in es.keys)

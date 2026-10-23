@@ -12,11 +12,15 @@ class BudgetProgressTile extends StatelessWidget {
     super.key,
     required this.name,
     required this.progress,
+    required this.currency,
     this.onTap,
   });
 
   final String name;
   final BudgetProgress progress;
+
+  /// La moneda de los montos (la base del usuario).
+  final String currency;
 
   /// Null cuando el mes no se puede editar (meses pasados).
   final VoidCallback? onTap;
@@ -48,13 +52,13 @@ class BudgetProgressTile extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  formats.money(progress.spentCents / 100),
+                  formats.money(progress.spentCents / 100, currency: currency),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  ' ${l10n.budgetsOfLimit(formats.money(progress.limitCents / 100))}',
+                  ' ${l10n.budgetsOfLimit(formats.money(progress.limitCents / 100, currency: currency))}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -78,7 +82,12 @@ class BudgetProgressTile extends StatelessWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    budgetStatusText(l10n, status, progress.remainingCents),
+                    budgetStatusText(
+                      l10n,
+                      status,
+                      progress.remainingCents,
+                      currency: currency,
+                    ),
                     style: theme.textTheme.bodySmall,
                   ),
                 ),

@@ -59,17 +59,26 @@ class NegativeBalanceCheck {
     final String sourceId;
     final String? destinationId;
     final int cents;
+    // Lo que llega al destino: en una transferencia entre monedas distintas no
+    // es lo mismo que lo que sale.
+    final int destinationCents;
 
     if (draft != null) {
       type = draft.type;
       sourceId = draft.accountId;
       destinationId = draft.destinationAccountId;
       cents = _cents(double.parse(draft.amount));
+      destinationCents = draft.destinationAmount == null
+          ? cents
+          : _cents(double.parse(draft.destinationAmount!));
     } else if (previous != null) {
       type = previous.type;
       sourceId = previous.accountId;
       destinationId = previous.destinationAccountId;
       cents = _cents(previous.amount);
+      destinationCents = previous.destinationAmount == null
+          ? cents
+          : _cents(previous.destinationAmount!);
     } else {
       return 0;
     }
@@ -79,7 +88,7 @@ class NegativeBalanceCheck {
       total += type == TransactionType.income ? cents : -cents;
     }
     if (type == TransactionType.transfer && destinationId == accountId) {
-      total += cents;
+      total += destinationCents;
     }
     return total;
   }

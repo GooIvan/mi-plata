@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../../../core/l10n/locale_controller.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../l10n/l10n.dart';
 import '../../auth/presentation/auth_providers.dart';
+import '../../currency/presentation/currency_providers.dart';
+import '../../currency/presentation/currency_ui.dart';
+import '../../currency/presentation/widgets/base_currency_sheet.dart';
 
 /// Ajustes de la app: el idioma y la sesión.
 class SettingsScreen extends ConsumerWidget {
@@ -18,6 +24,7 @@ class SettingsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final auth = ref.watch(authRepositoryProvider);
     final selected = ref.watch(localeControllerProvider)?.languageCode;
+    final base = ref.watch(currencyConverterProvider).value?.base;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
@@ -54,6 +61,43 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 24, 0, 4),
+            child: Text(
+              l10n.settingsCurrency,
+              style: theme.textTheme.titleMedium,
+            ),
+          ),
+          Card(
+            margin: EdgeInsets.zero,
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.payments_outlined),
+                  title: Text(l10n.settingsBaseCurrency),
+                  subtitle: base == null
+                      ? null
+                      : Text(
+                          l10n.settingsBaseCurrencyValue(
+                            base,
+                            currencyName(l10n, base),
+                          ),
+                        ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: base == null
+                      ? null
+                      : () => showBaseCurrencySheet(context),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.currency_exchange),
+                  title: Text(l10n.settingsExchangeRates),
+                  subtitle: Text(l10n.settingsExchangeRatesHelp),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.rates),
+                ),
+              ],
             ),
           ),
           Padding(

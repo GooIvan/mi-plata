@@ -68,17 +68,17 @@ void main() {
 
   group('formatMoney', () {
     test('usa punto para miles y omite los decimales si no los hay', () {
-      expect(normalized(formats.money(1500000)), r'$1.500.000');
-      expect(normalized(formats.money(0)), r'$0');
-      expect(normalized(formats.money(25000)), r'$25.000');
+      expect(normalized(formats.money(1500000, currency: 'COP')), r'$1.500.000');
+      expect(normalized(formats.money(0, currency: 'COP')), r'$0');
+      expect(normalized(formats.money(25000, currency: 'COP')), r'$25.000');
     });
 
     test('muestra los centavos con coma cuando existen', () {
-      expect(normalized(formats.money(1250000.5)), r'$1.250.000,50');
+      expect(normalized(formats.money(1250000.5, currency: 'COP')), r'$1.250.000,50');
     });
 
     test('los negativos llevan signo menos', () {
-      expect(normalized(formats.money(-350000)), r'-$350.000');
+      expect(normalized(formats.money(-350000, currency: 'COP')), r'-$350.000');
     });
   });
 

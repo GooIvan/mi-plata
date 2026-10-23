@@ -12,6 +12,7 @@ import '../../../transactions/domain/negative_balance_check.dart';
 import '../../../transactions/domain/transaction_draft.dart';
 import '../../../transactions/domain/transaction_type.dart';
 import '../../../transactions/presentation/negative_balance_dialog.dart';
+import '../../../currency/domain/currency.dart';
 import '../../domain/debt.dart';
 import '../../domain/debt_direction.dart';
 import '../../../transactions/domain/transaction_validators.dart';
@@ -184,11 +185,12 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                 l10n,
                 value,
                 remaining: debt.remaining,
+                currency: debt.currency,
               ),
               decoration: InputDecoration(
                 labelText: l10n.debtsPaymentAmountLabel,
                 hintText: l10n.debtsPaymentAmountHint,
-                prefixText: r'$ ',
+                prefixText: '${currencySymbol(debt.currency)} ',
                 border: const OutlineInputBorder(),
                 suffixIcon: TextButton(
                   onPressed: _saving

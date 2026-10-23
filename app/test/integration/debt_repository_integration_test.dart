@@ -98,8 +98,8 @@ void main() {
         accounts = AccountRepository(ana);
         transactions = TransactionRepository(ana);
 
-        await accounts.create(name: 'Bancolombia', type: AccountType.bank, initialBalance: '1000000');
-        await accounts.create(name: 'Efectivo', type: AccountType.cash, initialBalance: '50000');
+        await accounts.create(name: 'Bancolombia', type: AccountType.bank, initialBalance: '1000000', currency: 'COP');
+        await accounts.create(name: 'Efectivo', type: AccountType.cash, initialBalance: '50000', currency: 'COP');
         final all = await accounts.fetchAll();
         bank = all.firstWhere((a) => a.name == 'Bancolombia');
         cash = all.firstWhere((a) => a.name == 'Efectivo');

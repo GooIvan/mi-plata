@@ -837,5 +837,187 @@
         "type": "String"
       }
     }
-  }
+  },
+  "currencyNameCop": "Peso colombiano",
+  "currencyNameUsd": "Dólar estadounidense",
+  "currencyNameEur": "Euro",
+  "currencyNameMxn": "Peso mexicano",
+  "currencyNameArs": "Peso argentino",
+  "currencyNameBrl": "Real brasileño",
+  "currencyNameClp": "Peso chileno",
+  "currencyNamePen": "Sol peruano",
+  "currencyNameGbp": "Libra esterlina",
+  "currencyNameCad": "Dólar canadiense",
+  "currencyLabel": "Moneda",
+  "currencyOption": "{code} · {name}",
+  "@currencyOption": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyMissingRates": "Sin tasa de cambio para {currencies}: no se incluye en el total.",
+  "@currencyMissingRates": {
+    "placeholders": {
+      "currencies": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyMissingRatesAction": "Definir",
+  "settingsCurrency": "Moneda",
+  "settingsBaseCurrency": "Moneda base",
+  "settingsBaseCurrencyValue": "{code} · {name}",
+  "@settingsBaseCurrencyValue": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsExchangeRates": "Tasas de cambio",
+  "settingsExchangeRatesHelp": "Cuánto vale cada moneda en tu moneda base",
+  "baseCurrencyTitle": "Moneda base",
+  "baseCurrencyIntro": "Todo tu dinero, tus resúmenes y tus presupuestos se muestran en esta moneda.",
+  "baseCurrencyRateLabel": "1 {next} vale ({previous})",
+  "@baseCurrencyRateLabel": {
+    "placeholders": {
+      "next": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "baseCurrencyRateHelp": "Hace falta para pasar tus tasas y presupuestos a {next}.",
+  "@baseCurrencyRateHelp": {
+    "placeholders": {
+      "next": {
+        "type": "String"
+      }
+    }
+  },
+  "baseCurrencyChangeButton": "Cambiar moneda base",
+  "ratesTitle": "Tasas de cambio",
+  "ratesIntro": "Para sumar el dinero de tus cuentas en otras monedas, define cuánto vale cada una en {base}. Los totales usan la tasa de hoy.",
+  "@ratesIntro": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesEmpty": "No tienes cuentas ni deudas en otras monedas.\nCuando las tengas, define aquí sus tasas.",
+  "ratesNoRate": "Sin tasa",
+  "ratesOneEquals": "1 {currency} = {amount}",
+  "@ratesOneEquals": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesUpdatedToday": "Actualizada hoy",
+  "ratesUpdatedYesterday": "Actualizada ayer",
+  "ratesUpdatedDaysAgo": "Actualizada hace {days} días",
+  "@ratesUpdatedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "ratesAdd": "Agregar tasa",
+  "ratesFormTitle": "Tasa de {currency}",
+  "@ratesFormTitle": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesFormAmountLabel": "1 {currency} vale",
+  "@ratesFormAmountLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesFormHint": "Ej: 4.000",
+  "ratesFormInvalid": "Escribe una tasa mayor que cero. Ejemplo: 4.012,5",
+  "ratesFormRemove": "Quitar la tasa",
+  "ratesFormChooseCurrency": "Elige una moneda",
+  "ratesErrorInvalid": "Revisa la tasa: tiene que ser mayor que cero.",
+  "accountsCurrencyLocked": "La moneda de una cuenta no se puede cambiar.",
+  "accountsRateLabel": "1 {currency} vale (opcional)",
+  "@accountsRateLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsRateHelp": "Sin tasa, esta cuenta no suma al dinero total.",
+  "transactionsAmountOut": "Monto que sale ({currency})",
+  "@transactionsAmountOut": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsAmountIn": "Monto que llega ({currency})",
+  "@transactionsAmountIn": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsImpliedRate": "1 {from} = {rate} {to}",
+  "@transactionsImpliedRate": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsReceives": "recibe {amount}",
+  "@transactionsReceives": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryConvertedNote": "Los montos en otras monedas se pasan a {base} con la tasa de hoy.",
+  "@summaryConvertedNote": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "dbErrorRateForBaseCurrency": "La moneda base no necesita tasa de cambio",
+  "dbErrorBaseRateRequired": "Hace falta la tasa de la moneda nueva para convertir tus tasas y presupuestos",
+  "dbErrorTransferDestinationRequired": "Una transferencia entre monedas distintas necesita el monto que llega",
+  "dbErrorTransferDestinationUnexpected": "El monto que llega solo se indica en transferencias entre monedas distintas"
 }

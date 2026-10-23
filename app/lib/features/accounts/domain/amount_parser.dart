@@ -14,7 +14,16 @@ class AmountParser {
   static final _ignored = RegExp(r'[\s$]');
 
   /// Devuelve null si el texto no es un monto válido. Un texto vacío vale 0.
-  static String? parse(String? input, Formats formats) {
+  ///
+  /// Los montos llevan hasta dos decimales y doce dígitos enteros; las tasas de
+  /// cambio piden más decimales y menos enteros (ver [maxDecimals] y
+  /// [integerDigits]).
+  static String? parse(
+    String? input,
+    Formats formats, {
+    int maxDecimals = 2,
+    int integerDigits = maxIntegerDigits,
+  }) {
     final text = (input ?? '').replaceAll(_ignored, '');
     if (text.isEmpty) return '0';
 
@@ -22,14 +31,14 @@ class AmountParser {
     final group = formats.decimalSeparator == ',' ? '.' : ',';
     final pattern = RegExp(
       '^(-)?(\\d{1,3}(?:${RegExp.escape(group)}\\d{3})+|\\d+)'
-      '(?:$decimal(\\d{1,2}))?\$',
+      '(?:$decimal(\\d{1,$maxDecimals}))?\$',
     );
 
     final match = pattern.firstMatch(text);
     if (match == null) return null;
 
     final integer = match.group(2)!.replaceAll(group, '');
-    if (integer.length > maxIntegerDigits) return null;
+    if (integer.length > integerDigits) return null;
 
     final sign = match.group(1) ?? '';
     final decimals = match.group(3);

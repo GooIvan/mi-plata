@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/state_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../currency/presentation/currency_providers.dart';
 import '../domain/account.dart';
 import 'account_error_message.dart';
 import 'accounts_providers.dart';
@@ -119,6 +120,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
         final account = visible[index];
         return AccountTile(
           account: account,
+          baseCurrency: ref.watch(currencyConverterProvider).value?.base,
           onEdit: () => showAccountForm(context, account: account),
           onToggleArchived: () =>
               _setArchived(account, archived: !account.isArchived),

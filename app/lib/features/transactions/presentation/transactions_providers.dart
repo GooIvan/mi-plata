@@ -61,6 +61,14 @@ final accountNamesProvider = Provider.autoDispose<Map<String, String>>((ref) {
   return {for (final account in accounts) account.id: account.name};
 });
 
+/// La moneda de cada cuenta por id: un movimiento está en la de su cuenta.
+final accountCurrenciesProvider = Provider.autoDispose<Map<String, String>>((
+  ref,
+) {
+  final accounts = ref.watch(accountsProvider).value ?? const <Account>[];
+  return {for (final account in accounts) account.id: account.currency};
+});
+
 final categoryNamesProvider = Provider.autoDispose<Map<String, String>>((ref) {
   final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
   return {for (final category in categories) category.id: category.name};

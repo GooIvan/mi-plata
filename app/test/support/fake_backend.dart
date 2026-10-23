@@ -6,6 +6,8 @@ import 'package:mi_plata/features/categories/data/category_repository.dart';
 import 'package:mi_plata/features/categories/domain/category.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
 import 'package:mi_plata/features/accounts/domain/account.dart';
+import 'package:mi_plata/features/currency/data/currency_repository.dart';
+import 'package:mi_plata/features/currency/domain/exchange_rate.dart';
 import 'package:mi_plata/features/debts/data/debt_repository.dart';
 import 'package:mi_plata/features/debts/domain/debt.dart';
 import 'package:mi_plata/features/debts/domain/debt_direction.dart';
@@ -38,6 +40,7 @@ Transaction testTransaction(
   required double amount,
   required DateTime date,
   String? description,
+  double? destinationAmount,
 }) => Transaction(
   id: id,
   type: type,
@@ -45,6 +48,7 @@ Transaction testTransaction(
   destinationAccountId: destinationAccountId,
   categoryId: categoryId,
   amount: amount,
+  destinationAmount: destinationAmount,
   date: date,
   description: description,
 );
@@ -230,6 +234,9 @@ class FakeTransactionRepository implements TransactionRepository {
     destinationAccountId: draft.destinationAccountId,
     categoryId: draft.categoryId,
     amount: double.parse(draft.amount),
+    destinationAmount: draft.destinationAmount == null
+        ? null
+        : double.parse(draft.destinationAmount!),
     date: draft.date,
     description: draft.description,
   );
@@ -238,9 +245,14 @@ class FakeTransactionRepository implements TransactionRepository {
 /// Imita la vista `v_monthly_totals`: agrupa por mes, tipo y categoría, y deja
 /// fuera las transferencias.
 class FakeSummaryRepository implements SummaryRepository {
-  FakeSummaryRepository(this.transactions);
+  FakeSummaryRepository(this.transactions, [this.currencyOf = _cop]);
 
   final List<Transaction> transactions;
+
+  /// La moneda de una cuenta (por id): la de sus movimientos.
+  final String Function(String accountId) currencyOf;
+
+  static String _cop(String accountId) => 'COP';
   Object? error;
   final requests = <({DateTime from, DateTime to})>[];
 
@@ -257,13 +269,14 @@ class FakeSummaryRepository implements SummaryRepository {
     await gate?.future;
     if (error != null) throw error!;
 
-    final totals = <(DateTime, TransactionType, String?), (double, int)>{};
+    final totals =
+        <(DateTime, String, TransactionType, String?), (double, int)>{};
     for (final t in transactions) {
       if (t.type == TransactionType.transfer) continue;
       final month = DateTime(t.date.year, t.date.month);
       if (month.isBefore(from) || month.isAfter(to)) continue;
 
-      final key = (month, t.type, t.categoryId);
+      final key = (month, currencyOf(t.accountId), t.type, t.categoryId);
       final (sum, count) = totals[key] ?? (0.0, 0);
       totals[key] = (sum + t.amount, count + 1);
     }
@@ -302,25 +315,39 @@ class FakeSummaryRepository implements SummaryRepository {
           add(month, t.accountId, -cents);
         case TransactionType.transfer:
           add(month, t.accountId, -cents);
-          add(month, t.destinationAccountId!, cents);
+          add(
+            month,
+            t.destinationAccountId!,
+            t.destinationAmount == null
+                ? cents
+                : (t.destinationAmount! * 100).round(),
+          );
       }
     }
 
     return [
       for (final MapEntry(key: (month, accountId), value: cents) in flows.entries)
-        AccountFlow(month: month, accountId: accountId, currency: 'COP', cents: cents),
+        AccountFlow(
+          month: month,
+          accountId: accountId,
+          currency: currencyOf(accountId),
+          cents: cents,
+        ),
     ];
   }
 
   List<MonthlyTotal> _monthlyTotals(
-    Map<(DateTime, TransactionType, String?), (double, int)> totals,
+    Map<(DateTime, String, TransactionType, String?), (double, int)> totals,
   ) {
     return [
-      for (final MapEntry(key: (month, type, categoryId), value: (sum, count))
+      for (final MapEntry(
+            key: (month, currency, type, categoryId),
+            value: (sum, count),
+          )
           in totals.entries)
         MonthlyTotal(
           month: month,
-          currency: 'COP',
+          currency: currency,
           type: type,
           categoryId: categoryId,
           total: sum,
@@ -337,12 +364,14 @@ class _StoredDebt {
     required this.counterparty,
     required this.amount,
     required this.startDate,
+    this.currency = 'COP',
     this.dueDate,
     this.notes,
     this.isArchived = false,
   });
 
   final String id;
+  final String currency;
   final DebtDirection direction;
   String counterparty;
   double amount;
@@ -381,6 +410,7 @@ class FakeDebtRepository implements DebtRepository {
     String? notes,
     bool archived = false,
     String accountId = 'id-Bancolombia',
+    String currency = 'COP',
   }) {
     final debt = _StoredDebt(
       id: 'debt-${_next++}',
@@ -388,6 +418,7 @@ class FakeDebtRepository implements DebtRepository {
       counterparty: counterparty,
       amount: amount,
       startDate: startDate ?? DateTime(2026, 1, 1),
+      currency: currency,
       dueDate: dueDate,
       notes: notes,
       isArchived: archived,
@@ -444,7 +475,7 @@ class FakeDebtRepository implements DebtRepository {
           amount: debt.amount,
           paid: _paid(debt),
           remaining: debt.amount - _paid(debt),
-          currency: 'COP',
+          currency: debt.currency,
           startDate: debt.startDate,
           dueDate: debt.dueDate,
           notes: debt.notes,
@@ -488,6 +519,9 @@ class FakeDebtRepository implements DebtRepository {
       counterparty: draft.counterparty,
       amount: double.parse(draft.amount),
       startDate: draft.startDate,
+      currency: accountId != null
+          ? _accounts.accounts.firstWhere((a) => a.id == accountId).currency
+          : draft.currency ?? 'COP',
       dueDate: draft.dueDate,
       notes: draft.notes,
     );
@@ -601,6 +635,20 @@ class FakeBudgetRepository implements BudgetRepository {
   /// Si se asigna, las consultas esperan a que se complete.
   Completer<void>? gate;
 
+  /// Cambia la moneda base: los montos pasan de la base de antes a la nueva
+  /// (1 nueva = [rate] viejas), como hace `set_base_currency`.
+  void rescale(double rate) {
+    for (var i = 0; i < rules.length; i++) {
+      final rule = rules[i];
+      rules[i] = BudgetRule(
+        id: rule.id,
+        categoryId: rule.categoryId,
+        month: rule.month,
+        cents: (rule.cents / rate).round(),
+      );
+    }
+  }
+
   @override
   Future<List<BudgetRule>> fetchAll() async {
     calls.add('fetchAll');
@@ -636,6 +684,114 @@ class FakeBudgetRepository implements BudgetRepository {
   }
 }
 
+/// Imita `user_settings`, `exchange_rates` y las funciones `set_exchange_rate` y
+/// `set_base_currency`.
+class FakeCurrencyRepository implements CurrencyRepository {
+  FakeCurrencyRepository({
+    this.base = 'COP',
+    List<ExchangeRate> rates = const [],
+    this.hasBudgets = _never,
+    this.rescaleBudgets = _ignore,
+  }) : rates = {for (final rate in rates) rate.currency: rate};
+
+  String base;
+  final Map<String, ExchangeRate> rates;
+
+  /// Si hay presupuestos que convertir al cambiar la base, y cómo convertirlos.
+  final bool Function() hasBudgets;
+  final void Function(double rate) rescaleBudgets;
+
+  static bool _never() => false;
+  static void _ignore(double rate) {}
+
+  /// Error que lanzarán todas las operaciones mientras no sea null.
+  Object? error;
+
+  final calls = <String>[];
+
+  /// Si se asigna, las consultas esperan a que se complete.
+  Completer<void>? gate;
+
+  Never _fail(String message, String code, String details) =>
+      throw PostgrestException(message: message, code: code, details: details);
+
+  @override
+  Future<String> fetchBaseCurrency() async {
+    calls.add('fetchBase');
+    await gate?.future;
+    if (error != null) throw error!;
+    return base;
+  }
+
+  @override
+  Future<List<ExchangeRate>> fetchRates() async {
+    calls.add('fetchRates');
+    await gate?.future;
+    if (error != null) throw error!;
+    return [...rates.values]..sort((a, b) => a.currency.compareTo(b.currency));
+  }
+
+  @override
+  Future<void> setRate(String currency, String rate) async {
+    calls.add('setRate:$currency:$rate');
+    if (error != null) throw error!;
+    if (currency == base) {
+      _fail(
+        'La moneda base no necesita tasa de cambio',
+        '23514',
+        'rate_for_base_currency',
+      );
+    }
+    rates[currency] = ExchangeRate(
+      currency: currency,
+      rate: double.parse(rate),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<void> deleteRate(String currency) async {
+    calls.add('deleteRate:$currency');
+    if (error != null) throw error!;
+    rates.remove(currency);
+  }
+
+  @override
+  Future<void> setBaseCurrency(String currency, {String? rate}) async {
+    calls.add('setBase:$currency:${rate ?? ''}');
+    if (error != null) throw error!;
+    if (currency == base) return;
+
+    final newRate = rate != null ? double.parse(rate) : rates[currency]?.rate;
+    if (newRate == null && (rates.isNotEmpty || hasBudgets())) {
+      _fail(
+        'Hace falta la tasa de la moneda nueva para convertir tus tasas y presupuestos',
+        '23514',
+        'base_rate_required',
+      );
+    }
+
+    rates.remove(currency);
+    final old = base;
+    base = currency;
+    if (newRate != null) {
+      rates.updateAll(
+        (code, r) => ExchangeRate(
+          currency: code,
+          rate: r.rate / newRate,
+          updatedAt: r.updatedAt,
+        ),
+      );
+      rates[old] = ExchangeRate(
+        currency: old,
+        rate: 1 / newRate,
+        updatedAt: DateTime.now(),
+      );
+      rescaleBudgets(newRate);
+    }
+  }
+}
+
 /// Cuentas, categorías y movimientos enlazados, como la base de datos real.
 class FakeBackend {
   factory FakeBackend({
@@ -643,16 +799,33 @@ class FakeBackend {
     List<Category> categories = const [],
     List<Transaction> transactions = const [],
     List<BudgetRule> budgets = const [],
+    String baseCurrency = 'COP',
+    List<ExchangeRate> rates = const [],
   }) {
     final shared = [...transactions];
     final accountsRepository = FakeAccountRepository(accounts, shared);
+    final budgetsRepository = FakeBudgetRepository(budgets);
     return FakeBackend._(
       accountsRepository,
       FakeTransactionRepository(shared),
       FakeCategoryRepository(categories),
-      FakeSummaryRepository(shared),
+      FakeSummaryRepository(
+        shared,
+        (accountId) =>
+            accountsRepository.accounts
+                .where((account) => account.id == accountId)
+                .map((account) => account.currency)
+                .firstOrNull ??
+            'COP',
+      ),
       FakeDebtRepository(shared, accountsRepository),
-      FakeBudgetRepository(budgets),
+      budgetsRepository,
+      FakeCurrencyRepository(
+        base: baseCurrency,
+        rates: rates,
+        hasBudgets: () => budgetsRepository.rules.isNotEmpty,
+        rescaleBudgets: budgetsRepository.rescale,
+      ),
     );
   }
 
@@ -663,6 +836,7 @@ class FakeBackend {
     this.summary,
     this.debts,
     this.budgets,
+    this.currency,
   );
 
   final FakeAccountRepository accounts;
@@ -671,4 +845,5 @@ class FakeBackend {
   final FakeSummaryRepository summary;
   final FakeDebtRepository debts;
   final FakeBudgetRepository budgets;
+  final FakeCurrencyRepository currency;
 }

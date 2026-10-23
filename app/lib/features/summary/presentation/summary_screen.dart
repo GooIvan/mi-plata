@@ -10,6 +10,9 @@ import '../../transactions/domain/transaction_type.dart';
 import '../../transactions/presentation/transaction_form_screen.dart';
 import '../../transactions/presentation/transactions_providers.dart';
 import '../../accounts/presentation/accounts_providers.dart';
+import '../../currency/domain/currency_converter.dart';
+import '../../currency/presentation/currency_providers.dart';
+import '../../currency/presentation/widgets/missing_rates_note.dart';
 import '../domain/balance_history.dart';
 import '../domain/month_summary.dart';
 import 'summary_colors.dart';
@@ -30,6 +33,8 @@ class _SummaryView {
     required this.previous,
     required this.trend,
     required this.hasAnyData,
+    required this.converter,
+    required this.missing,
   });
 
   final MonthSummary summary;
@@ -40,6 +45,13 @@ class _SummaryView {
 
   /// Falso si no hay un solo movimiento en todo el período consultado.
   final bool hasAnyData;
+
+  /// Las tasas con que se pasó todo a la moneda base.
+  final CurrencyConverter converter;
+
+  /// Las monedas con movimientos en el período que no se sumaron por no tener
+  /// tasa.
+  final Set<String> missing;
 }
 
 class SummaryScreen extends ConsumerStatefulWidget {
@@ -66,20 +78,38 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
   @override
   Widget build(BuildContext context) {
     final totals = ref.watch(monthlyTotalsProvider(_month));
+    final rates = ref.watch(currencyConverterProvider);
+    final loading = totals.isLoading || rates.isLoading;
 
-    if (totals.hasValue && !totals.isLoading) {
+    if (totals.hasValue && rates.hasValue && !loading) {
       final rows = totals.requireValue;
+      final converter = rates.requireValue;
       _shown = _SummaryView(
-        summary: SummaryCalculator.forMonth(rows, _month),
+        summary: SummaryCalculator.forMonth(rows, _month, converter),
         previous: SummaryCalculator.forMonth(
           rows,
           SummaryCalculator.addMonths(_month, -1),
+          converter,
         ),
-        trend: SummaryCalculator.trend(rows, _month, months: trendMonths),
+        trend: SummaryCalculator.trend(
+          rows,
+          _month,
+          converter,
+          months: trendMonths,
+        ),
         hasAnyData: rows.isNotEmpty,
+        converter: converter,
+        missing: SummaryCalculator.missingCurrencies(rows, converter),
       );
     }
-    final failed = totals.hasError && !totals.isLoading;
+    // El primer error de lo que se está pidiendo (los totales o las tasas).
+    final error = loading
+        ? null
+        : totals.hasError
+        ? totals.error
+        : rates.hasError
+        ? rates.error
+        : null;
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.summaryTitle)),
@@ -96,24 +126,27 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
           ),
           SizedBox(
             height: 3,
-            child: totals.isLoading && _shown != null
+            child: loading && _shown != null
                 ? const LinearProgressIndicator()
                 : null,
           ),
-          Expanded(child: _body(totals, failed)),
+          Expanded(child: _body(loading, error)),
         ],
       ),
     );
   }
 
-  Widget _body(AsyncValue<Object?> totals, bool failed) {
+  Widget _body(bool loading, Object? error) {
     final l10n = context.l10n;
-    if (failed) {
+    if (error != null) {
       return StateMessage(
         icon: Icons.cloud_off_outlined,
-        text: summaryErrorMessage(l10n, totals.error!),
+        text: summaryErrorMessage(l10n, error),
         actionLabel: l10n.commonRetry,
-        onAction: () => ref.invalidate(monthlyTotalsProvider(_month)),
+        onAction: () {
+          ref.invalidate(monthlyTotalsProvider(_month));
+          ref.invalidate(currencyConverterProvider);
+        },
       );
     }
 
@@ -130,7 +163,7 @@ class _SummaryScreenState extends ConsumerState<SummaryScreen> {
     }
 
     return Opacity(
-      opacity: totals.isLoading ? 0.5 : 1,
+      opacity: loading ? 0.5 : 1,
       child: _SummaryBody(
         view: view,
         month: _month,
@@ -184,16 +217,47 @@ class _SummaryBody extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final converter = view.converter;
+    // Los saldos de las otras monedas se pasan con la tasa de hoy.
+    // (Las que faltan en los movimientos ya se avisan arriba.)
+    final missing = BalanceHistory.missingCurrencies(
+      loaded,
+      converter,
+    ).difference(view.missing);
+    final hasForeign = loaded.any(
+      (account) => !account.isArchived && account.currency != converter.base,
+    );
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: BalanceHistoryCard(
-        points: BalanceHistory.compute(
-          accounts: loaded,
-          flows: flowRows,
-          end: month,
-          months: trendMonths,
-        ),
-        selectedMonth: month,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BalanceHistoryCard(
+            points: BalanceHistory.compute(
+              accounts: loaded,
+              flows: flowRows,
+              end: month,
+              converter: converter,
+              months: trendMonths,
+            ),
+            selectedMonth: month,
+            currency: converter.base,
+          ),
+          if (hasForeign || missing.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+              child: missing.isNotEmpty
+                  ? MissingRatesNote(currencies: missing)
+                  : Text(
+                      context.l10n.summaryConvertedNote(converter.base),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+            ),
+        ],
       ),
     );
   }
@@ -253,10 +317,14 @@ class _SummaryBody extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       children: [
+        if (view.missing.isNotEmpty) ...[
+          MissingRatesNote(currencies: view.missing),
+          const SizedBox(height: 12),
+        ],
         StatTile(
           hero: true,
           label: l10n.summaryBalanceOfMonth,
-          value: formats.money(balance / 100),
+          value: formats.money(balance / 100, currency: summary.currency),
           caption: caption,
           captionIcon: icon,
           captionIconColor: iconColor,
@@ -268,7 +336,10 @@ class _SummaryBody extends ConsumerWidget {
             Expanded(
               child: StatTile(
                 label: l10n.commonIncomes,
-                value: formats.money(summary.incomeCents / 100),
+                value: formats.money(
+                  summary.incomeCents / 100,
+                  currency: summary.currency,
+                ),
                 marker: colors.income,
                 caption: incomeComparison?.text,
                 captionIcon: incomeComparison?.icon,
@@ -282,7 +353,10 @@ class _SummaryBody extends ConsumerWidget {
             Expanded(
               child: StatTile(
                 label: l10n.commonExpenses,
-                value: formats.money(summary.expenseCents / 100),
+                value: formats.money(
+                  summary.expenseCents / 100,
+                  currency: summary.currency,
+                ),
                 marker: colors.expense,
                 caption: expenseComparison?.text,
                 captionIcon: expenseComparison?.icon,
@@ -297,7 +371,11 @@ class _SummaryBody extends ConsumerWidget {
         const SizedBox(height: 16),
         PaceCard(summary: summary, previous: previous, today: DateTime.now()),
         const SizedBox(height: 16),
-        MonthlyTrendChart(points: view.trend, selectedMonth: month),
+        MonthlyTrendChart(
+          points: view.trend,
+          selectedMonth: month,
+          currency: summary.currency,
+        ),
         const SizedBox(height: 16),
         _balanceHistory(context, ref, month),
         Card(
@@ -347,6 +425,7 @@ class _SummaryBody extends ConsumerWidget {
                   CategoryRanking(
                     shares: shares,
                     names: names,
+                    currency: summary.currency,
                     color: isExpense ? colors.expense : colors.income,
                     mutedColor: colors.axisLabel,
                     previousCents: isExpense

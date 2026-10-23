@@ -225,6 +225,7 @@ class _TransactionList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountNames = ref.watch(accountNamesProvider);
+    final accountCurrencies = ref.watch(accountCurrenciesProvider);
     final categoryNames = ref.watch(categoryNamesProvider);
     final theme = Theme.of(context);
 
@@ -264,6 +265,7 @@ class _TransactionList extends ConsumerWidget {
         return TransactionTile(
           transaction: transaction,
           accountNames: accountNames,
+          accountCurrencies: accountCurrencies,
           categoryNames: categoryNames,
           onTap: () => showTransactionForm(context, transaction: transaction),
         );

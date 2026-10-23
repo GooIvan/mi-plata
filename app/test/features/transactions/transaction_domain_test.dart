@@ -36,8 +36,26 @@ void main() {
       expect(transaction.destinationAccountId, 'a2');
       expect(transaction.categoryId, isNull);
       expect(transaction.amount, 200000.5);
+      expect(transaction.destinationAmount, isNull);
       expect(transaction.date, DateTime(2026, 10, 22));
       expect(transaction.description, isNull);
+    });
+
+    test('lee lo que llega en una transferencia entre monedas', () {
+      final transaction = Transaction.fromJson({
+        'id': 't2',
+        'type': 'transfer',
+        'account_id': 'a1',
+        'destination_account_id': 'a2',
+        'category_id': null,
+        'amount': 400000,
+        'destination_amount': 99.5,
+        'transaction_date': '2026-10-22',
+        'description': null,
+      });
+
+      expect(transaction.amount, 400000);
+      expect(transaction.destinationAmount, 99.5);
     });
 
     test('conoce los tres tipos de movimiento', () {
@@ -62,9 +80,24 @@ void main() {
         'destination_account_id': null,
         'category_id': null,
         'amount': '1500.50',
+        'destination_amount': null,
         'transaction_date': '2026-03-05',
         'description': null,
       });
+    });
+
+    test('una transferencia entre monedas manda lo que llega', () {
+      final json = TransactionDraft(
+        type: TransactionType.transfer,
+        accountId: 'a1',
+        destinationAccountId: 'a2',
+        amount: '400000',
+        destinationAmount: '99.50',
+        date: DateTime(2026, 3, 5),
+      ).toJson();
+
+      expect(json['amount'], '400000');
+      expect(json['destination_amount'], '99.50');
     });
   });
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/format/formats.dart';
 import '../../../../l10n/l10n.dart';
+import '../../../currency/domain/currency.dart';
 import '../../domain/transaction.dart';
 import '../../domain/transaction_type.dart';
 import '../transaction_type_ui.dart';
@@ -11,12 +12,16 @@ class TransactionTile extends StatelessWidget {
     super.key,
     required this.transaction,
     required this.accountNames,
+    required this.accountCurrencies,
     required this.categoryNames,
     required this.onTap,
   });
 
   final Transaction transaction;
   final Map<String, String> accountNames;
+
+  /// La moneda de cada cuenta: un movimiento está en la moneda de su cuenta.
+  final Map<String, String> accountCurrencies;
   final Map<String, String> categoryNames;
   final VoidCallback onTap;
 
@@ -34,8 +39,23 @@ class TransactionTile extends StatelessWidget {
     final hasDescription = description != null && description.isNotEmpty;
 
     final title = hasDescription ? description : (category ?? type.label(l10n));
+    final formats = context.formats;
+    final currency = accountCurrencies[transaction.accountId] ?? defaultCurrency;
+    final received = transaction.destinationAmount;
     final subtitle = type == TransactionType.transfer
-        ? '$account → $destination'
+        ? [
+            '$account → $destination',
+            // Entre monedas distintas, también lo que llegó.
+            if (received != null)
+              l10n.transactionsReceives(
+                formats.money(
+                  received,
+                  currency:
+                      accountCurrencies[transaction.destinationAccountId] ??
+                      defaultCurrency,
+                ),
+              ),
+          ].join(' · ')
         : [if (hasDescription && category != null) category, account].join(' · ');
 
     final (sign, color) = switch (type) {
@@ -47,9 +67,10 @@ class TransactionTile extends StatelessWidget {
     return ListTile(
       leading: CircleAvatar(child: Icon(type.icon)),
       title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
+      // Dos líneas: una transferencia entre monedas también dice lo que llegó.
+      subtitle: Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
       trailing: Text(
-        '$sign${context.formats.money(transaction.amount)}',
+        '$sign${formats.money(transaction.amount, currency: currency)}',
         style: theme.textTheme.titleMedium?.copyWith(color: color),
       ),
       onTap: onTap,

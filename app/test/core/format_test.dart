@@ -69,35 +69,41 @@ void main() {
 
   group('formatCompactMoney', () {
     test('abrevia miles y millones para los ejes', () {
-      expect(normalized(formats.compactMoney(0)), r'$0');
-      expect(normalized(formats.compactMoney(500000)), r'$500 mil');
-      expect(normalized(formats.compactMoney(1500000)), r'$1,5 M');
-      expect(normalized(formats.compactMoney(4000000)), r'$4 M');
+      expect(normalized(formats.compactMoney(0, currency: 'COP')), r'$0');
+      expect(normalized(formats.compactMoney(500000, currency: 'COP')), r'$500 mil');
+      expect(normalized(formats.compactMoney(1500000, currency: 'COP')), r'$1,5 M');
+      expect(normalized(formats.compactMoney(4000000, currency: 'COP')), r'$4 M');
     });
 
     test('un negativo lleva el signo antes del símbolo', () {
-      expect(normalized(formats.compactMoney(-500000)), r'-$500 mil');
-      expect(normalized(formats.compactMoney(-1500000)), r'-$1,5 M');
+      expect(normalized(formats.compactMoney(-500000, currency: 'COP')), r'-$500 mil');
+      expect(normalized(formats.compactMoney(-1500000, currency: 'COP')), r'-$1,5 M');
     });
   });
 
   group('formatMoney', () {
     test('el símbolo va antes y el punto separa miles', () {
-      expect(normalized(formats.money(1500000)), r'$1.500.000');
-      expect(normalized(formats.money(-350000)), r'-$350.000');
+      expect(normalized(formats.money(1500000, currency: 'COP')), r'$1.500.000');
+      expect(normalized(formats.money(-350000, currency: 'COP')), r'-$350.000');
     });
 
     test('los centavos solo aparecen si existen', () {
-      expect(normalized(formats.money(1250000.5)), r'$1.250.000,50');
-      expect(normalized(formats.money(0.1 + 0.2)), r'$0,30');
+      expect(normalized(formats.money(1250000.5, currency: 'COP')), r'$1.250.000,50');
+      expect(normalized(formats.money(0.1 + 0.2, currency: 'COP')), r'$0,30');
     });
 
     test('el ruido del punto flotante no genera centavos', () {
-      expect(normalized(formats.money(1500000.0000000002)), r'$1.500.000');
+      expect(normalized(formats.money(1500000.0000000002, currency: 'COP')), r'$1.500.000');
     });
 
-    test('otra moneda lleva su código', () {
-      expect(normalized(formats.money(1500, currency: 'USD')), 'USD 1.500');
+    test('otra moneda lleva su símbolo, que no se confunde con el del peso', () {
+      expect(normalized(formats.money(1500, currency: 'USD')), r'US$1.500');
+      expect(normalized(formats.money(1500, currency: 'EUR')), '€1.500');
+      expect(normalized(formats.money(1500, currency: 'MXN')), r'MX$1.500');
+    });
+
+    test('una moneda que no está en la lista lleva su código', () {
+      expect(normalized(formats.money(1500, currency: 'XYZ')), 'XYZ 1.500');
     });
   });
 
@@ -131,15 +137,15 @@ void main() {
     setUpAll(() async => en = await loadFormats('en'));
 
     test('el dinero lleva el símbolo antes, coma de miles y punto decimal', () {
-      expect(normalized(en.money(1500000)), r'$1,500,000');
-      expect(normalized(en.money(1250000.5)), r'$1,250,000.50');
-      expect(normalized(en.money(-350000)), r'-$350,000');
+      expect(normalized(en.money(1500000, currency: 'COP')), r'$1,500,000');
+      expect(normalized(en.money(1250000.5, currency: 'COP')), r'$1,250,000.50');
+      expect(normalized(en.money(-350000, currency: 'COP')), r'-$350,000');
     });
 
     test('el dinero abreviado de los ejes', () {
-      expect(normalized(en.compactMoney(500000)), r'$500K');
-      expect(normalized(en.compactMoney(1500000)), r'$1.5M');
-      expect(normalized(en.compactMoney(-500000)), r'-$500K');
+      expect(normalized(en.compactMoney(500000, currency: 'COP')), r'$500K');
+      expect(normalized(en.compactMoney(1500000, currency: 'COP')), r'$1.5M');
+      expect(normalized(en.compactMoney(-500000, currency: 'COP')), r'-$500K');
     });
 
     test('días: hoy, ayer, esta semana y otro año', () {

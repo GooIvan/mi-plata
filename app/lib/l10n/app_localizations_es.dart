@@ -1236,4 +1236,203 @@ class AppLocalizationsEs extends AppLocalizations {
   String debtsLoanDescriptionReceivable(String name) {
     return 'Préstamo a $name';
   }
+
+  @override
+  String get currencyNameCop => 'Peso colombiano';
+
+  @override
+  String get currencyNameUsd => 'Dólar estadounidense';
+
+  @override
+  String get currencyNameEur => 'Euro';
+
+  @override
+  String get currencyNameMxn => 'Peso mexicano';
+
+  @override
+  String get currencyNameArs => 'Peso argentino';
+
+  @override
+  String get currencyNameBrl => 'Real brasileño';
+
+  @override
+  String get currencyNameClp => 'Peso chileno';
+
+  @override
+  String get currencyNamePen => 'Sol peruano';
+
+  @override
+  String get currencyNameGbp => 'Libra esterlina';
+
+  @override
+  String get currencyNameCad => 'Dólar canadiense';
+
+  @override
+  String get currencyLabel => 'Moneda';
+
+  @override
+  String currencyOption(String code, String name) {
+    return '$code · $name';
+  }
+
+  @override
+  String currencyMissingRates(String currencies) {
+    return 'Sin tasa de cambio para $currencies: no se incluye en el total.';
+  }
+
+  @override
+  String get currencyMissingRatesAction => 'Definir';
+
+  @override
+  String get settingsCurrency => 'Moneda';
+
+  @override
+  String get settingsBaseCurrency => 'Moneda base';
+
+  @override
+  String settingsBaseCurrencyValue(String code, String name) {
+    return '$code · $name';
+  }
+
+  @override
+  String get settingsExchangeRates => 'Tasas de cambio';
+
+  @override
+  String get settingsExchangeRatesHelp =>
+      'Cuánto vale cada moneda en tu moneda base';
+
+  @override
+  String get baseCurrencyTitle => 'Moneda base';
+
+  @override
+  String get baseCurrencyIntro =>
+      'Todo tu dinero, tus resúmenes y tus presupuestos se muestran en esta moneda.';
+
+  @override
+  String baseCurrencyRateLabel(String next, String previous) {
+    return '1 $next vale ($previous)';
+  }
+
+  @override
+  String baseCurrencyRateHelp(String next) {
+    return 'Hace falta para pasar tus tasas y presupuestos a $next.';
+  }
+
+  @override
+  String get baseCurrencyChangeButton => 'Cambiar moneda base';
+
+  @override
+  String get ratesTitle => 'Tasas de cambio';
+
+  @override
+  String ratesIntro(String base) {
+    return 'Para sumar el dinero de tus cuentas en otras monedas, define cuánto vale cada una en $base. Los totales usan la tasa de hoy.';
+  }
+
+  @override
+  String get ratesEmpty =>
+      'No tienes cuentas ni deudas en otras monedas.\nCuando las tengas, define aquí sus tasas.';
+
+  @override
+  String get ratesNoRate => 'Sin tasa';
+
+  @override
+  String ratesOneEquals(String currency, String amount) {
+    return '1 $currency = $amount';
+  }
+
+  @override
+  String get ratesUpdatedToday => 'Actualizada hoy';
+
+  @override
+  String get ratesUpdatedYesterday => 'Actualizada ayer';
+
+  @override
+  String ratesUpdatedDaysAgo(int days) {
+    return 'Actualizada hace $days días';
+  }
+
+  @override
+  String get ratesAdd => 'Agregar tasa';
+
+  @override
+  String ratesFormTitle(String currency) {
+    return 'Tasa de $currency';
+  }
+
+  @override
+  String ratesFormAmountLabel(String currency) {
+    return '1 $currency vale';
+  }
+
+  @override
+  String get ratesFormHint => 'Ej: 4.000';
+
+  @override
+  String get ratesFormInvalid =>
+      'Escribe una tasa mayor que cero. Ejemplo: 4.012,5';
+
+  @override
+  String get ratesFormRemove => 'Quitar la tasa';
+
+  @override
+  String get ratesFormChooseCurrency => 'Elige una moneda';
+
+  @override
+  String get ratesErrorInvalid =>
+      'Revisa la tasa: tiene que ser mayor que cero.';
+
+  @override
+  String get accountsCurrencyLocked =>
+      'La moneda de una cuenta no se puede cambiar.';
+
+  @override
+  String accountsRateLabel(String currency) {
+    return '1 $currency vale (opcional)';
+  }
+
+  @override
+  String get accountsRateHelp =>
+      'Sin tasa, esta cuenta no suma al dinero total.';
+
+  @override
+  String transactionsAmountOut(String currency) {
+    return 'Monto que sale ($currency)';
+  }
+
+  @override
+  String transactionsAmountIn(String currency) {
+    return 'Monto que llega ($currency)';
+  }
+
+  @override
+  String transactionsImpliedRate(String from, String rate, String to) {
+    return '1 $from = $rate $to';
+  }
+
+  @override
+  String transactionsReceives(String amount) {
+    return 'recibe $amount';
+  }
+
+  @override
+  String summaryConvertedNote(String base) {
+    return 'Los montos en otras monedas se pasan a $base con la tasa de hoy.';
+  }
+
+  @override
+  String get dbErrorRateForBaseCurrency =>
+      'La moneda base no necesita tasa de cambio';
+
+  @override
+  String get dbErrorBaseRateRequired =>
+      'Hace falta la tasa de la moneda nueva para convertir tus tasas y presupuestos';
+
+  @override
+  String get dbErrorTransferDestinationRequired =>
+      'Una transferencia entre monedas distintas necesita el monto que llega';
+
+  @override
+  String get dbErrorTransferDestinationUnexpected =>
+      'El monto que llega solo se indica en transferencias entre monedas distintas';
 }

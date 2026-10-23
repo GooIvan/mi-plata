@@ -16,9 +16,13 @@ class BalanceHistoryCard extends StatefulWidget {
     super.key,
     required this.points,
     required this.selectedMonth,
+    required this.currency,
   });
 
   final List<BalancePoint> points;
+
+  /// La moneda de los montos (la base del usuario).
+  final String currency;
 
   /// El mes que se está mirando: su etiqueta va en negrita.
   final DateTime selectedMonth;
@@ -64,13 +68,17 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
             ),
             const SizedBox(height: 12),
             Text(
-              formats.money(last / 100),
+              formats.money(last / 100, currency: widget.currency),
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 2),
-            _DeltaLine(delta: delta, months: points.length),
+            _DeltaLine(
+              delta: delta,
+              months: points.length,
+              currency: widget.currency,
+            ),
             const SizedBox(height: 16),
             Semantics(
               label: l10n.summaryHistorySemantics(points.length),
@@ -101,7 +109,7 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
                           getTitlesWidget: (value, meta) => SideTitleWidget(
                             meta: meta,
                             child: Text(
-                              formats.compactMoney(value),
+                              formats.compactMoney(value, currency: widget.currency),
                               style: labelStyle,
                               maxLines: 1,
                               softWrap: false,
@@ -143,7 +151,7 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
                           for (final spot in spots)
                             LineTooltipItem(
                               '${formats.month(points[spot.x.toInt()].month)}\n'
-                              '${formats.money(spot.y)}',
+                              '${formats.money(spot.y, currency: widget.currency)}',
                               TextStyle(
                                 color: theme.colorScheme.onInverseSurface,
                                 fontSize: 12,
@@ -188,7 +196,8 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
                 ),
               ),
             ),
-            if (_showTable) _BalanceTable(points: points),
+            if (_showTable)
+              _BalanceTable(points: points, currency: widget.currency),
           ],
         ),
       ),
@@ -198,10 +207,15 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
 
 /// "▲ $320.000 más que hace 5 meses": cuánto cambió el dinero en la ventana.
 class _DeltaLine extends StatelessWidget {
-  const _DeltaLine({required this.delta, required this.months});
+  const _DeltaLine({
+    required this.delta,
+    required this.months,
+    required this.currency,
+  });
 
   final int delta;
   final int months;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -217,13 +231,19 @@ class _DeltaLine extends StatelessWidget {
         ? (
             Icons.arrow_upward,
             theme.colorScheme.primary,
-            l10n.summaryDeltaUp(formats.money(delta / 100), since),
+            l10n.summaryDeltaUp(
+              formats.money(delta / 100, currency: currency),
+              since,
+            ),
           )
         : delta < 0
         ? (
             Icons.arrow_downward,
             theme.colorScheme.error,
-            l10n.summaryDeltaDown(formats.money(-delta / 100), since),
+            l10n.summaryDeltaDown(
+              formats.money(-delta / 100, currency: currency),
+              since,
+            ),
           )
         : (Icons.remove, null, l10n.summaryDeltaSame(since));
 
@@ -238,9 +258,10 @@ class _DeltaLine extends StatelessWidget {
 }
 
 class _BalanceTable extends StatelessWidget {
-  const _BalanceTable({required this.points});
+  const _BalanceTable({required this.points, required this.currency});
 
   final List<BalancePoint> points;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -277,7 +298,7 @@ class _BalanceTable extends StatelessWidget {
                 style: theme.textTheme.bodySmall,
               ),
               Text(
-                formats.money(point.cents / 100),
+                formats.money(point.cents / 100, currency: currency),
                 textAlign: TextAlign.end,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontFeatures: const [FontFeature.tabularFigures()],

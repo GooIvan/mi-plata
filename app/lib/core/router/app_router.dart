@@ -11,6 +11,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/budgets/presentation/budgets_screen.dart';
 import '../../features/categories/presentation/categories_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
+import '../../features/currency/presentation/rates_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/debts/presentation/debts_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
@@ -59,6 +60,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.budgets,
         builder: (context, state) => const BudgetsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.rates,
+        builder: (context, state) => const RatesScreen(),
       ),
       GoRoute(
         path: AppRoutes.settings,

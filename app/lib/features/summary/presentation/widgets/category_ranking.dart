@@ -16,6 +16,7 @@ class CategoryRanking extends StatelessWidget {
     super.key,
     required this.shares,
     required this.names,
+    required this.currency,
     required this.color,
     required this.mutedColor,
     required this.previousCents,
@@ -26,6 +27,9 @@ class CategoryRanking extends StatelessWidget {
 
   final List<CategoryShare> shares;
   final Map<String, String> names;
+
+  /// La moneda de los montos (la base del usuario).
+  final String currency;
 
   /// El color de la serie (ingresos o gastos).
   final Color color;
@@ -87,7 +91,7 @@ class CategoryRanking extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      formats.money(share.cents / 100),
+                      formats.money(share.cents / 100, currency: currency),
                       style: theme.textTheme.titleSmall,
                     ),
                     SizedBox(

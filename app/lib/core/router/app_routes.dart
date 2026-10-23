@@ -11,6 +11,7 @@ class AppRoutes {
   static const debts = '/debts';
   static const budgets = '/budgets';
   static const settings = '/settings';
+  static const rates = '/rates';
 
   /// Rutas accesibles sin sesión.
   static const public = {login, register};

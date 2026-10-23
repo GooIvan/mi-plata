@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/format/formats.dart';
 import '../../../../core/widgets/error_banner.dart';
 import '../../../../l10n/l10n.dart';
+import '../../../currency/domain/currency.dart';
+import '../../../currency/presentation/currency_providers.dart';
 import '../../../accounts/domain/amount_parser.dart';
 import '../../../categories/domain/category.dart';
 import '../../../categories/domain/category_type.dart';
@@ -129,6 +131,8 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
+    final currency =
+        ref.watch(currencyConverterProvider).value?.base ?? defaultCurrency;
     final categories =
         ref.watch(categoriesProvider).value ?? const <Category>[];
     final fixed = widget.categoryId != null;
@@ -225,7 +229,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
               decoration: InputDecoration(
                 labelText: l10n.budgetsFormAmountLabel,
                 hintText: l10n.budgetsFormAmountHint,
-                prefixText: r'$ ',
+                prefixText: '${currencySymbol(currency)} ',
                 border: const OutlineInputBorder(),
               ),
             ),

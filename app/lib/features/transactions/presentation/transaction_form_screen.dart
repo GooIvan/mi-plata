@@ -9,8 +9,12 @@ import '../../../core/widgets/state_message.dart';
 import '../../../l10n/l10n.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/domain/amount_parser.dart';
+import '../../accounts/presentation/account_label.dart';
 import '../../accounts/presentation/accounts_providers.dart';
 import '../../budgets/presentation/budget_expense_alert.dart';
+import '../../currency/domain/currency.dart';
+import '../../currency/domain/currency_converter.dart';
+import '../../currency/presentation/currency_providers.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/domain/category_type.dart';
 import '../../categories/presentation/categories_providers.dart';
@@ -51,6 +55,7 @@ class TransactionFormScreen extends ConsumerStatefulWidget {
 class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amount = TextEditingController();
+  final _destinationAmount = TextEditingController();
   late final _description = TextEditingController(
     text: widget.transaction?.description,
   );
@@ -67,6 +72,19 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   bool get _isEditing => widget.transaction != null;
   bool get _isTransfer => _type == TransactionType.transfer;
 
+  /// Si es una transferencia entre cuentas de monedas distintas: entonces hay
+  /// un monto que sale y otro que llega.
+  bool _isCrossCurrency(List<Account> accounts) {
+    if (!_isTransfer) return false;
+    final source = accounts.where((a) => a.id == _accountId).firstOrNull;
+    final destination = accounts
+        .where((a) => a.id == _destinationId)
+        .firstOrNull;
+    return source != null &&
+        destination != null &&
+        source.currency != destination.currency;
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -80,6 +98,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
           transaction.amount,
           context.formats,
         );
+        final received = transaction.destinationAmount;
+        if (received != null) {
+          _destinationAmount.text = AmountParser.toInput(
+            received,
+            context.formats,
+          );
+        }
       }
     }
   }
@@ -87,6 +112,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   @override
   void dispose() {
     _amount.dispose();
+    _destinationAmount.dispose();
     _description.dispose();
     super.dispose();
   }
@@ -106,18 +132,24 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final description = _description.text.trim();
+    final accounts = ref.read(accountsProvider).value ?? const <Account>[];
+    final formats = context.formats;
     final draft = TransactionDraft(
       type: _type,
       accountId: _accountId!,
       destinationAccountId: _isTransfer ? _destinationId : null,
       categoryId: _isTransfer ? null : _categoryId,
-      amount: AmountParser.parse(_amount.text, context.formats)!,
+      amount: AmountParser.parse(_amount.text, formats)!,
+      // Solo una transferencia entre monedas distintas dice cuánto llega.
+      destinationAmount: _isCrossCurrency(accounts)
+          ? AmountParser.parse(_destinationAmount.text, formats)
+          : null,
       date: _date,
       description: description.isEmpty ? null : description,
     );
 
     final warnings = NegativeBalanceCheck.after(
-      accounts: ref.read(accountsProvider).value ?? const <Account>[],
+      accounts: accounts,
       draft: draft,
       previous: widget.transaction,
     );
@@ -314,13 +346,29 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         .where((account) => account.id != _accountId)
         .toList();
     final theme = Theme.of(context);
+    final formats = context.formats;
+    final source = accounts.where((a) => a.id == _accountId).firstOrNull;
+    final destination = accounts
+        .where((a) => a.id == _destinationId)
+        .firstOrNull;
+    final crossCurrency = _isCrossCurrency(accounts);
+    final baseCurrency = ref.watch(currencyConverterProvider).value?.base;
+    // El monto va en la moneda de la cuenta; mientras no hay cuenta, en la base.
+    final currency = source?.currency ?? baseCurrency ?? defaultCurrency;
+    final sent = AmountParser.parse(_amount.text, formats);
+    final received = AmountParser.parse(_destinationAmount.text, formats);
+    final impliedRate = !crossCurrency || sent == null || received == null
+        ? null
+        : CurrencyConverter.impliedRate(
+            fromCents: (double.parse(sent) * 100).round(),
+            toCents: (double.parse(received) * 100).round(),
+          );
 
+    // Las cuentas de otra moneda la dicen: así no se confunden en la lista.
     DropdownMenuItem<String> accountItem(Account account) => DropdownMenuItem(
       value: account.id,
       child: Text(
-        account.isArchived
-            ? l10n.accountsArchivedName(account.name)
-            : account.name,
+        accountLabel(l10n, account, baseCurrency: baseCurrency),
         overflow: TextOverflow.ellipsis,
       ),
     );
@@ -360,10 +408,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               textInputAction: TextInputAction.next,
               validator: (value) => TransactionValidators.amount(l10n, value),
               style: theme.textTheme.headlineSmall,
+              onChanged: crossCurrency ? (_) => setState(() {}) : null,
               decoration: InputDecoration(
-                labelText: l10n.commonAmount,
+                labelText: crossCurrency
+                    ? l10n.transactionsAmountOut(currency)
+                    : l10n.commonAmount,
                 hintText: l10n.transactionsAmountHint,
-                prefixText: r'$ ',
+                prefixText: '${currencySymbol(currency)} ',
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -435,6 +486,33 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   border: const OutlineInputBorder(),
                 ),
               ),
+            if (crossCurrency && destination != null) ...[
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _destinationAmount,
+                enabled: !_saving,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                textInputAction: TextInputAction.next,
+                validator: (value) => TransactionValidators.amount(l10n, value),
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.transactionsAmountIn(destination.currency),
+                  hintText: l10n.transactionsAmountHint,
+                  prefixText: '${currencySymbol(destination.currency)} ',
+                  // Lo que equivale a 1 de la moneda de origen, a la vista.
+                  helperText: impliedRate == null
+                      ? null
+                      : l10n.transactionsImpliedRate(
+                          currency,
+                          formats.rate(impliedRate),
+                          destination.currency,
+                        ),
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             InkWell(
               onTap: _saving ? null : _pickDate,

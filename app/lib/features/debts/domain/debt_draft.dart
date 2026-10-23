@@ -13,6 +13,7 @@ class DebtDraft {
     this.notes,
     this.accountId,
     this.description,
+    this.currency,
   });
 
   final DebtDirection direction;
@@ -29,6 +30,10 @@ class DebtDraft {
   /// lo escribe la app en el idioma del usuario. Sin él, la base usa el suyo.
   final String? description;
 
+  /// La moneda de la deuda cuando no se registra en una cuenta (con cuenta es
+  /// la de la cuenta). Null deja que la base use la moneda base del usuario.
+  final String? currency;
+
   /// Los parámetros de la función `create_debt`.
   Map<String, dynamic> toRpcParams() => {
     'p_direction': direction.dbValue,
@@ -39,5 +44,6 @@ class DebtDraft {
     'p_notes': notes,
     'p_account_id': accountId,
     'p_description': description,
+    'p_currency': currency,
   };
 }

@@ -13,9 +13,13 @@ class AccountTile extends StatelessWidget {
     required this.account,
     required this.onEdit,
     required this.onToggleArchived,
+    this.baseCurrency,
   });
 
   final Account account;
+
+  /// La moneda base: si la cuenta es de otra, se dice cuál.
+  final String? baseCurrency;
   final VoidCallback onEdit;
   final VoidCallback onToggleArchived;
 
@@ -31,9 +35,12 @@ class AccountTile extends StatelessWidget {
         leading: CircleAvatar(child: Icon(account.type.icon)),
         title: Text(account.name, maxLines: 1, overflow: TextOverflow.ellipsis),
         subtitle: Text(
-          account.isArchived
-              ? '${account.type.label(l10n)} · ${l10n.accountsArchivedTag}'
-              : account.type.label(l10n),
+          [
+            account.type.label(l10n),
+            if (baseCurrency != null && account.currency != baseCurrency)
+              account.currency,
+            if (account.isArchived) l10n.accountsArchivedTag,
+          ].join(' · '),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

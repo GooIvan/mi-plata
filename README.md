@@ -22,7 +22,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 
 ### Fase 3 — Idiomas, monedas, recurrentes y ahorro
 - [x] **Internacionalización**: español e inglés. La app sigue el idioma del teléfono (español si no lo tiene) y se puede cambiar en Ajustes. Montos, fechas, errores de la base de datos y categorías por defecto también se adaptan (ver [Idiomas](#-idiomas)).
-- [ ] **Soporte multimoneda**: moneda base, tasas de cambio y totales convertidos.
+- [x] **Soporte multimoneda**: cada cuenta tiene su moneda; todo se suma en una moneda base con tasas de cambio que defines tú, y las transferencias entre monedas dicen cuánto sale y cuánto llega (ver [Monedas](#-monedas)).
 - [ ] **Gastos recurrentes** (suscripciones, arriendo), generados por el servidor sin duplicarse.
 - [ ] **Metas de ahorro** con monto objetivo, fecha límite y progreso.
 
@@ -82,16 +82,18 @@ Cada módulo dentro de `features/` se organiza en capas:
 |---|---|
 | `accounts` | Dónde está el dinero: nombre, tipo, saldo inicial, moneda (`COP` por defecto) |
 | `categories` | Clasificación de movimientos, de tipo ingreso (`income`) o gasto (`expense`) |
-| `transactions` | Ingresos, gastos y transferencias (`income`, `expense`, `transfer`) asociados a una cuenta |
+| `transactions` | Ingresos, gastos y transferencias (`income`, `expense`, `transfer`) asociados a una cuenta; en una transferencia entre monedas, `destination_amount` es lo que llega |
 | `v_account_balances` | Vista que calcula el saldo actual de cada cuenta |
 | `debts` | Lo que debo (`payable`) o me deben (`receivable`): persona, monto, fechas y notas |
 | `debt_payments` | Enlaza cada deuda con los movimientos que son sus abonos |
 | `v_debt_balances` | Vista con lo pagado y lo pendiente de cada deuda |
 | `v_monthly_totals` | Vista con ingresos y gastos por mes, tipo, categoría y moneda (para el resumen) |
 | `v_monthly_account_flows` | Vista con lo que entró y salió de cada cuenta cada mes; con el saldo inicial reconstruye el dinero al cierre de cualquier mes |
+| `user_settings` | Preferencias del usuario: la moneda base (`COP` por defecto, también si no hay fila) |
+| `exchange_rates` | Cuánto vale 1 unidad de cada moneda en la moneda base; una tasa por moneda, sin historial |
 | `budgets` | Presupuesto mensual de una categoría de gasto, vigente desde un mes (monto 0 = sin presupuesto); solo se aceptan categorías de gasto |
 
-Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa.
+Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa. Lo mismo vale para `set_exchange_rate` y `set_base_currency`, que reexpresa las tasas y los presupuestos al cambiar la moneda base.
 
 **Principios de diseño:**
 
@@ -178,6 +180,19 @@ La app está en español e inglés. Los textos viven en `app/lib/l10n/app_es.arb
 - **Errores de la base de datos**: las validaciones de Postgres mandan un código estable en `detail` (por ejemplo `payment_exceeds_remaining`) y la app lo traduce con `core/errors/database_error.dart`. El mensaje en español se conserva como respaldo.
 - **Categorías por defecto**: el idioma viaja en los metadatos del registro (`language`) y la base crea las 13 categorías en ese idioma. Lo que cada usuario escribe (nombres, descripciones) no se traduce.
 - **Agregar un idioma**: un `app_xx.arb` nuevo, el código en `supportedLanguages` (`core/l10n/locale_controller.dart`), su opción en Ajustes, sus formatos en `Formats` y sus categorías en `create_default_categories()` (una migración nueva).
+
+---
+
+## 💱 Monedas
+
+Cada cuenta (y cada deuda) tiene su moneda, que se elige al crearla y no cambia. Las monedas que ofrece la app son COP, USD, EUR, MXN, ARS, BRL, CLP, PEN, GBP y CAD (la base de datos acepta cualquier código de tres letras).
+
+- **Moneda base** (Ajustes → Moneda): es en la que se suma todo — dinero total, resumen, evolución, presupuestos y deudas. Por defecto, el peso colombiano.
+- **Tasas de cambio** (Ajustes → Tasas de cambio): las defines tú, una por moneda ("1 USD vale $4.000"), con la fecha en que las cambiaste. No dependen de ningún servicio externo. Una moneda sin tasa no se suma y la app lo avisa con un atajo para definirla; nunca inventa un valor.
+- **Cambiar la base** reexpresa las tasas y los presupuestos en la moneda nueva; pide la tasa de la nueva si hay algo que convertir.
+- **Transferencias entre monedas** guardan dos montos (`amount` sale, `destination_amount` llega) y muestran la tasa que resulta. Entre cuentas de la misma moneda no hay segundo monto.
+- Los totales usan **la tasa de hoy**, también para meses pasados (no hay tasas históricas). Un movimiento siempre se ve en la moneda de su cuenta.
+- **Límites conocidos**: un abono tiene que salir de una cuenta en la moneda de la deuda, y los presupuestos están en la moneda base (un gasto en otra moneda cuenta con la tasa de hoy).
 
 ---
 

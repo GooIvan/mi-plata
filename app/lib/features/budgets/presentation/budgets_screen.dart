@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/format/formats.dart';
 import '../../../core/widgets/state_message.dart';
+import '../../currency/presentation/widgets/missing_rates_note.dart';
 import '../../../l10n/l10n.dart';
 import '../../summary/domain/month_summary.dart';
 import '../../summary/presentation/summary_providers.dart';
@@ -153,6 +154,11 @@ class _Content extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.only(bottom: 96),
       children: [
+        if (overview.missingCurrencies.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: MissingRatesNote(currencies: overview.missingCurrencies),
+          ),
         if (overview.hasBudgets) _OverviewCard(overview: overview),
         if (overview.hasBudgets) ...[
           Padding(
@@ -166,6 +172,7 @@ class _Content extends ConsumerWidget {
             BudgetProgressTile(
               name: nameOf(progress.categoryId),
               progress: progress,
+              currency: overview.currency,
               onTap: canEdit
                   ? () => showBudgetForm(
                       context,
@@ -194,7 +201,10 @@ class _Content extends ConsumerWidget {
                   ? Text(l10n.budgetsTapToDefine)
                   : null,
               trailing: Text(
-                context.formats.money(spending.spentCents / 100),
+                context.formats.money(
+                  spending.spentCents / 100,
+                  currency: overview.currency,
+                ),
                 style: theme.textTheme.titleMedium,
               ),
               // "Sin categoría" no tiene a quién ponerle un presupuesto.
@@ -240,13 +250,21 @@ class _OverviewCard extends StatelessWidget {
               Text(l10n.budgetsTotalTitle, style: theme.textTheme.labelLarge),
               const SizedBox(height: 4),
               Text(
-                formats.money(overview.totalSpentCents / 100),
+                formats.money(
+                  overview.totalSpentCents / 100,
+                  currency: overview.currency,
+                ),
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                l10n.budgetsTotalOf(formats.money(overview.totalLimitCents / 100)),
+                l10n.budgetsTotalOf(
+                  formats.money(
+                    overview.totalLimitCents / 100,
+                    currency: overview.currency,
+                  ),
+                ),
                 style: theme.textTheme.bodySmall,
               ),
               const SizedBox(height: 12),
@@ -270,6 +288,7 @@ class _OverviewCard extends StatelessWidget {
                         l10n,
                         status,
                         overview.totalRemainingCents,
+                        currency: overview.currency,
                       ),
                       style: theme.textTheme.bodyMedium,
                     ),

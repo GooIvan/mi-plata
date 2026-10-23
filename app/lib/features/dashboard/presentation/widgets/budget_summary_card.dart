@@ -43,14 +43,17 @@ class BudgetSummaryCard extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text.rich(
                         TextSpan(
-                          text: formats.money(overview.totalSpentCents / 100),
+                          text: formats.money(
+                            overview.totalSpentCents / 100,
+                            currency: overview.currency,
+                          ),
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                           children: [
                             TextSpan(
                               text:
-                                  ' ${l10n.budgetsOfLimit(formats.money(overview.totalLimitCents / 100))}',
+                                  ' ${l10n.budgetsOfLimit(formats.money(overview.totalLimitCents / 100, currency: overview.currency))}',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.normal,
@@ -85,6 +88,7 @@ class BudgetSummaryCard extends StatelessWidget {
                         l10n,
                         status,
                         overview.totalRemainingCents,
+                        currency: overview.currency,
                       ),
                       style: theme.textTheme.bodySmall,
                     ),

@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/format/formats.dart';
 import '../../../core/widgets/state_message.dart';
 import '../../../l10n/l10n.dart';
+import '../../currency/domain/converted_total.dart';
+import '../../currency/presentation/currency_providers.dart';
+import '../../currency/presentation/widgets/missing_rates_note.dart';
 import '../domain/debt.dart';
 import '../domain/debt_direction.dart';
 import '../domain/debt_totals.dart';
@@ -120,15 +123,22 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen>
     }
 
     final today = DateTime.now();
-    final total = DebtTotals.remainingCents(all, direction);
+    final converter = ref.watch(currencyConverterProvider).value;
+    final total = converter == null
+        ? null
+        : DebtTotals.remaining(all, direction, converter);
 
     return ListView(
       padding: const EdgeInsets.only(bottom: 88),
       children: [
-        _TotalHeader(
-          label: isPayable ? l10n.debtsTotalPayable : l10n.debtsTotalReceivable,
-          cents: total,
-        ),
+        if (total != null && converter != null)
+          _TotalHeader(
+            label: isPayable
+                ? l10n.debtsTotalPayable
+                : l10n.debtsTotalReceivable,
+            total: total,
+            currency: converter.base,
+          ),
         for (final debt in visible) ...[
           DebtTile(
             debt: debt,
@@ -147,10 +157,15 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen>
 }
 
 class _TotalHeader extends StatelessWidget {
-  const _TotalHeader({required this.label, required this.cents});
+  const _TotalHeader({
+    required this.label,
+    required this.total,
+    required this.currency,
+  });
 
   final String label;
-  final int cents;
+  final ConvertedTotal total;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -164,11 +179,15 @@ class _TotalHeader extends StatelessWidget {
           Text(label, style: theme.textTheme.labelLarge),
           const SizedBox(height: 2),
           Text(
-            context.formats.money(cents / 100),
+            context.formats.money(total.cents / 100, currency: currency),
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (!total.isComplete) ...[
+            const SizedBox(height: 4),
+            MissingRatesNote(currencies: total.missing),
+          ],
         ],
       ),
     );

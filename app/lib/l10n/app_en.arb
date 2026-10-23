@@ -822,5 +822,187 @@
         "type": "String"
       }
     }
-  }
+  },
+  "currencyNameCop": "Colombian peso",
+  "currencyNameUsd": "US dollar",
+  "currencyNameEur": "Euro",
+  "currencyNameMxn": "Mexican peso",
+  "currencyNameArs": "Argentine peso",
+  "currencyNameBrl": "Brazilian real",
+  "currencyNameClp": "Chilean peso",
+  "currencyNamePen": "Peruvian sol",
+  "currencyNameGbp": "Pound sterling",
+  "currencyNameCad": "Canadian dollar",
+  "currencyLabel": "Currency",
+  "currencyOption": "{code} · {name}",
+  "@currencyOption": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyMissingRates": "No exchange rate for {currencies}: not included in the total.",
+  "@currencyMissingRates": {
+    "placeholders": {
+      "currencies": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyMissingRatesAction": "Set rate",
+  "settingsCurrency": "Currency",
+  "settingsBaseCurrency": "Base currency",
+  "settingsBaseCurrencyValue": "{code} · {name}",
+  "@settingsBaseCurrencyValue": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsExchangeRates": "Exchange rates",
+  "settingsExchangeRatesHelp": "What each currency is worth in your base currency",
+  "baseCurrencyTitle": "Base currency",
+  "baseCurrencyIntro": "All your money, summaries and budgets are shown in this currency.",
+  "baseCurrencyRateLabel": "1 {next} is worth ({previous})",
+  "@baseCurrencyRateLabel": {
+    "placeholders": {
+      "next": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "baseCurrencyRateHelp": "Needed to convert your rates and budgets to {next}.",
+  "@baseCurrencyRateHelp": {
+    "placeholders": {
+      "next": {
+        "type": "String"
+      }
+    }
+  },
+  "baseCurrencyChangeButton": "Change base currency",
+  "ratesTitle": "Exchange rates",
+  "ratesIntro": "To add up the money in your accounts in other currencies, set what each one is worth in {base}. Totals use today's rate.",
+  "@ratesIntro": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesEmpty": "You have no accounts or debts in other currencies.\nWhen you do, set their rates here.",
+  "ratesNoRate": "No rate",
+  "ratesOneEquals": "1 {currency} = {amount}",
+  "@ratesOneEquals": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesUpdatedToday": "Updated today",
+  "ratesUpdatedYesterday": "Updated yesterday",
+  "ratesUpdatedDaysAgo": "Updated {days} days ago",
+  "@ratesUpdatedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "ratesAdd": "Add rate",
+  "ratesFormTitle": "{currency} rate",
+  "@ratesFormTitle": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesFormAmountLabel": "1 {currency} is worth",
+  "@ratesFormAmountLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesFormHint": "e.g. 4,000",
+  "ratesFormInvalid": "Enter a rate greater than zero. Example: 4,012.5",
+  "ratesFormRemove": "Remove the rate",
+  "ratesFormChooseCurrency": "Choose a currency",
+  "ratesErrorInvalid": "Check the rate: it must be greater than zero.",
+  "accountsCurrencyLocked": "An account's currency can't be changed.",
+  "accountsRateLabel": "1 {currency} is worth (optional)",
+  "@accountsRateLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsRateHelp": "Without a rate, this account isn't added to your total money.",
+  "transactionsAmountOut": "Amount sent ({currency})",
+  "@transactionsAmountOut": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsAmountIn": "Amount received ({currency})",
+  "@transactionsAmountIn": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsImpliedRate": "1 {from} = {rate} {to}",
+  "@transactionsImpliedRate": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsReceives": "receives {amount}",
+  "@transactionsReceives": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryConvertedNote": "Amounts in other currencies are converted to {base} at today's rate.",
+  "@summaryConvertedNote": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "dbErrorRateForBaseCurrency": "The base currency does not need an exchange rate",
+  "dbErrorBaseRateRequired": "The new currency needs a rate to convert your rates and budgets",
+  "dbErrorTransferDestinationRequired": "A transfer between different currencies needs the amount received",
+  "dbErrorTransferDestinationUnexpected": "The amount received is only given for transfers between different currencies"
 }

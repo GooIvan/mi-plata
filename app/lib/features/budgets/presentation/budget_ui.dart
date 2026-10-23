@@ -23,9 +23,13 @@ IconData budgetStatusIcon(BudgetStatus status) => switch (status) {
 String budgetStatusText(
   AppLocalizations l10n,
   BudgetStatus status,
-  int remainingCents,
-) {
-  final amount = Formats(l10n).money(remainingCents.abs() / 100);
+  int remainingCents, {
+  required String currency,
+}) {
+  final amount = Formats(l10n).money(
+    remainingCents.abs() / 100,
+    currency: currency,
+  );
   return switch (status) {
     BudgetStatus.ok => l10n.budgetsStatusOk(amount),
     BudgetStatus.near =>
@@ -40,11 +44,12 @@ String budgetStatusText(
 String budgetAlertMessage(
   AppLocalizations l10n,
   BudgetAlert alert,
-  String categoryName,
-) {
+  String categoryName, {
+  required String currency,
+}) {
   final formats = Formats(l10n);
-  final spent = formats.money(alert.spentAfterCents / 100);
-  final limit = formats.money(alert.limitCents / 100);
+  final spent = formats.money(alert.spentAfterCents / 100, currency: currency);
+  final limit = formats.money(alert.limitCents / 100, currency: currency);
 
   if (alert.status == BudgetStatus.over) {
     return l10n.budgetsAlertOver(categoryName, spent, limit);

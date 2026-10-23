@@ -8,6 +8,9 @@ import '../../accounts/domain/account.dart';
 import '../../accounts/domain/amount_parser.dart';
 import '../../accounts/presentation/accounts_providers.dart';
 import '../../accounts/presentation/widgets/account_dropdown.dart';
+import '../../currency/domain/currency.dart';
+import '../../currency/presentation/currency_providers.dart';
+import '../../currency/presentation/currency_ui.dart';
 import '../../transactions/domain/negative_balance_check.dart';
 import '../../transactions/domain/transaction_draft.dart';
 import '../../transactions/domain/transaction_type.dart';
@@ -65,12 +68,28 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
   late DateTime? _due = widget.debt?.dueDate;
   bool _registerMoney = false;
   String? _accountId;
+
+  /// La moneda elegida para una deuda sin cuenta; null es la moneda base.
+  String? _currency;
   bool _saving = false;
   bool _amountReady = false;
   String? _error;
 
   bool get _isEditing => widget.debt != null;
   bool get _isPayable => _direction == DebtDirection.payable;
+
+  /// La moneda de la deuda según lo que se eligió: la de la cuenta si el dinero
+  /// se registra en una; si no, la que se escogió (o la moneda base).
+  String _currencyFor(List<Account> accounts) {
+    if (_isEditing) return widget.debt!.currency;
+    if (_registerMoney) {
+      final account = accounts.where((a) => a.id == _accountId).firstOrNull;
+      if (account != null) return account.currency;
+    }
+    return _currency ??
+        ref.read(currencyConverterProvider).value?.base ??
+        defaultCurrency;
+  }
 
   @override
   void didChangeDependencies() {
@@ -122,7 +141,9 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
     final cents = (double.parse(AmountParser.parse(value, formats)!) * 100)
         .round();
     if (paid > 0 && cents < (paid * 100).round()) {
-      return l10n.debtsAmountBelowPaid(formats.money(paid));
+      return l10n.debtsAmountBelowPaid(
+        formats.money(paid, currency: widget.debt!.currency),
+      );
     }
     return null;
   }
@@ -145,6 +166,10 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
         dueDate: _due,
         notes: notes,
         accountId: _registerMoney ? _accountId : null,
+        // Con cuenta, la deuda es en la moneda de la cuenta.
+        currency: _registerMoney
+            ? null
+            : _currencyFor(ref.read(accountsProvider).value ?? const []),
         description: _isPayable
             ? context.l10n.debtsLoanDescriptionPayable(counterparty)
             : context.l10n.debtsLoanDescriptionReceivable(counterparty),
@@ -220,6 +245,7 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
     if (_registerMoney && _accountId == null && accounts.length == 1) {
       _accountId = accounts.single.id;
     }
+    final currency = _currencyFor(accounts);
 
     return Scaffold(
       appBar: AppBar(title: Text(_isEditing ? l10n.debtsEdit : l10n.debtsNew)),
@@ -261,6 +287,30 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              if (!_isEditing && !_registerMoney) ...[
+                DropdownButtonFormField<String>(
+                  initialValue: currency,
+                  isExpanded: true,
+                  items: [
+                    for (final option in supportedCurrencies)
+                      DropdownMenuItem(
+                        value: option.code,
+                        child: Text(
+                          currencyOptionLabel(l10n, option.code),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: _saving
+                      ? null
+                      : (code) => setState(() => _currency = code),
+                  decoration: InputDecoration(
+                    labelText: l10n.currencyLabel,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               TextFormField(
                 controller: _amount,
                 enabled: !_saving,
@@ -270,7 +320,7 @@ class _DebtFormScreenState extends ConsumerState<DebtFormScreen> {
                 decoration: InputDecoration(
                   labelText: l10n.debtsAmountLabel,
                   hintText: l10n.debtsAmountHint,
-                  prefixText: r'$ ',
+                  prefixText: '${currencySymbol(currency)} ',
                   border: const OutlineInputBorder(),
                 ),
               ),

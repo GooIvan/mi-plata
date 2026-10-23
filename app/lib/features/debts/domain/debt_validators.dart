@@ -47,6 +47,7 @@ class DebtValidators {
     AppLocalizations l10n,
     String? value, {
     required double remaining,
+    required String currency,
   }) {
     final error = TransactionValidators.amount(l10n, value);
     if (error != null) return error;
@@ -55,7 +56,9 @@ class DebtValidators {
     final cents = (double.parse(AmountParser.parse(value, formats)!) * 100)
         .round();
     if (cents > (remaining * 100).round()) {
-      return l10n.debtsPaymentExceeds(formats.money(remaining));
+      return l10n.debtsPaymentExceeds(
+        formats.money(remaining, currency: currency),
+      );
     }
     return null;
   }

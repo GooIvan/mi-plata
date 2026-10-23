@@ -6,6 +6,7 @@ import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 
 import '../../support/fake_account_repository.dart';
 import '../../support/fake_backend.dart';
+import '../../support/test_app.dart';
 
 AccountFlow flow(
   DateTime month,
@@ -72,6 +73,7 @@ void main() {
         flows: flows,
         end: m(2026, 4),
         months: 4,
+       converter: copConverter,
       );
 
       expect(points.map((p) => p.month), [m(2026, 1), m(2026, 2), m(2026, 3), m(2026, 4)]);
@@ -89,6 +91,7 @@ void main() {
         flows: flows,
         end: m(2026, 3),
         months: 2,
+       converter: copConverter,
       );
 
       // La ventana es feb-mar, pero enero ya había sumado 380.000.
@@ -102,6 +105,7 @@ void main() {
         flows: flows,
         end: m(2026, 2),
         months: 2,
+       converter: copConverter,
       );
 
       expect(centsOf(points), [143000000, 140000000]); // sin los -25.000 de marzo
@@ -116,6 +120,7 @@ void main() {
         ],
         end: m(2026, 2),
         months: 2,
+       converter: copConverter,
       );
 
       expect(centsOf(points), [105000000, 105000000]);
@@ -131,6 +136,7 @@ void main() {
         ],
         end: m(2026, 2),
         months: 2,
+       converter: copConverter,
       );
 
       // Igual que el panel: las archivadas no cuentan, ni su saldo inicial.
@@ -156,13 +162,14 @@ void main() {
         ],
         end: m(2026, 1),
         months: 1,
+       converter: copConverter,
       );
 
       expect(centsOf(points), [100010000]);
     });
 
     test('sin cuentas, todo en cero', () {
-      final points = BalanceHistory.compute(accounts: [], flows: [], end: m(2026, 5));
+      final points = BalanceHistory.compute(accounts: [], flows: [], end: m(2026, 5), converter: copConverter);
 
       expect(points, hasLength(6));
       expect(centsOf(points).toSet(), {0});
@@ -174,6 +181,7 @@ void main() {
         flows: [flow(m(2025, 12), bank.id, 5000)],
         end: m(2026, 2),
         months: 4,
+       converter: copConverter,
       );
 
       expect(points.map((p) => p.month), [m(2025, 11), m(2025, 12), m(2026, 1), m(2026, 2)]);
@@ -189,6 +197,7 @@ void main() {
         flows: [],
         end: m(2026, 1),
         months: 1,
+       converter: copConverter,
       );
 
       expect(points.single.cents, 30);
@@ -219,7 +228,7 @@ void main() {
       final flows = await backend.summary.fetchAccountFlows();
       final active = accounts.where((a) => !a.isArchived);
 
-      final points = BalanceHistory.compute(accounts: accounts, flows: flows, end: now);
+      final points = BalanceHistory.compute(accounts: accounts, flows: flows, end: now, converter: copConverter);
 
       expect(
         points.last.cents,

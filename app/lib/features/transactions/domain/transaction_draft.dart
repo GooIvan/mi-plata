@@ -9,6 +9,7 @@ class TransactionDraft {
     this.destinationAccountId,
     this.categoryId,
     required this.amount,
+    this.destinationAmount,
     required this.date,
     this.description,
   });
@@ -20,6 +21,10 @@ class TransactionDraft {
 
   /// Decimal exacto en texto, como lo devuelve `AmountParser`.
   final String amount;
+
+  /// Lo que llega al destino cuando las dos cuentas son de monedas distintas;
+  /// null si llega lo mismo que sale. También un decimal exacto en texto.
+  final String? destinationAmount;
   final DateTime date;
   final String? description;
 
@@ -31,6 +36,7 @@ class TransactionDraft {
     'destination_account_id': destinationAccountId,
     'category_id': categoryId,
     'amount': amount,
+    'destination_amount': destinationAmount,
     'transaction_date': toDbDate(date),
     'description': description,
   };

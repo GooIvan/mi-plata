@@ -19,6 +19,7 @@ Future<void> pump(WidgetTester tester, List<int> pesos) => tester.pumpWidget(
         child: BalanceHistoryCard(
           points: months(pesos),
           selectedMonth: DateTime(2026, 10),
+          currency: 'COP',
         ),
       ),
     ),

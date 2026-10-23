@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mi_plata/features/currency/domain/currency_converter.dart';
+import 'package:mi_plata/features/currency/domain/exchange_rate.dart';
 import 'package:mi_plata/features/debts/domain/debt.dart';
 import 'package:mi_plata/features/debts/domain/debt_direction.dart';
 import 'package:mi_plata/features/debts/domain/debt_draft.dart';
@@ -238,25 +240,44 @@ void main() {
     ];
 
     test('suma lo pendiente de cada sentido, sin archivadas ni saldadas', () {
-      expect(DebtTotals.remainingCents(debts, payable), 38000000);
-      expect(DebtTotals.remainingCents(debts, receivable), 25000000);
+      expect(DebtTotals.remaining(debts, payable, copConverter).cents, 38000000);
+      expect(DebtTotals.remaining(debts, receivable, copConverter).cents, 25000000);
     });
 
-    test('solo cuenta la moneda pedida', () {
-      expect(DebtTotals.remainingCents(debts, payable, currency: 'USD'), 50000);
+    test('una moneda con tasa se suma ya convertida; sin tasa, se aparta', () {
+      final usd = [
+        debt(counterparty: 'A', amount: 100, currency: 'USD'),
+        debt(counterparty: 'B', amount: 200, currency: 'EUR'),
+      ];
+      final converter = CurrencyConverter(
+        base: 'COP',
+        rates: {
+          'USD': ExchangeRate(
+            currency: 'USD',
+            rate: 4000,
+            updatedAt: DateTime(2026, 10, 1),
+          ),
+        },
+      );
+
+      final total = DebtTotals.remaining(usd, payable, converter);
+
+      expect(total.cents, 40000000); // US$100 a $4.000
+      expect(total.missing, {'EUR'});
+      expect(total.isComplete, isFalse);
     });
 
     test('sin deudas es cero', () {
-      expect(DebtTotals.remainingCents(const [], payable), 0);
+      expect(DebtTotals.remaining(const [], payable, copConverter).cents, 0);
     });
 
     test('suma en centavos sin error de punto flotante', () {
-      final cents = DebtTotals.remainingCents([
+      final total = DebtTotals.remaining([
         debt(counterparty: 'X', amount: 0.1),
         debt(counterparty: 'Y', amount: 0.2),
-      ], payable);
+      ], payable, copConverter);
 
-      expect(cents, 30);
+      expect(total.cents, 30);
     });
   });
 
@@ -293,7 +314,12 @@ void main() {
 
     group('abono', () {
       String? check(String? value) =>
-          DebtValidators.paymentAmount(l10n, value, remaining: 300000);
+          DebtValidators.paymentAmount(
+            l10n,
+            value,
+            remaining: 300000,
+            currency: 'COP',
+          );
 
       test('acepta hasta lo que falta, inclusive', () {
         expect(check('100.000'), isNull);
@@ -333,6 +359,7 @@ void main() {
         'p_notes': null,
         'p_account_id': null,
         'p_description': null,
+        'p_currency': null,
       });
     });
 

@@ -46,8 +46,8 @@ void main() {
         repository = TransactionRepository(ana);
 
         final accounts = AccountRepository(ana);
-        await accounts.create(name: 'Bancolombia', type: AccountType.bank, initialBalance: '0');
-        await accounts.create(name: 'Efectivo', type: AccountType.cash, initialBalance: '0');
+        await accounts.create(name: 'Bancolombia', type: AccountType.bank, initialBalance: '0', currency: 'COP');
+        await accounts.create(name: 'Efectivo', type: AccountType.cash, initialBalance: '0', currency: 'COP');
         final list = await accounts.fetchAll();
         bank = list.firstWhere((a) => a.name == 'Bancolombia').id;
         cash = list.firstWhere((a) => a.name == 'Efectivo').id;

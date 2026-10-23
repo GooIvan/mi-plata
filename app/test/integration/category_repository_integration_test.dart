@@ -183,7 +183,7 @@ void main() {
         await accounts.create(
           name: 'Bancolombia',
           type: AccountType.bank,
-          initialBalance: '100000',
+          initialBalance: '100000', currency: 'COP',
         );
         final account = (await accounts.fetchAll()).single;
         final transporte = await named('Transporte');

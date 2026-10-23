@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
+import '../../features/currency/domain/currency.dart';
 import '../../l10n/l10n.dart';
 
 /// Los idiomas para los que hay que cargar datos de fecha al arrancar.
@@ -27,29 +28,36 @@ class Formats {
   String get decimalSeparator => _english ? '.' : ',';
 
   /// Una cifra corta para ejes de gráficos: "$1,5 M", "$500 mil", "-$500 mil".
-  String compactMoney(double value) {
+  String compactMoney(double value, {required String currency}) {
     final amount = NumberFormat.compact(
       locale: _numberLocale,
     ).format(value.abs());
-    return value < 0 ? '-\$$amount' : '\$$amount';
+    final symbol = currencySymbol(currency);
+    return value < 0 ? '-$symbol$amount' : '$symbol$amount';
   }
 
-  /// Da formato de moneda: "$1.500.000" (con centavos solo si los hay).
+  /// Da formato de moneda: "$1.500.000" (con centavos solo si los hay), o
+  /// "US$1.500" para otra moneda.
   ///
   /// El patrón es explícito porque el de `es_CO` en intl pone el símbolo al
   /// final ("1.500.000 $"), y en Colombia se escribe antes.
-  String money(double value, {String currency = 'COP'}) {
+  String money(double value, {required String currency}) {
     // Se redondea a centavos para que una suma como 0.1 + 0.2 no muestre ruido.
     final rounded = (value * 100).round() / 100;
     final hasCents = rounded != rounded.roundToDouble();
 
     return NumberFormat.currency(
       locale: _numberLocale,
-      symbol: currency == 'COP' ? r'$' : '$currency ',
+      symbol: currencySymbol(currency),
       customPattern: '¤#,##0.00',
       decimalDigits: hasCents ? 2 : 0,
     ).format(rounded);
   }
+
+  /// Una tasa de cambio con hasta seis decimales, sin ceros de sobra:
+  /// "4.012,5" o "0,00025".
+  String rate(double value) =>
+      NumberFormat('#,##0.######', _numberLocale).format(value);
 
   /// "Hoy", "Ayer", "Lunes 12 de octubre" o, de otro año, "12 de octubre de 2025".
   String day(DateTime date, {DateTime? today}) {

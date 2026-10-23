@@ -57,13 +57,17 @@ class PaceCard extends StatelessWidget {
               label: l10n.summaryDailyAverage,
               value: formats.money(
                 (pace.dailyAverageCents / 100).roundToDouble(),
+                currency: summary.currency,
               ),
             ),
             if (projected != null) ...[
               const SizedBox(height: 8),
               _Row(
                 label: l10n.summaryProjectedClose,
-                value: formats.money((projected / 100).roundToDouble()),
+                value: formats.money(
+                  (projected / 100).roundToDouble(),
+                  currency: summary.currency,
+                ),
               ),
             ],
             if (comparison != null) ...[
