@@ -20,14 +20,15 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 - [x] **Deudas**: lo que debo y lo que me deben, con registro de abonos. Cada abono es un movimiento real (gasto si debo, ingreso si me deben) y el préstamo inicial se puede registrar opcionalmente en una cuenta.
 - [x] **Presupuestos por categoría**: cuánto quiero gastar al mes en cada categoría de gasto y cómo voy (bien, cerca del límite desde el 80 %, o pasado). Un presupuesto rige desde el mes en que se define hasta que se cambie, así que subirlo no reescribe los meses anteriores, que solo se consultan. Aparece en el panel y avisa, sin bloquear, al registrar un gasto que llega al 80 % o supera el presupuesto.
 
-### Fase 3 — Ahorro
+### Fase 3 — Idiomas, monedas, recurrentes y ahorro
+- [ ] **Internacionalización**: español e inglés, con el idioma del teléfono por defecto y opción de cambiarlo dentro de la app.
+- [ ] **Soporte multimoneda**: moneda base, tasas de cambio y totales convertidos.
+- [ ] **Gastos recurrentes** (suscripciones, arriendo), generados por el servidor sin duplicarse.
 - [ ] **Metas de ahorro** con monto objetivo, fecha límite y progreso.
 
 ### Futuro
-- [ ] Gastos recurrentes (suscripciones, arriendo)
+- [ ] Modo sin conexión (primero consulta, luego registrar movimientos con cola de sincronización)
 - [ ] Importación de extractos bancarios (CSV)
-- [ ] Soporte multimoneda
-- [ ] Modo sin conexión
 - [ ] Versión web (Flutter Web)
 
 ---
