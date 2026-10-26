@@ -91,17 +91,19 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.only(bottom: 88),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
       itemCount: visible.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
+      separatorBuilder: (context, index) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final progress = visible[index];
-        return GoalTile(
-          progress: progress,
-          today: today,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => GoalDetailScreen(goalId: progress.goal.id),
+        return Card(
+          child: GoalTile(
+            progress: progress,
+            today: today,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => GoalDetailScreen(goalId: progress.goal.id),
+              ),
             ),
           ),
         );

@@ -253,7 +253,7 @@ class _TransactionList extends ConsumerWidget {
         final item = items[index];
         if (item is DateTime) {
           return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
             child: Text(
               context.formats.day(item),
               style: theme.textTheme.labelLarge?.copyWith(
@@ -264,12 +264,18 @@ class _TransactionList extends ConsumerWidget {
         }
 
         final transaction = item as Transaction;
-        return TransactionTile(
-          transaction: transaction,
-          accountNames: accountNames,
-          accountCurrencies: accountCurrencies,
-          categoryNames: categoryNames,
-          onTap: () => showTransactionForm(context, transaction: transaction),
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Card(
+            child: TransactionTile(
+              transaction: transaction,
+              accountNames: accountNames,
+              accountCurrencies: accountCurrencies,
+              categoryNames: categoryNames,
+              onTap: () =>
+                  showTransactionForm(context, transaction: transaction),
+            ),
+          ),
         );
       },
     );

@@ -98,9 +98,7 @@ class TotalBalanceCard extends StatelessWidget {
       _ => false,
     };
     // Un total en rojo se ve desde lejos: la tarjeta cambia de color.
-    final gradient = negative
-        ? [const Color(0xFFB3261E), const Color(0xFFE5484D)]
-        : finance.heroGradient;
+    final gradient = negative ? finance.heroLossGradient : finance.heroGradient;
 
     return Container(
       decoration: BoxDecoration(

@@ -115,17 +115,19 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.only(bottom: 88),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
       itemCount: visible.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
+      separatorBuilder: (context, index) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final account = visible[index];
-        return AccountTile(
-          account: account,
-          baseCurrency: ref.watch(currencyConverterProvider).value?.base,
-          onEdit: () => showAccountForm(context, account: account),
-          onToggleArchived: () =>
-              _setArchived(account, archived: !account.isArchived),
+        return Card(
+          child: AccountTile(
+            account: account,
+            baseCurrency: ref.watch(currencyConverterProvider).value?.base,
+            onEdit: () => showAccountForm(context, account: account),
+            onToggleArchived: () =>
+                _setArchived(account, archived: !account.isArchived),
+          ),
         );
       },
     );

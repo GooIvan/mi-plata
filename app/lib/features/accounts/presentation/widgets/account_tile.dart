@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/format/formats.dart';
+import '../../../../core/widgets/icon_badge.dart';
 import '../../../../l10n/l10n.dart';
 import '../../domain/account.dart';
 import '../account_type_ui.dart';
@@ -32,7 +33,11 @@ class AccountTile extends StatelessWidget {
     return Opacity(
       opacity: account.isArchived ? 0.6 : 1,
       child: ListTile(
-        leading: CircleAvatar(child: Icon(account.type.icon)),
+        contentPadding: const EdgeInsets.only(left: 16, right: 6),
+        leading: IconBadge(
+          icon: account.type.icon,
+          color: account.type.color(theme.brightness),
+        ),
         title: Text(account.name, maxLines: 1, overflow: TextOverflow.ellipsis),
         subtitle: Text(
           [
@@ -51,11 +56,14 @@ class AccountTile extends StatelessWidget {
                 currency: account.currency,
               ),
               style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
                 color: isNegative ? theme.colorScheme.error : null,
               ),
             ),
             PopupMenuButton<AccountMenuAction>(
               tooltip: l10n.commonOptions,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              iconSize: 20,
               onSelected: (action) => switch (action) {
                 AccountMenuAction.edit => onEdit(),
                 AccountMenuAction.toggleArchived => onToggleArchived(),

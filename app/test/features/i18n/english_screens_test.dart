@@ -888,7 +888,9 @@ void main() {
       }
 
       Future<void> phoneGoals(WidgetTester tester, [String? route]) async {
-        tester.view.physicalSize = const Size(360, 740);
+        // Estrecho como un teléfono, y alto: las metas son tarjetas y todas deben
+        // estar a la vista.
+        tester.view.physicalSize = const Size(360, 1300);
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
         await pumpMiPlata(tester, backend: _goalsBackend(), language: language);
