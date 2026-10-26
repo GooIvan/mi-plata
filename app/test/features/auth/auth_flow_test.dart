@@ -28,7 +28,7 @@ void main() {
     testWidgets('con sesión muestra el panel con el correo', (tester) async {
       await pumpApp(tester, FakeAuthRepository(signedInAs: 'ana@correo.com'));
 
-      expect(find.text('ana@correo.com'), findsOneWidget);
+      expect(find.byTooltip('ana@correo.com'), findsOneWidget);
       expect(button('Entrar'), findsNothing);
     });
 
@@ -82,7 +82,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repository.calls, ['signIn:ana@correo.com']);
-      expect(find.text('ana@correo.com'), findsOneWidget);
+      expect(find.byTooltip('ana@correo.com'), findsOneWidget);
       expect(button('Entrar'), findsNothing);
     });
 
@@ -184,7 +184,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repository.calls, ['signUp:ana@correo.com']);
-      expect(find.text('ana@correo.com'), findsOneWidget);
+      expect(find.byTooltip('ana@correo.com'), findsOneWidget);
     });
 
     testWidgets('el registro manda el idioma de la app', (tester) async {

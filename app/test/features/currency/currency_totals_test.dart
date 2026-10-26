@@ -109,7 +109,8 @@ void main() {
         FakeBackend(accounts: [testAccount('Dólares', balance: 100, currency: 'USD')]),
       );
 
-      expect(textLike(r'$0'), findsOneWidget);
+      // El total, y lo que entró y salió este mes (también en cero).
+      expect(textLike(r'$0'), findsNWidgets(3));
       expect(find.textContaining('Sin tasa de cambio para USD'), findsOneWidget);
     });
 
