@@ -7,7 +7,7 @@ import '../domain/transaction_filter.dart';
 import 'transactions_providers.dart';
 
 /// El filtro de la pantalla de movimientos. Vive mientras la pantalla está
-/// abierta: al volver a entrar, empieza sin filtros.
+/// abierta; como es una pestaña, se conserva al cambiar a otra y volver.
 final transactionFilterProvider =
     NotifierProvider.autoDispose<TransactionFilterNotifier, TransactionFilter>(
       TransactionFilterNotifier.new,

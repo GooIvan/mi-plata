@@ -20,6 +20,7 @@ import '../accounts_providers.dart';
 Future<void> showAccountForm(BuildContext context, {Account? account}) {
   return showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,

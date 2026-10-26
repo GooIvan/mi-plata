@@ -118,6 +118,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        // Las pestañas viven a la vez: sin etiqueta de héroe compartida.
+        heroTag: null,
         onPressed: () => showTransactionForm(context),
         icon: const Icon(Icons.add),
         label: Text(l10n.transactionsNew),

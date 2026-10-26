@@ -7,8 +7,7 @@ import '../../support/fake_auth_repository.dart';
 import '../../support/test_app.dart';
 
 Future<void> openSettings(WidgetTester tester) async {
-  await tester.tap(find.byTooltip('Ajustes'));
-  await tester.pumpAndSettle();
+  await openFromMore(tester, 'Ajustes');
 }
 
 Finder languageOption(String label) => find.widgetWithText(RadioListTile<String>, label);
@@ -58,14 +57,17 @@ void main() {
     // Y las demás pantallas también.
     await tester.pageBack();
     await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(of: find.byType(NavigationBar), matching: find.text('Home')),
+    );
+    await tester.pumpAndSettle();
     expect(find.text("You don't have any accounts yet"), findsOneWidget);
     expect(find.text('Aún no tienes cuentas'), findsNothing);
   });
 
   testWidgets('volver a español', (tester) async {
     await pumpMiPlata(tester, language: 'en');
-    await tester.tap(find.byTooltip('Settings'));
-    await tester.pumpAndSettle();
+    await openFromMore(tester, 'Settings', more: 'More');
 
     await tester.tap(languageOption('Español'));
     await tester.pumpAndSettle();

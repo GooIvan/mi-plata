@@ -19,6 +19,7 @@ Future<void> showCategoryForm(
   assert(category != null || type != null, 'Hace falta una categoría o un tipo');
   return showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,

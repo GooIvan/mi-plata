@@ -24,6 +24,7 @@ import '../debts_providers.dart';
 Future<void> showPaymentSheet(BuildContext context, Debt debt) {
   return showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,

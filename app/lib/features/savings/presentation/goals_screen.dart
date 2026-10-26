@@ -53,6 +53,8 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
         data: _buildList,
       ),
       floatingActionButton: FloatingActionButton.extended(
+        // Las pestañas viven a la vez: sin etiqueta de héroe compartida.
+        heroTag: null,
         onPressed: () => showGoalForm(context),
         icon: const Icon(Icons.add),
         label: Text(l10n.goalsNew),

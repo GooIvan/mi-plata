@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:mi_plata/app.dart';
 import 'package:mi_plata/core/format/formats.dart';
+import 'package:mi_plata/core/router/app_routes.dart';
 import 'package:mi_plata/core/riverpod/no_retry.dart';
 import 'package:mi_plata/core/storage/preferences_provider.dart';
 import 'package:mi_plata/features/currency/domain/currency_converter.dart';
@@ -147,9 +148,32 @@ Future<FakeBackend> pumpMiPlata(
   return fakes;
 }
 
-/// Navega a [location] como lo haría un enlace, sin pasar por los botones.
+/// Navega a [location] como lo haría un enlace, sin pasar por los botones. Las
+/// pestañas de la barra se abren con `go`, como en la app; el resto, encima.
 Future<void> goTo(WidgetTester tester, String location) async {
   final context = tester.element(find.byType(Scaffold).first);
-  GoRouter.of(context).push(location);
+  const tabs = {
+    AppRoutes.dashboard,
+    AppRoutes.transactions,
+    AppRoutes.accounts,
+    AppRoutes.goals,
+    AppRoutes.more,
+  };
+  final router = GoRouter.of(context);
+  tabs.contains(location) ? router.go(location) : router.push(location);
+  await tester.pumpAndSettle();
+}
+
+/// Abre una pantalla desde la pestaña "Más", como lo haría una persona.
+Future<void> openFromMore(
+  WidgetTester tester,
+  String entry, {
+  String more = 'Más',
+}) async {
+  await tester.tap(
+    find.descendant(of: find.byType(NavigationBar), matching: find.text(more)),
+  );
+  await tester.pumpAndSettle();
+  await tester.tap(find.widgetWithText(ListTile, entry));
   await tester.pumpAndSettle();
 }

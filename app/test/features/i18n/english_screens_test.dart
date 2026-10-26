@@ -270,8 +270,12 @@ void main() {
       expect(find.text('You owe'), findsOneWidget);
       expect(find.text('Owed to you'), findsOneWidget);
       expect(find.text('Today'), findsNothing); // el panel no agrupa por día
-      for (final tooltip in ['Monthly summary', 'Budgets', 'Categories', 'Settings']) {
-        expect(find.byTooltip(tooltip), findsOneWidget, reason: tooltip);
+      for (final label in ['Home', 'Activity', 'Accounts', 'Goals', 'More']) {
+        expect(
+          find.descendant(of: find.byType(NavigationBar), matching: find.text(label)),
+          findsOneWidget,
+          reason: label,
+        );
       }
       expect(find.text('Expense'), findsNothing);
       _expectNoSpanish(tester, spanish);
@@ -332,7 +336,7 @@ void main() {
 
       expect(find.text('Today'), findsOneWidget);
       expect(find.text('Yesterday'), findsOneWidget);
-      expect(find.text('Transactions'), findsOneWidget);
+      expect(find.widgetWithText(AppBar, 'Transactions'), findsOneWidget);
       expect(textLike(r'-$120,000'), findsOneWidget);
       expect(textLike(r'+$3,000,000'), findsOneWidget);
       expect(find.text('Bancolombia → Nequi'), findsOneWidget);
@@ -864,6 +868,8 @@ void main() {
       }
 
       for (final route in [
+        AppRoutes.more,
+        AppRoutes.goals,
         AppRoutes.recurring,
         AppRoutes.rates,
         AppRoutes.dashboard,

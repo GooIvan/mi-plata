@@ -14,6 +14,7 @@ class AppRoutes {
   static const rates = '/rates';
   static const recurring = '/recurring';
   static const goals = '/goals';
+  static const more = '/more';
 
   /// Rutas accesibles sin sesión.
   static const public = {login, register};

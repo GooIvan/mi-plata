@@ -69,8 +69,7 @@ Future<FakeBackend> openSummary(
     transactions: transactions,
   );
   await pumpMiPlata(tester, backend: backend);
-  await tester.tap(find.byTooltip('Resumen mensual'));
-  await tester.pumpAndSettle();
+  await openFromMore(tester, 'Resumen mensual');
   return backend;
 }
 
@@ -409,8 +408,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await pumpMiPlata(tester, backend: backend);
-      await tester.tap(find.byTooltip('Resumen mensual'));
-      await tester.pumpAndSettle();
+      await openFromMore(tester, 'Resumen mensual');
 
       expect(find.textContaining('No se pudo cargar el resumen'), findsOneWidget);
 
@@ -603,8 +601,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await pumpMiPlata(tester, backend: backend);
-      await tester.tap(find.byTooltip('Resumen mensual'));
-      await tester.pumpAndSettle();
+      await openFromMore(tester, 'Resumen mensual');
 
       expect(find.text('No se pudo cargar la evolución del dinero.'), findsOneWidget);
       // Lo demás del resumen sigue ahí.

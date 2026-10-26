@@ -1901,4 +1901,16 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get dbErrorGoalAccountCard =>
       'Una tarjeta no puede ser la cuenta de una meta de ahorro';
+
+  @override
+  String get navHome => 'Inicio';
+
+  @override
+  String get navGoals => 'Metas';
+
+  @override
+  String get navMore => 'Más';
+
+  @override
+  String get navTransactions => 'Actividad';
 }

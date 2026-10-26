@@ -3174,6 +3174,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Una tarjeta no puede ser la cuenta de una meta de ahorro'**
   String get dbErrorGoalAccountCard;
+
+  /// No description provided for @navHome.
+  ///
+  /// In es, this message translates to:
+  /// **'Inicio'**
+  String get navHome;
+
+  /// No description provided for @navGoals.
+  ///
+  /// In es, this message translates to:
+  /// **'Metas'**
+  String get navGoals;
+
+  /// No description provided for @navMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Más'**
+  String get navMore;
+
+  /// No description provided for @navTransactions.
+  ///
+  /// In es, this message translates to:
+  /// **'Actividad'**
+  String get navTransactions;
 }
 
 class _AppLocalizationsDelegate

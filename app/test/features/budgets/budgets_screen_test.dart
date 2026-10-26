@@ -73,8 +73,7 @@ Future<FakeBackend> openBudgets(
   final fakes =
       backend ?? backendWith(rules: rules, transactions: transactions);
   await pumpMiPlata(tester, backend: fakes);
-  await tester.tap(find.byTooltip('Presupuestos'));
-  await tester.pumpAndSettle();
+  await openFromMore(tester, 'Presupuestos');
   return fakes;
 }
 
@@ -479,6 +478,7 @@ void main() {
 
   group('panel principal', () {
     testWidgets('sin presupuestos no hay tarjeta', (tester) async {
+      tallView(tester);
       await pumpMiPlata(tester, backend: backendWith());
 
       expect(find.text('Presupuestos'), findsNothing);
@@ -487,6 +487,7 @@ void main() {
     testWidgets('con presupuestos resume el mes y lo que pide atención', (
       tester,
     ) async {
+      tallView(tester);
       await pumpMiPlata(
         tester,
         backend: backendWith(
@@ -513,6 +514,7 @@ void main() {
     });
 
     testWidgets('si todo va bien no marca nada de más', (tester) async {
+      tallView(tester);
       await pumpMiPlata(
         tester,
         backend: backendWith(
@@ -528,6 +530,7 @@ void main() {
 
     testWidgets('al tocarla abre los presupuestos', (tester) async {
       tallView(tester);
+      tallView(tester);
       await pumpMiPlata(
         tester,
         backend: backendWith(rules: [rule('Mercado', 100000)]),
@@ -542,10 +545,15 @@ void main() {
     testWidgets('si falla la carga, el panel sigue igual', (tester) async {
       final backend = backendWith(rules: [rule('Mercado', 100000)]);
       backend.budgets.error = Exception('sin red');
+      tallView(tester);
       await pumpMiPlata(tester, backend: backend);
 
       expect(find.text('Presupuestos'), findsNothing);
-      expect(find.text('Cuentas'), findsOneWidget);
+      // El encabezado de la sección (la barra de abajo también dice Cuentas).
+      expect(
+        find.descendant(of: find.byType(ListView), matching: find.text('Cuentas')),
+        findsOneWidget,
+      );
     });
   });
 
@@ -555,6 +563,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
 
+      tallView(tester);
       await pumpMiPlata(
         tester,
         backend: backendWith(
@@ -562,8 +571,7 @@ void main() {
           transactions: [expense('Mercado', 100000)],
         ),
       );
-      await tester.tap(find.byTooltip('Resumen mensual'));
-      await tester.pumpAndSettle();
+      await openFromMore(tester, 'Resumen mensual');
 
       await tester.tap(find.text('Cuánto llevas gastado de lo que planeaste'));
       await tester.pumpAndSettle();

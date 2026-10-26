@@ -1904,4 +1904,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dbErrorGoalAccountCard =>
       'A card can\'t be the account of a savings goal';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navGoals => 'Goals';
+
+  @override
+  String get navMore => 'More';
+
+  @override
+  String get navTransactions => 'Activity';
 }

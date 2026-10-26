@@ -356,6 +356,7 @@ void main() {
     });
 
     testWidgets('elimina tras confirmar y avisa', (tester) async {
+      tallView(tester);
       final backend = withOneExpense();
       await pumpMiPlata(tester, backend: backend);
       await openFirstMovement(tester);
@@ -372,8 +373,7 @@ void main() {
       expect(find.text('Compra semanal'), findsNothing);
 
       // De vuelta en el panel, el saldo ya no descuenta el movimiento borrado.
-      await tester.tap(find.byType(BackButton));
-      await tester.pumpAndSettle();
+      await goTo(tester, AppRoutes.dashboard);
       expect(textLike(r'$1.000.000'), findsNWidgets(2)); // el total y la cuenta
     });
 

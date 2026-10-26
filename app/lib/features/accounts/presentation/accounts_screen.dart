@@ -79,6 +79,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
         data: _buildList,
       ),
       floatingActionButton: FloatingActionButton.extended(
+        // Las pestañas viven a la vez: sin etiqueta de héroe compartida.
+        heroTag: null,
         onPressed: () => showAccountForm(context),
         icon: const Icon(Icons.add),
         label: Text(l10n.accountsNew),

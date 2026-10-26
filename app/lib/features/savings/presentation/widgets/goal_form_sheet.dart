@@ -22,6 +22,7 @@ import '../goals_providers.dart';
 Future<void> showGoalForm(BuildContext context, {SavingsGoal? goal}) {
   return showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,

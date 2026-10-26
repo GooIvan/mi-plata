@@ -16,6 +16,7 @@ import '../transaction_type_ui.dart';
 Future<void> showTransactionFilterSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,

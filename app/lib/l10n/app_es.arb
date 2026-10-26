@@ -1311,5 +1311,9 @@
   "goalsErrorInvalid": "Revisa los datos de la meta.",
   "goalsErrorAccountTaken": "Esa cuenta ya tiene otra meta activa.",
   "goalsErrorMissingAccount": "La cuenta elegida ya no existe.",
-  "dbErrorGoalAccountCard": "Una tarjeta no puede ser la cuenta de una meta de ahorro"
+  "dbErrorGoalAccountCard": "Una tarjeta no puede ser la cuenta de una meta de ahorro",
+  "navHome": "Inicio",
+  "navGoals": "Metas",
+  "navMore": "Más",
+  "navTransactions": "Actividad"
 }

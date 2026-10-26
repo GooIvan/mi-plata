@@ -40,7 +40,8 @@ Future<void> showTransactionForm(
   String? initialAccountId,
   String? initialDestinationId,
 }) {
-  return Navigator.of(context).push(
+  // En el navegador raíz: el formulario cubre la barra de navegación.
+  return Navigator.of(context, rootNavigator: true).push(
     MaterialPageRoute<void>(
       fullscreenDialog: true,
       builder: (_) => TransactionFormScreen(

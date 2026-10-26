@@ -67,28 +67,6 @@ class DashboardScreen extends ConsumerWidget {
               Text(email, style: theme.textTheme.labelSmall),
           ],
         ),
-        actions: [
-          IconButton(
-            tooltip: l10n.dashboardSummaryTooltip,
-            icon: const Icon(Icons.insights_outlined),
-            onPressed: () => context.push(AppRoutes.summary),
-          ),
-          IconButton(
-            tooltip: l10n.budgetsTitle,
-            icon: const Icon(Icons.savings_outlined),
-            onPressed: () => context.push(AppRoutes.budgets),
-          ),
-          IconButton(
-            tooltip: l10n.categoriesTitle,
-            icon: const Icon(Icons.category_outlined),
-            onPressed: () => context.push(AppRoutes.categories),
-          ),
-          IconButton(
-            tooltip: l10n.settingsTitle,
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => context.push(AppRoutes.settings),
-          ),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
@@ -100,13 +78,13 @@ class DashboardScreen extends ConsumerWidget {
               ref.invalidate(accountsProvider);
               ref.invalidate(currencyConverterProvider);
             },
-            onCreateAccount: () => context.push(AppRoutes.accounts),
+            onCreateAccount: () => context.go(AppRoutes.accounts),
           ),
           if (activeAccounts.isNotEmpty) ...[
             _SectionHeader(
               title: l10n.accountsTitle,
               actionLabel: l10n.commonSeeAll,
-              onAction: () => context.push(AppRoutes.accounts),
+              onAction: () => context.go(AppRoutes.accounts),
             ),
             Card(
               margin: EdgeInsets.zero,
@@ -131,7 +109,7 @@ class DashboardScreen extends ConsumerWidget {
                               : null,
                         ),
                       ),
-                      onTap: () => context.push(AppRoutes.accounts),
+                      onTap: () => context.go(AppRoutes.accounts),
                     ),
                 ],
               ),
@@ -161,11 +139,11 @@ class DashboardScreen extends ConsumerWidget {
           _SectionHeader(
             title: l10n.goalsTitle,
             actionLabel: l10n.commonSeeAll,
-            onAction: () => context.push(AppRoutes.goals),
+            onAction: () => context.go(AppRoutes.goals),
           ),
           GoalsSummaryCard(
             goals: goals,
-            onOpenAll: () => context.push(AppRoutes.goals),
+            onOpenAll: () => context.go(AppRoutes.goals),
           ),
           _SectionHeader(
             title: l10n.debtsTitle,
@@ -180,7 +158,7 @@ class DashboardScreen extends ConsumerWidget {
           _SectionHeader(
             title: l10n.dashboardRecentTransactions,
             actionLabel: l10n.commonSeeAllMasculine,
-            onAction: () => context.push(AppRoutes.transactions),
+            onAction: () => context.go(AppRoutes.transactions),
           ),
           transactions.when(
             loading: () => const Padding(
@@ -224,6 +202,8 @@ class DashboardScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        // Las pestañas viven a la vez: sin etiqueta de héroe compartida.
+        heroTag: null,
         onPressed: () => showTransactionForm(context),
         icon: const Icon(Icons.add),
         label: Text(l10n.transactionsNew),

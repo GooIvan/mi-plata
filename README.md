@@ -25,6 +25,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 - [x] **Soporte multimoneda**: cada cuenta tiene su moneda; todo se suma en una moneda base con tasas de cambio que defines tú, y las transferencias entre monedas dicen cuánto sale y cuánto llega (ver [Monedas](#-monedas)).
 - [x] **Pagos recurrentes** (suscripciones, arriendo): se registra qué se paga, cuánto y cada cuánto; cuando se acerca la fecha la app avisa con "Pago próximo" y **no descuenta nada hasta que confirmas que pagaste** (o lo omites). Ver [Pagos recurrentes](#-pagos-recurrentes).
 - [x] **Metas de ahorro** con monto objetivo, fecha límite y progreso: cada meta se apoya en una cuenta y lo ahorrado es el saldo de esa cuenta. Ver [Metas de ahorro](#-metas-de-ahorro).
+- [x] **Barra de navegación** con cinco pestañas (Inicio, Actividad, Cuentas, Metas y Más). *Más* reúne el resumen mensual, presupuestos, deudas, pagos recurrentes, categorías y ajustes. Cada pestaña conserva lo que estabas viendo al cambiar, y tocar la pestaña en la que estás vuelve a su pantalla inicial.
 
 ### Futuro
 - [ ] Modo sin conexión (primero consulta, luego registrar movimientos con cola de sincronización)

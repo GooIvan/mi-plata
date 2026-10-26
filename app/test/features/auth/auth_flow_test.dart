@@ -37,8 +37,7 @@ void main() {
       await pumpApp(tester, repository);
 
       // Cerrar sesión vive en los ajustes.
-      await tester.tap(find.byTooltip('Ajustes'));
-      await tester.pumpAndSettle();
+      await openFromMore(tester, 'Ajustes');
       await tester.ensureVisible(find.text('Cerrar sesión'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cerrar sesión'));

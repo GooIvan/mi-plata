@@ -15,6 +15,7 @@ import '../currency_ui.dart';
 Future<void> showRateForm(BuildContext context, {String? currency}) {
   return showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,

@@ -14,6 +14,7 @@ import '../currency_ui.dart';
 Future<void> showBaseCurrencySheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,

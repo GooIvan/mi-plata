@@ -1296,5 +1296,9 @@
   "goalsErrorInvalid": "Check the goal's details.",
   "goalsErrorAccountTaken": "That account already has another active goal.",
   "goalsErrorMissingAccount": "The chosen account no longer exists.",
-  "dbErrorGoalAccountCard": "A card can't be the account of a savings goal"
+  "dbErrorGoalAccountCard": "A card can't be the account of a savings goal",
+  "navHome": "Home",
+  "navGoals": "Goals",
+  "navMore": "More",
+  "navTransactions": "Activity"
 }
