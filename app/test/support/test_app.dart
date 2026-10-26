@@ -85,6 +85,19 @@ Future<bool> loadRealFonts() async {
     'Roboto-Light.ttf',
   ]);
   await load('MaterialIcons', ['MaterialIcons-Regular.otf']);
+
+  // La tipografía de la app, tal como se empaqueta en pubspec.yaml.
+  final app = FontLoader('PlusJakartaSans');
+  for (final file in [
+    'Regular',
+    'Medium',
+    'SemiBold',
+    'Bold',
+  ]) {
+    final bytes = File('assets/fonts/PlusJakartaSans-$file.ttf').readAsBytesSync();
+    app.addFont(Future.value(ByteData.view(bytes.buffer)));
+  }
+  await app.load();
   return true;
 }
 
