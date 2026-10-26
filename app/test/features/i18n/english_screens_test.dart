@@ -9,6 +9,7 @@ import 'package:mi_plata/features/budgets/domain/budget_rule.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
 import 'package:mi_plata/features/currency/domain/exchange_rate.dart';
 import 'package:mi_plata/features/debts/domain/debt_direction.dart';
+import 'package:mi_plata/features/savings/domain/savings_goal.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 
 import '../../support/fake_account_repository.dart';
@@ -112,6 +113,59 @@ FakeBackend _backend() {
       amount: 300000,
     );
   return backend;
+}
+
+/// Metas en todos sus estados: ahorrando con fecha, cumplida, vencida, sin
+/// fecha (con un nombre larguísimo), una cuya cuenta se archivó y una meta
+/// archivada. Queda una cuenta libre para crear otra.
+FakeBackend _goalsBackend() {
+  SavingsGoal goal(
+    String name,
+    String account,
+    double target, {
+    DateTime? date,
+    bool archived = false,
+  }) => SavingsGoal(
+    id: 'goal-$name',
+    name: name,
+    targetCents: (target * 100).round(),
+    accountId: 'id-$account',
+    isArchived: archived,
+    targetDate: date,
+  );
+
+  return FakeBackend(
+    accounts: [
+      testAccount('Checking', balance: 2000000),
+      testAccount('Trip fund', balance: 1200000),
+      testAccount('Emergency', balance: 500000),
+      testAccount('Savings jar', balance: 30000),
+      testAccount('Old jar', balance: 10000, archived: true),
+      testAccount('Spare jar'),
+    ],
+    goals: [
+      goal(
+        'Japan trip',
+        'Trip fund',
+        5000000,
+        date: DateTime(_now.year + 1, _now.month, _now.day),
+      ),
+      goal('Emergency fund', 'Emergency', 500000),
+      goal(
+        'Motorbike',
+        'Checking',
+        9000000,
+        date: DateTime(_now.year, _now.month, _now.day - 3),
+      ),
+      goal(
+        'A very long goal name that must not overflow the narrow phone screen',
+        'Savings jar',
+        120000000,
+      ),
+      goal('Old plan', 'Old jar', 800000),
+      goal('Past plan', 'Spare jar', 100000, archived: true),
+    ],
+  );
 }
 
 /// Pesos, dólares (con tasa) y euros (sin tasa), para ver todo lo de monedas.
@@ -695,6 +749,105 @@ void main() {
     });
   });
 
+  group('metas de ahorro', () {
+    Future<void> openGoals(WidgetTester tester, [String? route]) async {
+      tester.view.physicalSize = const Size(900, 3600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await pumpMiPlata(tester, backend: _goalsBackend(), language: 'en');
+      if (route != null) await goTo(tester, route);
+    }
+
+    testWidgets('el panel', (tester) async {
+      await openGoals(tester);
+
+      expect(find.text('Savings goals'), findsOneWidget);
+      expect(find.text('Motorbike'), findsOneWidget);
+      expect(find.text('Japan trip'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('la lista, con cada estado', (tester) async {
+      await openGoals(tester, AppRoutes.goals);
+
+      expect(find.widgetWithText(AppBar, 'Savings goals'), findsOneWidget);
+      expect(textLike(r'$1,200,000 of $5,000,000'), findsOneWidget);
+      expect(find.textContaining(r'$3,800,000 to go · '), findsOneWidget);
+      expect(find.textContaining('days left'), findsOneWidget);
+      expect(find.text('Goal reached!'), findsOneWidget);
+      expect(find.textContaining('Was due'), findsOneWidget);
+      expect(find.textContaining(r'$7,000,000 to go'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+
+      expect(find.text('Past plan'), findsNothing);
+      await tester.tap(find.byTooltip('Show archived'));
+      await tester.pumpAndSettle();
+      expect(find.text('Past plan'), findsOneWidget);
+      expect(find.text('Archived'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('el detalle', (tester) async {
+      await openGoals(tester, AppRoutes.goals);
+
+      await tester.tap(find.text('Japan trip'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('By '), findsOneWidget);
+      expect(find.textContaining('To get there on time, save'), findsOneWidget);
+      expect(find.text('Account: Trip fund'), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
+      expect(find.text('Withdraw'), findsOneWidget);
+      expect(find.text('Goal activity'), findsOneWidget);
+      expect(
+        find.text("You haven't saved anything in this account yet."),
+        findsOneWidget,
+      );
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('el detalle de una meta cumplida y el de una cuenta archivada', (
+      tester,
+    ) async {
+      await openGoals(tester, AppRoutes.goals);
+
+      await tester.tap(find.text('Emergency fund'));
+      await tester.pumpAndSettle();
+      expect(find.text('Goal reached!'), findsOneWidget);
+      expect(
+        find.text('When you no longer need it, archive it to free up its account.'),
+        findsOneWidget,
+      );
+      _expectNoSpanish(tester, spanish);
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Old plan'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text("The account Old jar is archived: you can't save into it anymore."),
+        findsOneWidget,
+      );
+      _expectNoSpanish(tester, spanish);
+    });
+
+    testWidgets('los formularios', (tester) async {
+      await openGoals(tester, AppRoutes.goals);
+
+      await tester.tap(find.widgetWithText(FloatingActionButton, 'New goal'));
+      await tester.pumpAndSettle();
+      expect(find.text('Account where you save'), findsOneWidget);
+      expect(find.text('Create a new account'), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Create goal'));
+      await tester.pump();
+      expect(find.text("Enter the goal's name"), findsOneWidget);
+      expect(find.text("Choose the goal's account"), findsOneWidget);
+      _expectNoSpanish(tester, spanish);
+    });
+  });
+
   // Los textos en inglés tienen otro largo: en un teléfono angosto no deben
   // desbordar (un desborde hace fallar la prueba).
   group('sin desbordes en un teléfono angosto', () {
@@ -727,6 +880,77 @@ void main() {
           expect(tester.takeException(), isNull);
         });
       }
+
+      Future<void> phoneGoals(WidgetTester tester, [String? route]) async {
+        tester.view.physicalSize = const Size(360, 740);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await pumpMiPlata(tester, backend: _goalsBackend(), language: language);
+        if (route != null) await goTo(tester, route);
+      }
+
+      testWidgets('$language: panel y lista de metas', (tester) async {
+        await phoneGoals(tester);
+        expect(tester.takeException(), isNull);
+
+        await goTo(tester, AppRoutes.goals);
+        await tester.tap(find.byIcon(Icons.inventory_2_outlined));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('$language: detalle de cada meta', (tester) async {
+        await phoneGoals(tester, AppRoutes.goals);
+
+        for (final name in [
+          'Japan trip',
+          'Emergency fund',
+          'Motorbike',
+          'A very long goal name that must not overflow the narrow phone screen',
+          'Old plan',
+        ]) {
+          await tester.tap(find.text(name));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull, reason: name);
+          await tester.tap(find.byType(BackButton));
+          await tester.pumpAndSettle();
+        }
+      });
+
+      testWidgets('$language: formularios de metas', (tester) async {
+        await phoneGoals(tester, AppRoutes.goals);
+
+        // Nueva, con los errores de validación a la vista.
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(FilledButton).last);
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        await tester.tapAt(const Offset(10, 10)); // cierra la hoja
+        await tester.pumpAndSettle();
+
+        // Editar, con el nombre larguísimo.
+        await tester.tap(
+          find.text(
+            'A very long goal name that must not overflow the narrow phone screen',
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byIcon(Icons.edit_outlined));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        await tester.tapAt(const Offset(10, 10));
+        await tester.pumpAndSettle();
+
+        // Ahorrar y sacar abren la transferencia.
+        for (final icon in [Icons.savings_outlined, Icons.output_outlined]) {
+          await tester.tap(find.byIcon(icon));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          await tester.tap(find.byType(CloseButton));
+          await tester.pumpAndSettle();
+        }
+      });
 
       testWidgets('$language: formularios y hojas', (tester) async {
         await phone(tester, AppRoutes.accounts);

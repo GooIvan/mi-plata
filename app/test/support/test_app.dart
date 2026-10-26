@@ -18,6 +18,7 @@ import 'package:mi_plata/features/categories/presentation/categories_providers.d
 import 'package:mi_plata/features/currency/presentation/currency_providers.dart';
 import 'package:mi_plata/features/debts/presentation/debts_providers.dart';
 import 'package:mi_plata/features/recurring/presentation/recurring_providers.dart';
+import 'package:mi_plata/features/savings/presentation/goals_providers.dart';
 import 'package:mi_plata/features/summary/presentation/summary_providers.dart';
 import 'package:mi_plata/features/transactions/presentation/transactions_providers.dart';
 import 'package:mi_plata/l10n/l10n.dart';
@@ -137,6 +138,7 @@ Future<FakeBackend> pumpMiPlata(
         budgetRepositoryProvider.overrideWithValue(fakes.budgets),
         currencyRepositoryProvider.overrideWithValue(fakes.currency),
         recurringRepositoryProvider.overrideWithValue(fakes.recurring),
+        savingsGoalRepositoryProvider.overrideWithValue(fakes.goals),
       ],
       child: const MiPlataApp(),
     ),

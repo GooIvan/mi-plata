@@ -1177,5 +1177,139 @@
   },
   "recurringDeletePlanBody": "La deuda y los abonos que ya registraste se conservan.",
   "dbErrorInstallmentDirection": "Solo las deudas que debes pueden pagarse en cuotas",
-  "dbErrorInstallmentCurrency": "La cuenta de las cuotas tiene que ser de la moneda de la deuda"
+  "dbErrorInstallmentCurrency": "La cuenta de las cuotas tiene que ser de la moneda de la deuda",
+  "goalsTitle": "Metas de ahorro",
+  "goalsNew": "Nueva meta",
+  "goalsEdit": "Editar meta",
+  "goalsCreateButton": "Crear meta",
+  "goalsEmpty": "Aún no tienes metas. Una meta es una cantidad que quieres juntar en una cuenta: lo que ahorras es el saldo de esa cuenta.",
+  "goalsAllArchived": "Todas tus metas están archivadas.",
+  "goalsDashboardEmpty": "Junta plata para algo: crea una meta de ahorro.",
+  "goalsNameLabel": "Nombre",
+  "goalsNameHint": "Viaje, moto, fondo de emergencia",
+  "goalsNameRequired": "Escribe el nombre de la meta",
+  "goalsTargetLabel": "Cuánto quieres juntar",
+  "goalsTargetPositive": "La meta tiene que ser mayor que cero",
+  "goalsAccountLabel": "Cuenta donde ahorras",
+  "goalsAccountHelp": "Lo que llevas ahorrado es el saldo de esta cuenta. Para ahorrar, pasa plata a ella.",
+  "goalsAccountLocked": "La cuenta de una meta no se cambia.",
+  "goalsAccountRequired": "Elige la cuenta de la meta",
+  "goalsNoFreeAccount": "No tienes una cuenta libre: cada cuenta sirve para una sola meta y las tarjetas no sirven.",
+  "goalsNewAccount": "Crear una cuenta nueva",
+  "goalsDeadlineLabel": "Fecha límite (opcional)",
+  "goalsDeadlineNone": "Sin fecha",
+  "goalsDeadlineClear": "Quitar la fecha",
+  "goalsSavedOf": "{saved} de {target}",
+  "@goalsSavedOf": {
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsRemaining": "Faltan {amount}",
+  "@goalsRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsDaysLeft": "{count, plural, =0{vence hoy} one{queda {count} día} other{quedan {count} días}}",
+  "@goalsDaysLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsStatusReached": "¡Meta cumplida!",
+  "goalsStatusOverdue": "Venció el {date} · faltan {amount}",
+  "@goalsStatusOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsArchivedLabel": "Archivada",
+  "goalsAccountArchivedNote": "La cuenta {name} está archivada: ya no puedes ahorrar en ella.",
+  "@goalsAccountArchivedNote": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsSuggestMonthly": "Para llegar a tiempo, ahorra {amount} al mes.",
+  "@goalsSuggestMonthly": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsSuggestBefore": "Para llegar a tiempo, ahorra {amount} antes del {date}.",
+  "@goalsSuggestBefore": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsDeadlineOn": "Para el {date}",
+  "@goalsDeadlineOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsReachedHint": "Cuando ya no la necesites, archívala para liberar su cuenta.",
+  "goalsSave": "Ahorrar",
+  "goalsWithdraw": "Sacar",
+  "goalsAccountRow": "Cuenta: {name}",
+  "@goalsAccountRow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsHistoryTitle": "Movimientos de la meta",
+  "goalsHistoryEmpty": "Todavía no has ahorrado nada en esta cuenta.",
+  "goalsMovementFrom": "Desde {account}",
+  "@goalsMovementFrom": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMovementTo": "Hacia {account}",
+  "@goalsMovementTo": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsArchive": "Archivar",
+  "goalsRestore": "Restaurar",
+  "goalsArchivedMessage": "Meta archivada",
+  "goalsRestoredMessage": "Meta restaurada",
+  "goalsGone": "Esta meta ya no existe.",
+  "goalsErrorInvalid": "Revisa los datos de la meta.",
+  "goalsErrorAccountTaken": "Esa cuenta ya tiene otra meta activa.",
+  "goalsErrorMissingAccount": "La cuenta elegida ya no existe.",
+  "dbErrorGoalAccountCard": "Una tarjeta no puede ser la cuenta de una meta de ahorro"
 }

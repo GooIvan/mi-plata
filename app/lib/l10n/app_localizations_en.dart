@@ -1723,4 +1723,185 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dbErrorInstallmentCurrency =>
       'The installments\' account must be in the debt\'s currency';
+
+  @override
+  String get goalsTitle => 'Savings goals';
+
+  @override
+  String get goalsNew => 'New goal';
+
+  @override
+  String get goalsEdit => 'Edit goal';
+
+  @override
+  String get goalsCreateButton => 'Create goal';
+
+  @override
+  String get goalsEmpty =>
+      'You have no goals yet. A goal is an amount you want to save up in an account: what you\'ve saved is that account\'s balance.';
+
+  @override
+  String get goalsAllArchived => 'All your goals are archived.';
+
+  @override
+  String get goalsDashboardEmpty =>
+      'Save up for something: create a savings goal.';
+
+  @override
+  String get goalsNameLabel => 'Name';
+
+  @override
+  String get goalsNameHint => 'Trip, bike, emergency fund';
+
+  @override
+  String get goalsNameRequired => 'Enter the goal\'s name';
+
+  @override
+  String get goalsTargetLabel => 'How much do you want to save';
+
+  @override
+  String get goalsTargetPositive => 'The goal must be greater than zero';
+
+  @override
+  String get goalsAccountLabel => 'Account where you save';
+
+  @override
+  String get goalsAccountHelp =>
+      'What you\'ve saved is this account\'s balance. To save, move money into it.';
+
+  @override
+  String get goalsAccountLocked => 'A goal\'s account can\'t be changed.';
+
+  @override
+  String get goalsAccountRequired => 'Choose the goal\'s account';
+
+  @override
+  String get goalsNoFreeAccount =>
+      'You have no free account: each account can back only one goal, and cards can\'t.';
+
+  @override
+  String get goalsNewAccount => 'Create a new account';
+
+  @override
+  String get goalsDeadlineLabel => 'Deadline (optional)';
+
+  @override
+  String get goalsDeadlineNone => 'No deadline';
+
+  @override
+  String get goalsDeadlineClear => 'Remove the date';
+
+  @override
+  String goalsSavedOf(String saved, String target) {
+    return '$saved of $target';
+  }
+
+  @override
+  String goalsRemaining(String amount) {
+    return '$amount to go';
+  }
+
+  @override
+  String goalsDaysLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days left',
+      one: '$count day left',
+      zero: 'due today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goalsStatusReached => 'Goal reached!';
+
+  @override
+  String goalsStatusOverdue(String date, String amount) {
+    return 'Was due $date · $amount to go';
+  }
+
+  @override
+  String get goalsArchivedLabel => 'Archived';
+
+  @override
+  String goalsAccountArchivedNote(String name) {
+    return 'The account $name is archived: you can\'t save into it anymore.';
+  }
+
+  @override
+  String goalsSuggestMonthly(String amount) {
+    return 'To get there on time, save $amount a month.';
+  }
+
+  @override
+  String goalsSuggestBefore(String amount, String date) {
+    return 'To get there on time, save $amount by $date.';
+  }
+
+  @override
+  String goalsDeadlineOn(String date) {
+    return 'By $date';
+  }
+
+  @override
+  String get goalsReachedHint =>
+      'When you no longer need it, archive it to free up its account.';
+
+  @override
+  String get goalsSave => 'Save';
+
+  @override
+  String get goalsWithdraw => 'Withdraw';
+
+  @override
+  String goalsAccountRow(String name) {
+    return 'Account: $name';
+  }
+
+  @override
+  String get goalsHistoryTitle => 'Goal activity';
+
+  @override
+  String get goalsHistoryEmpty =>
+      'You haven\'t saved anything in this account yet.';
+
+  @override
+  String goalsMovementFrom(String account) {
+    return 'From $account';
+  }
+
+  @override
+  String goalsMovementTo(String account) {
+    return 'To $account';
+  }
+
+  @override
+  String get goalsArchive => 'Archive';
+
+  @override
+  String get goalsRestore => 'Restore';
+
+  @override
+  String get goalsArchivedMessage => 'Goal archived';
+
+  @override
+  String get goalsRestoredMessage => 'Goal restored';
+
+  @override
+  String get goalsGone => 'This goal no longer exists.';
+
+  @override
+  String get goalsErrorInvalid => 'Check the goal\'s details.';
+
+  @override
+  String get goalsErrorAccountTaken =>
+      'That account already has another active goal.';
+
+  @override
+  String get goalsErrorMissingAccount => 'The chosen account no longer exists.';
+
+  @override
+  String get dbErrorGoalAccountCard =>
+      'A card can\'t be the account of a savings goal';
 }

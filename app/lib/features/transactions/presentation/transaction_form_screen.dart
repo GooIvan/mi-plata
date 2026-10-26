@@ -30,22 +30,44 @@ import 'transaction_type_ui.dart';
 import 'transactions_providers.dart';
 
 /// Abre el formulario para registrar un movimiento, o para editar [transaction].
+///
+/// Para uno nuevo se puede empezar con el tipo y las cuentas ya elegidos (por
+/// ejemplo, "ahorrar" es una transferencia hacia la cuenta de una meta).
 Future<void> showTransactionForm(
   BuildContext context, {
   Transaction? transaction,
+  TransactionType? initialType,
+  String? initialAccountId,
+  String? initialDestinationId,
 }) {
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
       fullscreenDialog: true,
-      builder: (_) => TransactionFormScreen(transaction: transaction),
+      builder: (_) => TransactionFormScreen(
+        transaction: transaction,
+        initialType: initialType,
+        initialAccountId: initialAccountId,
+        initialDestinationId: initialDestinationId,
+      ),
     ),
   );
 }
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
-  const TransactionFormScreen({super.key, this.transaction});
+  const TransactionFormScreen({
+    super.key,
+    this.transaction,
+    this.initialType,
+    this.initialAccountId,
+    this.initialDestinationId,
+  });
 
   final Transaction? transaction;
+
+  /// Con qué se abre un movimiento nuevo; al editar no se usan.
+  final TransactionType? initialType;
+  final String? initialAccountId;
+  final String? initialDestinationId;
 
   @override
   ConsumerState<TransactionFormScreen> createState() =>
@@ -60,9 +82,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     text: widget.transaction?.description,
   );
   late TransactionType _type =
-      widget.transaction?.type ?? TransactionType.expense;
-  late String? _accountId = widget.transaction?.accountId;
-  late String? _destinationId = widget.transaction?.destinationAccountId;
+      widget.transaction?.type ?? widget.initialType ?? TransactionType.expense;
+  late String? _accountId =
+      widget.transaction?.accountId ?? widget.initialAccountId;
+  late String? _destinationId =
+      widget.transaction?.destinationAccountId ?? widget.initialDestinationId;
   late String? _categoryId = widget.transaction?.categoryId;
   late DateTime _date = widget.transaction?.date ?? DateTime.now();
   bool _saving = false;

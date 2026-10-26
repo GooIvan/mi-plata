@@ -34,6 +34,7 @@ String? databaseErrorMessage(AppLocalizations l10n, PostgrestException error) {
     'installment_account_currency' => l10n.dbErrorInstallmentCurrency,
     'transfer_destination_amount_unexpected' =>
       l10n.dbErrorTransferDestinationUnexpected,
+    'goal_account_card' => l10n.dbErrorGoalAccountCard,
     'debt_not_found' => l10n.debtsErrorMissingReference,
     'account_not_found' => l10n.debtsErrorMissingReference,
     _ => null,

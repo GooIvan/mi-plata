@@ -12,6 +12,7 @@ import '../../auth/presentation/auth_providers.dart';
 import '../../budgets/presentation/budget_providers_overview.dart';
 import '../../currency/presentation/currency_providers.dart';
 import '../../recurring/presentation/recurring_providers.dart';
+import '../../savings/presentation/goals_providers.dart';
 import '../../summary/domain/month_summary.dart';
 import '../../transactions/presentation/transaction_error_message.dart';
 import '../../transactions/presentation/transaction_form_screen.dart';
@@ -20,6 +21,7 @@ import '../../transactions/presentation/widgets/transaction_tile.dart';
 import '../../debts/presentation/debts_providers.dart';
 import 'widgets/budget_summary_card.dart';
 import 'widgets/debts_summary_card.dart';
+import 'widgets/goals_summary_card.dart';
 import 'widgets/recurring_summary_card.dart';
 import 'widgets/total_balance_card.dart';
 
@@ -37,6 +39,7 @@ class DashboardScreen extends ConsumerWidget {
     final debts = ref.watch(debtsProvider);
     final converter = ref.watch(currencyConverterProvider);
     final recurring = ref.watch(recurringPaymentsProvider);
+    final goals = ref.watch(goalProgressProvider);
     // Es un extra: mientras carga o si falla, simplemente no aparece.
     final budgets = ref
         .watch(
@@ -155,6 +158,15 @@ class DashboardScreen extends ConsumerWidget {
               onTap: () => context.push(AppRoutes.budgets),
             ),
           ],
+          _SectionHeader(
+            title: l10n.goalsTitle,
+            actionLabel: l10n.commonSeeAll,
+            onAction: () => context.push(AppRoutes.goals),
+          ),
+          GoalsSummaryCard(
+            goals: goals,
+            onOpenAll: () => context.push(AppRoutes.goals),
+          ),
           _SectionHeader(
             title: l10n.debtsTitle,
             actionLabel: l10n.commonSeeAll,

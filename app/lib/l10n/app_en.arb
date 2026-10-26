@@ -1162,5 +1162,139 @@
   },
   "recurringDeletePlanBody": "The debt and the payments you already recorded are kept.",
   "dbErrorInstallmentDirection": "Only debts you owe can be paid in installments",
-  "dbErrorInstallmentCurrency": "The installments' account must be in the debt's currency"
+  "dbErrorInstallmentCurrency": "The installments' account must be in the debt's currency",
+  "goalsTitle": "Savings goals",
+  "goalsNew": "New goal",
+  "goalsEdit": "Edit goal",
+  "goalsCreateButton": "Create goal",
+  "goalsEmpty": "You have no goals yet. A goal is an amount you want to save up in an account: what you've saved is that account's balance.",
+  "goalsAllArchived": "All your goals are archived.",
+  "goalsDashboardEmpty": "Save up for something: create a savings goal.",
+  "goalsNameLabel": "Name",
+  "goalsNameHint": "Trip, bike, emergency fund",
+  "goalsNameRequired": "Enter the goal's name",
+  "goalsTargetLabel": "How much do you want to save",
+  "goalsTargetPositive": "The goal must be greater than zero",
+  "goalsAccountLabel": "Account where you save",
+  "goalsAccountHelp": "What you've saved is this account's balance. To save, move money into it.",
+  "goalsAccountLocked": "A goal's account can't be changed.",
+  "goalsAccountRequired": "Choose the goal's account",
+  "goalsNoFreeAccount": "You have no free account: each account can back only one goal, and cards can't.",
+  "goalsNewAccount": "Create a new account",
+  "goalsDeadlineLabel": "Deadline (optional)",
+  "goalsDeadlineNone": "No deadline",
+  "goalsDeadlineClear": "Remove the date",
+  "goalsSavedOf": "{saved} of {target}",
+  "@goalsSavedOf": {
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsRemaining": "{amount} to go",
+  "@goalsRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsDaysLeft": "{count, plural, =0{due today} one{{count} day left} other{{count} days left}}",
+  "@goalsDaysLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsStatusReached": "Goal reached!",
+  "goalsStatusOverdue": "Was due {date} · {amount} to go",
+  "@goalsStatusOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsArchivedLabel": "Archived",
+  "goalsAccountArchivedNote": "The account {name} is archived: you can't save into it anymore.",
+  "@goalsAccountArchivedNote": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsSuggestMonthly": "To get there on time, save {amount} a month.",
+  "@goalsSuggestMonthly": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsSuggestBefore": "To get there on time, save {amount} by {date}.",
+  "@goalsSuggestBefore": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsDeadlineOn": "By {date}",
+  "@goalsDeadlineOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsReachedHint": "When you no longer need it, archive it to free up its account.",
+  "goalsSave": "Save",
+  "goalsWithdraw": "Withdraw",
+  "goalsAccountRow": "Account: {name}",
+  "@goalsAccountRow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsHistoryTitle": "Goal activity",
+  "goalsHistoryEmpty": "You haven't saved anything in this account yet.",
+  "goalsMovementFrom": "From {account}",
+  "@goalsMovementFrom": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMovementTo": "To {account}",
+  "@goalsMovementTo": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsArchive": "Archive",
+  "goalsRestore": "Restore",
+  "goalsArchivedMessage": "Goal archived",
+  "goalsRestoredMessage": "Goal restored",
+  "goalsGone": "This goal no longer exists.",
+  "goalsErrorInvalid": "Check the goal's details.",
+  "goalsErrorAccountTaken": "That account already has another active goal.",
+  "goalsErrorMissingAccount": "The chosen account no longer exists.",
+  "dbErrorGoalAccountCard": "A card can't be the account of a savings goal"
 }

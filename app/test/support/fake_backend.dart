@@ -6,6 +6,7 @@ import 'package:mi_plata/features/categories/data/category_repository.dart';
 import 'package:mi_plata/features/categories/domain/category.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
 import 'package:mi_plata/features/accounts/domain/account.dart';
+import 'package:mi_plata/features/accounts/domain/account_type.dart';
 import 'package:mi_plata/features/currency/data/currency_repository.dart';
 import 'package:mi_plata/features/currency/domain/exchange_rate.dart';
 import 'package:mi_plata/features/debts/data/debt_repository.dart';
@@ -18,6 +19,9 @@ import 'package:mi_plata/features/debts/domain/debt_direction.dart';
 import 'package:mi_plata/features/debts/domain/debt_draft.dart';
 import 'package:mi_plata/features/debts/domain/debt_payment.dart';
 import 'package:mi_plata/features/debts/domain/installment_plan_draft.dart';
+import 'package:mi_plata/features/savings/data/savings_goal_repository.dart';
+import 'package:mi_plata/features/savings/domain/goal_draft.dart';
+import 'package:mi_plata/features/savings/domain/savings_goal.dart';
 import 'package:mi_plata/features/summary/data/summary_repository.dart';
 import 'package:mi_plata/features/summary/domain/balance_history.dart';
 import 'package:mi_plata/features/summary/domain/monthly_total.dart';
@@ -1135,6 +1139,103 @@ class FakeCurrencyRepository implements CurrencyRepository {
   }
 }
 
+/// Imita la tabla `savings_goals` con sus reglas: una meta activa por cuenta y
+/// nunca una tarjeta. Lo ahorrado no se guarda: es el saldo de la cuenta.
+class FakeSavingsGoalRepository implements SavingsGoalRepository {
+  FakeSavingsGoalRepository(
+    this._accounts, [
+    List<SavingsGoal> initial = const [],
+  ]) : _goals = [...initial];
+
+  final FakeAccountRepository _accounts;
+  final List<SavingsGoal> _goals;
+  Object? error;
+  final calls = <String>[];
+
+  List<SavingsGoal> get goals => List.unmodifiable(_goals);
+
+  Never _fail(String message, String code, [String? details]) =>
+      throw PostgrestException(message: message, code: code, details: details);
+
+  /// Las reglas de la base: la cuenta existe, no es una tarjeta y no tiene ya
+  /// otra meta activa.
+  void _validate(String accountId, {String? ignoring, bool active = true}) {
+    final account = _accounts.accounts
+        .where((account) => account.id == accountId)
+        .firstOrNull;
+    if (account == null) _fail('foreign key violation', '23503');
+    if (account.type == AccountType.card) {
+      _fail(
+        'Una tarjeta no puede ser la cuenta de una meta de ahorro',
+        '23514',
+        'goal_account_card',
+      );
+    }
+    final taken = _goals.any(
+      (goal) =>
+          !goal.isArchived && goal.accountId == accountId && goal.id != ignoring,
+    );
+    if (active && taken) _fail('duplicate key', '23505');
+  }
+
+  SavingsGoal _from(String id, GoalDraft draft, {bool isArchived = false}) =>
+      SavingsGoal(
+        id: id,
+        name: draft.name.trim(),
+        targetCents: (double.parse(draft.targetAmount) * 100).round(),
+        accountId: draft.accountId,
+        isArchived: isArchived,
+        targetDate: draft.targetDate,
+      );
+
+  @override
+  Future<List<SavingsGoal>> fetchAll() async {
+    calls.add('fetchAll');
+    if (error != null) throw error!;
+    return [..._goals];
+  }
+
+  @override
+  Future<void> create(GoalDraft draft) async {
+    calls.add('create ${draft.name.trim()}');
+    if (error != null) throw error!;
+    _validate(draft.accountId);
+    _goals.add(_from('goal-${_goals.length + 1}', draft));
+  }
+
+  @override
+  Future<void> update(String id, GoalDraft draft) async {
+    calls.add('update $id');
+    if (error != null) throw error!;
+    final index = _goals.indexWhere((goal) => goal.id == id);
+    if (index < 0) return;
+    _validate(
+      draft.accountId,
+      ignoring: id,
+      active: !_goals[index].isArchived,
+    );
+    _goals[index] = _from(id, draft, isArchived: _goals[index].isArchived);
+  }
+
+  @override
+  Future<void> setArchived(String id, {required bool isArchived}) async {
+    calls.add('setArchived $id $isArchived');
+    if (error != null) throw error!;
+    final index = _goals.indexWhere((goal) => goal.id == id);
+    if (index < 0) return;
+    final goal = _goals[index];
+    if (!isArchived) _validate(goal.accountId, ignoring: id);
+    _goals[index] = SavingsGoal(
+      id: goal.id,
+      name: goal.name,
+      targetCents: goal.targetCents,
+      accountId: goal.accountId,
+      isArchived: isArchived,
+      targetDate: goal.targetDate,
+    );
+  }
+}
+
 /// Cuentas, categorías y movimientos enlazados, como la base de datos real.
 class FakeBackend {
   factory FakeBackend({
@@ -1142,6 +1243,7 @@ class FakeBackend {
     List<Category> categories = const [],
     List<Transaction> transactions = const [],
     List<BudgetRule> budgets = const [],
+    List<SavingsGoal> goals = const [],
     String baseCurrency = 'COP',
     List<ExchangeRate> rates = const [],
   }) {
@@ -1168,6 +1270,7 @@ class FakeBackend {
       debtsRepository,
       budgetsRepository,
       recurringRepository,
+      FakeSavingsGoalRepository(accountsRepository, goals),
       FakeCurrencyRepository(
         base: baseCurrency,
         rates: rates,
@@ -1185,6 +1288,7 @@ class FakeBackend {
     this.debts,
     this.budgets,
     this.recurring,
+    this.goals,
     this.currency,
   );
 
@@ -1195,5 +1299,6 @@ class FakeBackend {
   final FakeDebtRepository debts;
   final FakeBudgetRepository budgets;
   final FakeRecurringRepository recurring;
+  final FakeSavingsGoalRepository goals;
   final FakeCurrencyRepository currency;
 }

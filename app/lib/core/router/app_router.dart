@@ -14,6 +14,7 @@ import '../../features/auth/presentation/register_screen.dart';
 import '../../features/currency/presentation/rates_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/recurring/presentation/recurring_screen.dart';
+import '../../features/savings/presentation/goals_screen.dart';
 import '../../features/debts/presentation/debts_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/summary/presentation/summary_screen.dart';
@@ -65,6 +66,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.recurring,
         builder: (context, state) => const RecurringScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.goals,
+        builder: (context, state) => const GoalsScreen(),
       ),
       GoRoute(
         path: AppRoutes.rates,

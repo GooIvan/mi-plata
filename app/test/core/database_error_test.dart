@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mi_plata/core/errors/database_error.dart';
 import 'package:mi_plata/features/budgets/presentation/budget_error_message.dart';
 import 'package:mi_plata/features/debts/presentation/debt_error_message.dart';
+import 'package:mi_plata/features/savings/presentation/goal_error_message.dart';
 import 'package:mi_plata/features/transactions/presentation/transaction_error_message.dart';
 import 'package:mi_plata/l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -62,6 +63,10 @@ void main() {
       'La deuda está archivada: restáurala para registrar abonos',
       'The debt is archived: restore it to record payments',
     ),
+    'goal_account_card': (
+      'Una tarjeta no puede ser la cuenta de una meta de ahorro',
+      "A card can't be the account of a savings goal",
+    ),
   };
 
   group('databaseErrorMessage', () {
@@ -111,6 +116,29 @@ void main() {
       expect(
         budgetErrorMessage(en, failure('Solo las categorías...', details: 'budget_expense_only')),
         'Only expense categories can have a budget',
+      );
+      expect(
+        goalErrorMessage(en, failure('Una tarjeta no puede...', details: 'goal_account_card')),
+        "A card can't be the account of a savings goal",
+      );
+    });
+
+    test('las metas explican sus errores de la base', () {
+      expect(
+        goalErrorMessage(en, failure('duplicate key', code: '23505')),
+        'That account already has another active goal.',
+      );
+      expect(
+        goalErrorMessage(es, failure('duplicate key', code: '23505')),
+        'Esa cuenta ya tiene otra meta activa.',
+      );
+      expect(
+        goalErrorMessage(en, failure('x', code: '23503')),
+        'The chosen account no longer exists.',
+      );
+      expect(
+        goalErrorMessage(en, failure('new row violates check constraint "x"')),
+        "Check the goal's details.",
       );
     });
 

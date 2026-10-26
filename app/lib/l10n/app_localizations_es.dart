@@ -1721,4 +1721,184 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get dbErrorInstallmentCurrency =>
       'La cuenta de las cuotas tiene que ser de la moneda de la deuda';
+
+  @override
+  String get goalsTitle => 'Metas de ahorro';
+
+  @override
+  String get goalsNew => 'Nueva meta';
+
+  @override
+  String get goalsEdit => 'Editar meta';
+
+  @override
+  String get goalsCreateButton => 'Crear meta';
+
+  @override
+  String get goalsEmpty =>
+      'Aún no tienes metas. Una meta es una cantidad que quieres juntar en una cuenta: lo que ahorras es el saldo de esa cuenta.';
+
+  @override
+  String get goalsAllArchived => 'Todas tus metas están archivadas.';
+
+  @override
+  String get goalsDashboardEmpty =>
+      'Junta plata para algo: crea una meta de ahorro.';
+
+  @override
+  String get goalsNameLabel => 'Nombre';
+
+  @override
+  String get goalsNameHint => 'Viaje, moto, fondo de emergencia';
+
+  @override
+  String get goalsNameRequired => 'Escribe el nombre de la meta';
+
+  @override
+  String get goalsTargetLabel => 'Cuánto quieres juntar';
+
+  @override
+  String get goalsTargetPositive => 'La meta tiene que ser mayor que cero';
+
+  @override
+  String get goalsAccountLabel => 'Cuenta donde ahorras';
+
+  @override
+  String get goalsAccountHelp =>
+      'Lo que llevas ahorrado es el saldo de esta cuenta. Para ahorrar, pasa plata a ella.';
+
+  @override
+  String get goalsAccountLocked => 'La cuenta de una meta no se cambia.';
+
+  @override
+  String get goalsAccountRequired => 'Elige la cuenta de la meta';
+
+  @override
+  String get goalsNoFreeAccount =>
+      'No tienes una cuenta libre: cada cuenta sirve para una sola meta y las tarjetas no sirven.';
+
+  @override
+  String get goalsNewAccount => 'Crear una cuenta nueva';
+
+  @override
+  String get goalsDeadlineLabel => 'Fecha límite (opcional)';
+
+  @override
+  String get goalsDeadlineNone => 'Sin fecha';
+
+  @override
+  String get goalsDeadlineClear => 'Quitar la fecha';
+
+  @override
+  String goalsSavedOf(String saved, String target) {
+    return '$saved de $target';
+  }
+
+  @override
+  String goalsRemaining(String amount) {
+    return 'Faltan $amount';
+  }
+
+  @override
+  String goalsDaysLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'quedan $count días',
+      one: 'queda $count día',
+      zero: 'vence hoy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get goalsStatusReached => '¡Meta cumplida!';
+
+  @override
+  String goalsStatusOverdue(String date, String amount) {
+    return 'Venció el $date · faltan $amount';
+  }
+
+  @override
+  String get goalsArchivedLabel => 'Archivada';
+
+  @override
+  String goalsAccountArchivedNote(String name) {
+    return 'La cuenta $name está archivada: ya no puedes ahorrar en ella.';
+  }
+
+  @override
+  String goalsSuggestMonthly(String amount) {
+    return 'Para llegar a tiempo, ahorra $amount al mes.';
+  }
+
+  @override
+  String goalsSuggestBefore(String amount, String date) {
+    return 'Para llegar a tiempo, ahorra $amount antes del $date.';
+  }
+
+  @override
+  String goalsDeadlineOn(String date) {
+    return 'Para el $date';
+  }
+
+  @override
+  String get goalsReachedHint =>
+      'Cuando ya no la necesites, archívala para liberar su cuenta.';
+
+  @override
+  String get goalsSave => 'Ahorrar';
+
+  @override
+  String get goalsWithdraw => 'Sacar';
+
+  @override
+  String goalsAccountRow(String name) {
+    return 'Cuenta: $name';
+  }
+
+  @override
+  String get goalsHistoryTitle => 'Movimientos de la meta';
+
+  @override
+  String get goalsHistoryEmpty =>
+      'Todavía no has ahorrado nada en esta cuenta.';
+
+  @override
+  String goalsMovementFrom(String account) {
+    return 'Desde $account';
+  }
+
+  @override
+  String goalsMovementTo(String account) {
+    return 'Hacia $account';
+  }
+
+  @override
+  String get goalsArchive => 'Archivar';
+
+  @override
+  String get goalsRestore => 'Restaurar';
+
+  @override
+  String get goalsArchivedMessage => 'Meta archivada';
+
+  @override
+  String get goalsRestoredMessage => 'Meta restaurada';
+
+  @override
+  String get goalsGone => 'Esta meta ya no existe.';
+
+  @override
+  String get goalsErrorInvalid => 'Revisa los datos de la meta.';
+
+  @override
+  String get goalsErrorAccountTaken => 'Esa cuenta ya tiene otra meta activa.';
+
+  @override
+  String get goalsErrorMissingAccount => 'La cuenta elegida ya no existe.';
+
+  @override
+  String get dbErrorGoalAccountCard =>
+      'Una tarjeta no puede ser la cuenta de una meta de ahorro';
 }

@@ -24,7 +24,7 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 - [x] **Internacionalización**: español e inglés. La app sigue el idioma del teléfono (español si no lo tiene) y se puede cambiar en Ajustes. Montos, fechas, errores de la base de datos y categorías por defecto también se adaptan (ver [Idiomas](#-idiomas)).
 - [x] **Soporte multimoneda**: cada cuenta tiene su moneda; todo se suma en una moneda base con tasas de cambio que defines tú, y las transferencias entre monedas dicen cuánto sale y cuánto llega (ver [Monedas](#-monedas)).
 - [x] **Pagos recurrentes** (suscripciones, arriendo): se registra qué se paga, cuánto y cada cuánto; cuando se acerca la fecha la app avisa con "Pago próximo" y **no descuenta nada hasta que confirmas que pagaste** (o lo omites). Ver [Pagos recurrentes](#-pagos-recurrentes).
-- [ ] **Metas de ahorro** con monto objetivo, fecha límite y progreso.
+- [x] **Metas de ahorro** con monto objetivo, fecha límite y progreso: cada meta se apoya en una cuenta y lo ahorrado es el saldo de esa cuenta. Ver [Metas de ahorro](#-metas-de-ahorro).
 
 ### Futuro
 - [ ] Modo sin conexión (primero consulta, luego registrar movimientos con cola de sincronización)
@@ -61,6 +61,9 @@ mi-plata/
 │           ├── summary/
 │           ├── debts/
 │           ├── budgets/
+│           ├── currency/
+│           ├── recurring/
+│           ├── savings/
 │           ├── settings/
 │           └── dashboard/
 ├── supabase/           # Migraciones SQL, vistas y políticas de seguridad
@@ -193,6 +196,20 @@ Una compra que se paga de a poco (un televisor en 12 cuotas, un crédito de una 
 - Omitir una cuota no cambia lo que debes: el plan sigue hasta que se pague todo, aunque pase de las cuotas pactadas.
 - La deuda es en la moneda de la cuenta con que se pagan las cuotas. Crear la compra no mueve dinero; cada abono es un gasto del mes en que lo pagas.
 - Todavía solo sirve para deudas que *debes*, y no para préstamos en los que recibes el dinero (para esos, registra el préstamo como una deuda normal).
+
+---
+
+## 🎯 Metas de ahorro
+
+Una meta es **una cantidad que quieres juntar en una cuenta**, con una fecha límite si quieres: un viaje, una moto, el fondo de emergencia.
+
+- **Cada meta se apoya en una cuenta** (la creas ahí mismo o eliges una que ya tienes) y **lo ahorrado es el saldo de esa cuenta**. No hay un "avance" guardado aparte, así que el dinero nunca se cuenta dos veces: si pasas plata a esa cuenta la meta sube, si la sacas baja, y los totales del panel siguen siendo los de siempre.
+- **Ahorrar es una transferencia.** En el detalle de la meta, *Ahorrar* abre el formulario de transferencia con la cuenta de la meta como destino, y *Sacar* con ella como origen. Si solo tienes otra cuenta, ya viene elegida.
+- **Cómo va**: porcentaje (hacia abajo: no dice 100 % antes de llegar), lo que falta y los días que quedan. Una meta cumplida se marca ("¡Meta cumplida!") y una vencida sin cumplir dice cuánto faltó. Siempre con ícono y texto, no solo color.
+- **Cuánto ahorrar**: con fecha, el detalle sugiere cuánto apartar al mes para llegar a tiempo (redondeado hacia arriba a la unidad entera, nunca más de lo que falta) o, si queda menos de un mes, todo lo que falta antes de la fecha.
+- **Reglas**: una cuenta tiene **una sola meta activa** (dos metas sobre la misma cuenta serían el mismo dinero) y **una tarjeta no puede ser la cuenta de una meta**. La cuenta de una meta no se cambia después. El monto está en la moneda de la cuenta.
+- **Archivar**: cuando ya no la necesites, archiva la meta; su cuenta queda libre para otra, y las archivadas se consultan con el botón de la lista. Un saldo negativo cuenta como cero ahorrado.
+- **En el panel** salen las tres metas que vencen primero, con su barra de avance; la lista completa está en *Metas de ahorro*.
 
 ---
 
