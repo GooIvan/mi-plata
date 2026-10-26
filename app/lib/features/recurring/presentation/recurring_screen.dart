@@ -77,25 +77,29 @@ class _List extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
           child: Text(title, style: theme.textTheme.titleMedium),
         ),
-        for (final payment in list) ...[
-          RecurringTile(
-            payment: payment,
-            today: today,
-            currency: currencies[payment.accountId],
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => RecurringDetailScreen(paymentId: payment.id),
+        for (final payment in list)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+            child: Card(
+              child: RecurringTile(
+                payment: payment,
+                today: today,
+                currency: currencies[payment.accountId],
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) =>
+                        RecurringDetailScreen(paymentId: payment.id),
+                  ),
+                ),
+                onPay: payment.needsAttention(today)
+                    ? () => showConfirmPaymentSheet(context, payment)
+                    : null,
               ),
             ),
-            onPay: payment.needsAttention(today)
-                ? () => showConfirmPaymentSheet(context, payment)
-                : null,
           ),
-          const Divider(height: 1),
-        ],
       ],
     );
 

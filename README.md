@@ -27,6 +27,9 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 - [x] **Metas de ahorro** con monto objetivo, fecha límite y progreso: cada meta se apoya en una cuenta y lo ahorrado es el saldo de esa cuenta. Ver [Metas de ahorro](#-metas-de-ahorro).
 - [x] **Barra de navegación** con cinco pestañas (Inicio, Actividad, Cuentas, Metas y Más). *Más* reúne el resumen mensual, presupuestos, deudas, pagos recurrentes, categorías y ajustes. Cada pestaña conserva lo que estabas viendo al cambiar, y tocar la pestaña en la que estás vuelve a su pantalla inicial.
 
+### Diseño
+- [x] **Diseño renovado**: tema propio con la tipografía Plus Jakarta Sans (empaquetada en `app/assets/fonts`, licencia OFL), paleta esmeralda en claro y oscuro, tarjetas redondeadas y colores con significado (verde ingresos, rojo gastos, azul transferencias). El Inicio abre con una tarjeta del dinero total con lo que entró y salió este mes (se pone roja si el total es negativo) y las cuentas como tarjetas con el color de su tipo. Los colores del dinero viven en `FinanceColors` (`app/lib/core/theme/`) y una prueba verifica su contraste.
+
 ### Futuro
 - [ ] Modo sin conexión (primero consulta, luego registrar movimientos con cola de sincronización)
 - [ ] Importación de extractos bancarios (CSV)
@@ -244,6 +247,7 @@ Cada cuenta (y cada deuda) tiene su moneda, que se elige al crearla y no cambia.
 - **Commits**: [Conventional Commits](https://www.conventionalcommits.org/es/) (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`).
 - **Ramas**: `main` estable; nuevas funcionalidades en `feat/<nombre>`.
 - **Idioma**: el código, las tablas y las columnas van en inglés. Los textos que ve el usuario nunca se escriben en el código: van en `app/lib/l10n/*.arb`, uno por idioma.
+- **Colores**: las pantallas no usan colores sueltos: salen del tema (`Theme.of(context).colorScheme` y `context.finance`).
 - **Base de datos**: todo cambio de esquema se hace mediante una migración en `supabase/migrations/`, nunca a mano desde el panel.
 
 ---

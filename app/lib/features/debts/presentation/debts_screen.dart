@@ -139,18 +139,21 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen>
             total: total,
             currency: converter.base,
           ),
-        for (final debt in visible) ...[
-          DebtTile(
-            debt: debt,
-            today: today,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => DebtDetailScreen(debtId: debt.id),
+        for (final debt in visible)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+            child: Card(
+              child: DebtTile(
+                debt: debt,
+                today: today,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => DebtDetailScreen(debtId: debt.id),
+                  ),
+                ),
               ),
             ),
           ),
-          const Divider(height: 1),
-        ],
       ],
     );
   }

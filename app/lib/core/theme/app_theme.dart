@@ -161,7 +161,10 @@ class AppTheme {
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: SegmentedButton.styleFrom(
-          textStyle: text.labelLarge,
+          // Con "Transferencia" en tres segmentos, el relleno de fábrica no
+          // deja espacio en un teléfono de 360 px.
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          textStyle: text.labelLarge?.copyWith(fontSize: 13),
           side: BorderSide(color: scheme.outlineVariant),
         ),
       ),
