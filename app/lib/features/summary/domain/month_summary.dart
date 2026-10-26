@@ -1,3 +1,5 @@
+import '../../currency/domain/currency.dart';
+import '../../currency/domain/currency_converter.dart';
 import '../../transactions/domain/transaction_type.dart';
 import 'monthly_total.dart';
 
@@ -54,9 +56,14 @@ class MonthSummary {
     required this.incomeCentsByCategory,
     required this.expenseCentsByCategory,
     required this.movements,
+    this.currency = defaultCurrency,
+    this.missingCurrencies = const {},
   });
 
   final DateTime month;
+
+  /// La moneda de los montos: la moneda base del usuario.
+  final String currency;
   final int incomeCents;
   final int expenseCents;
 
@@ -69,6 +76,9 @@ class MonthSummary {
   final Map<String?, int> incomeCentsByCategory;
   final Map<String?, int> expenseCentsByCategory;
   final int movements;
+
+  /// Las monedas con movimientos este mes que no se sumaron por no tener tasa.
+  final Set<String> missingCurrencies;
 
   int get balanceCents => incomeCents - expenseCents;
   bool get isEmpty => movements == 0;
@@ -118,46 +128,78 @@ class SpendingPace {
   final int? projectedCents;
 }
 
+/// Una fila del resumen ya pasada a la moneda base.
+typedef _Converted = ({
+  TransactionType type,
+  String? categoryId,
+  int cents,
+  int movements,
+});
+
 /// Calcula el resumen a partir de las filas de `v_monthly_totals`.
 ///
 /// Todo se suma en centavos enteros para no acumular error de punto
-/// flotante. De momento solo se resume una moneda (el peso colombiano).
+/// flotante. Los movimientos de otras monedas se pasan a la moneda base con la
+/// tasa de hoy; los de una moneda sin tasa no se suman (ver
+/// [MonthSummary.missingCurrencies]).
 class SummaryCalculator {
   const SummaryCalculator._();
 
-  static const currency = 'COP';
-
   /// Cuántas categorías se muestran antes de agrupar el resto en "Otras".
   static const maxCategories = 7;
-
-  static int _cents(double amount) => (amount * 100).round();
 
   static DateTime monthStart(DateTime date) => DateTime(date.year, date.month);
 
   static DateTime addMonths(DateTime month, int months) =>
       DateTime(month.year, month.month + months);
 
-  /// Lo que pasó en [month].
-  static MonthSummary forMonth(Iterable<MonthlyTotal> rows, DateTime month) {
+  /// Lo que pasó en [month], en la moneda base de [converter].
+  static MonthSummary forMonth(
+    Iterable<MonthlyTotal> rows,
+    DateTime month,
+    CurrencyConverter converter,
+  ) {
     final start = monthStart(month);
-    final ofMonth = rows
-        .where((row) => row.currency == currency && row.month == start)
-        .toList();
+    final ofMonth = rows.where((row) => row.month == start).toList();
 
-    final income = _byCategory(ofMonth, TransactionType.income);
-    final expense = _byCategory(ofMonth, TransactionType.expense);
+    // Las filas de una moneda sin tasa no se pueden sumar: se apartan.
+    final missing = converter.missing(ofMonth.map((row) => row.currency));
+    final converted = [
+      for (final row in ofMonth)
+        if (!missing.contains(row.currency))
+          (
+            type: row.type,
+            categoryId: row.categoryId,
+            cents: converter.toBaseCents(
+              (row.total * 100).round(),
+              row.currency,
+            )!,
+            movements: row.movements,
+          ),
+    ];
+
+    final income = _byCategory(converted, TransactionType.income);
+    final expense = _byCategory(converted, TransactionType.expense);
 
     return MonthSummary(
       month: start,
-      incomeCents: _sum(ofMonth, TransactionType.income),
-      expenseCents: _sum(ofMonth, TransactionType.expense),
+      incomeCents: _sum(converted, TransactionType.income),
+      expenseCents: _sum(converted, TransactionType.expense),
       incomeByCategory: _shares(income),
       expenseByCategory: _shares(expense),
       incomeCentsByCategory: income,
       expenseCentsByCategory: expense,
-      movements: ofMonth.fold(0, (total, row) => total + row.movements),
+      movements: converted.fold(0, (total, row) => total + row.movements),
+      currency: converter.base,
+      missingCurrencies: missing,
     );
   }
+
+  /// Las monedas de [rows] que no tienen tasa, en cualquiera de sus meses.
+  static Set<String> missingCurrencies(
+    Iterable<MonthlyTotal> rows,
+    CurrencyConverter converter,
+  ) => converter.missing(rows.map((row) => row.currency));
 
   /// Los días que tiene [month].
   static int daysInMonth(DateTime month) =>
@@ -191,14 +233,15 @@ class SummaryCalculator {
   /// viejo al más reciente. Un mes sin movimientos cuenta como cero.
   static List<MonthPoint> trend(
     Iterable<MonthlyTotal> rows,
-    DateTime end, {
+    DateTime end,
+    CurrencyConverter converter, {
     int months = 6,
   }) {
     final last = monthStart(end);
     return [
       for (var i = months - 1; i >= 0; i--)
         () {
-          final summary = forMonth(rows, addMonths(last, -i));
+          final summary = forMonth(rows, addMonths(last, -i), converter);
           return MonthPoint(
             month: summary.month,
             incomeCents: summary.incomeCents,
@@ -208,22 +251,22 @@ class SummaryCalculator {
     ];
   }
 
-  static int _sum(List<MonthlyTotal> rows, TransactionType type) => rows
+  static int _sum(List<_Converted> rows, TransactionType type) => rows
       .where((row) => row.type == type)
-      .fold(0, (total, row) => total + _cents(row.total));
+      .fold(0, (total, row) => total + row.cents);
 
   /// Lo de cada categoría de [type], en centavos (la clave nula es "sin
   /// categoría").
   static Map<String?, int> _byCategory(
-    List<MonthlyTotal> rows,
+    List<_Converted> rows,
     TransactionType type,
   ) {
     final byCategory = <String?, int>{};
     for (final row in rows.where((row) => row.type == type)) {
       byCategory.update(
         row.categoryId,
-        (cents) => cents + _cents(row.total),
-        ifAbsent: () => _cents(row.total),
+        (cents) => cents + row.cents,
+        ifAbsent: () => row.cents,
       );
     }
     return byCategory;

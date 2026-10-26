@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../../accounts/domain/account.dart';
+import '../../currency/domain/currency_converter.dart';
 import 'month_summary.dart';
 
 /// Cuánto entró (positivo) o salió (negativo) de una cuenta en un mes: una
@@ -46,14 +47,64 @@ class BalanceHistory {
   /// El dinero total, mes a mes, de los [months] meses que terminan en [end]
   /// (del más viejo al más reciente).
   ///
-  /// Solo cuentan las cuentas activas de [currency], igual que el total del
-  /// panel. Lo que ocurra después de [end] no entra.
+  /// Solo cuentan las cuentas activas, igual que el total del panel. El dinero
+  /// de otras monedas se pasa a la moneda base con la tasa de hoy (no hay
+  /// tasas históricas) y el de una moneda sin tasa no se suma. Lo que ocurra
+  /// después de [end] no entra.
   static List<BalancePoint> compute({
     required Iterable<Account> accounts,
     required Iterable<AccountFlow> flows,
     required DateTime end,
+    required CurrencyConverter converter,
     int months = 6,
-    String currency = 'COP',
+  }) {
+    final currencies = {
+      for (final account in accounts)
+        if (!account.isArchived && converter.canConvert(account.currency))
+          account.currency,
+    };
+
+    // Cada moneda se reconstruye por separado y luego se pasa a la base.
+    final totals = List.filled(months, 0);
+    for (final currency in currencies) {
+      final points = _compute(
+        accounts: accounts,
+        flows: flows,
+        end: end,
+        months: months,
+        currency: currency,
+      );
+      for (var i = 0; i < months; i++) {
+        totals[i] += converter.toBaseCents(points[i].cents, currency)!;
+      }
+    }
+
+    final last = SummaryCalculator.monthStart(end);
+    final first = SummaryCalculator.addMonths(last, -(months - 1));
+    return [
+      for (var i = 0; i < months; i++)
+        BalancePoint(
+          month: SummaryCalculator.addMonths(first, i),
+          cents: totals[i],
+        ),
+    ];
+  }
+
+  /// Las monedas con cuentas activas que no se pueden pasar a la base.
+  static Set<String> missingCurrencies(
+    Iterable<Account> accounts,
+    CurrencyConverter converter,
+  ) => converter.missing([
+    for (final account in accounts)
+      if (!account.isArchived) account.currency,
+  ]);
+
+  static List<BalancePoint> _compute({
+    required Iterable<Account> accounts,
+    required Iterable<AccountFlow> flows,
+    required DateTime end,
+    required int months,
+    required String currency,
   }) {
     final last = SummaryCalculator.monthStart(end);
     final first = SummaryCalculator.addMonths(last, -(months - 1));

@@ -41,13 +41,15 @@ class IntegrationHarness {
     return client;
   }
 
-  /// Un cliente con un usuario nuevo y la sesión ya abierta.
-  Future<SupabaseClient> signedUpClient(String prefix) async {
+  /// Un cliente con un usuario nuevo y la sesión ya abierta. [language] es el
+  /// idioma con que se registra (si no se indica, no manda ninguno).
+  Future<SupabaseClient> signedUpClient(String prefix, {String? language}) async {
     final client = newClient();
     final email = '$prefix-${DateTime.now().microsecondsSinceEpoch}@example.com';
     final response = await client.auth.signUp(
       email: email,
       password: 'clave-segura-1',
+      data: language == null ? null : {'language': language},
     );
     expect(response.session, isNotNull, reason: 'el registro abre sesión');
     return client;

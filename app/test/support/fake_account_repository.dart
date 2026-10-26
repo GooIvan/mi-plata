@@ -10,11 +10,12 @@ Account testAccount(
   AccountType type = AccountType.bank,
   double balance = 0,
   bool archived = false,
+  String currency = 'COP',
 }) => Account(
   id: 'id-$name',
   name: name,
   type: type,
-  currency: 'COP',
+  currency: currency,
   initialBalance: balance,
   currentBalance: balance,
   isArchived: archived,
@@ -50,7 +51,7 @@ class FakeAccountRepository implements AccountRepository {
       }
       if (transaction.type == TransactionType.transfer &&
           transaction.destinationAccountId == accountId) {
-        total += transaction.amount;
+        total += transaction.destinationAmount ?? transaction.amount;
       }
     }
     return total;
@@ -74,12 +75,23 @@ class FakeAccountRepository implements AccountRepository {
     required String name,
     required AccountType type,
     required String initialBalance,
+    required String currency,
   }) async {
-    calls.add('create:$name:${type.name}:$initialBalance');
+    // La moneda solo se anota cuando no es el peso: así las pruebas de siempre
+    // siguen comparando 'create:Nombre:tipo:saldo'.
+    calls.add(
+      'create:$name:${type.name}:$initialBalance'
+      '${currency == 'COP' ? '' : ':$currency'}',
+    );
     if (error != null) throw error!;
     _failIfNameTaken(name);
     _accounts.add(
-      testAccount(name, type: type, balance: double.parse(initialBalance)),
+      testAccount(
+        name,
+        type: type,
+        balance: double.parse(initialBalance),
+        currency: currency,
+      ),
     );
   }
 
@@ -99,7 +111,7 @@ class FakeAccountRepository implements AccountRepository {
       id: id,
       name: name,
       type: type,
-      currency: 'COP',
+      currency: _accounts[index].currency,
       initialBalance: balance,
       currentBalance: balance,
       isArchived: _accounts[index].isArchived,

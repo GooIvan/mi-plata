@@ -6,11 +6,22 @@ import 'package:mi_plata/features/categories/data/category_repository.dart';
 import 'package:mi_plata/features/categories/domain/category.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
 import 'package:mi_plata/features/accounts/domain/account.dart';
+import 'package:mi_plata/features/accounts/domain/account_type.dart';
+import 'package:mi_plata/features/currency/data/currency_repository.dart';
+import 'package:mi_plata/features/currency/domain/exchange_rate.dart';
 import 'package:mi_plata/features/debts/data/debt_repository.dart';
+import 'package:mi_plata/features/recurring/data/recurring_repository.dart';
+import 'package:mi_plata/features/recurring/domain/recurrence.dart';
+import 'package:mi_plata/features/recurring/domain/recurring_draft.dart';
+import 'package:mi_plata/features/recurring/domain/recurring_payment.dart';
 import 'package:mi_plata/features/debts/domain/debt.dart';
 import 'package:mi_plata/features/debts/domain/debt_direction.dart';
 import 'package:mi_plata/features/debts/domain/debt_draft.dart';
 import 'package:mi_plata/features/debts/domain/debt_payment.dart';
+import 'package:mi_plata/features/debts/domain/installment_plan_draft.dart';
+import 'package:mi_plata/features/savings/data/savings_goal_repository.dart';
+import 'package:mi_plata/features/savings/domain/goal_draft.dart';
+import 'package:mi_plata/features/savings/domain/savings_goal.dart';
 import 'package:mi_plata/features/summary/data/summary_repository.dart';
 import 'package:mi_plata/features/summary/domain/balance_history.dart';
 import 'package:mi_plata/features/summary/domain/monthly_total.dart';
@@ -38,6 +49,7 @@ Transaction testTransaction(
   required double amount,
   required DateTime date,
   String? description,
+  double? destinationAmount,
 }) => Transaction(
   id: id,
   type: type,
@@ -45,6 +57,7 @@ Transaction testTransaction(
   destinationAccountId: destinationAccountId,
   categoryId: categoryId,
   amount: amount,
+  destinationAmount: destinationAmount,
   date: date,
   description: description,
 );
@@ -230,6 +243,9 @@ class FakeTransactionRepository implements TransactionRepository {
     destinationAccountId: draft.destinationAccountId,
     categoryId: draft.categoryId,
     amount: double.parse(draft.amount),
+    destinationAmount: draft.destinationAmount == null
+        ? null
+        : double.parse(draft.destinationAmount!),
     date: draft.date,
     description: draft.description,
   );
@@ -238,9 +254,14 @@ class FakeTransactionRepository implements TransactionRepository {
 /// Imita la vista `v_monthly_totals`: agrupa por mes, tipo y categoría, y deja
 /// fuera las transferencias.
 class FakeSummaryRepository implements SummaryRepository {
-  FakeSummaryRepository(this.transactions);
+  FakeSummaryRepository(this.transactions, [this.currencyOf = _cop]);
 
   final List<Transaction> transactions;
+
+  /// La moneda de una cuenta (por id): la de sus movimientos.
+  final String Function(String accountId) currencyOf;
+
+  static String _cop(String accountId) => 'COP';
   Object? error;
   final requests = <({DateTime from, DateTime to})>[];
 
@@ -257,13 +278,14 @@ class FakeSummaryRepository implements SummaryRepository {
     await gate?.future;
     if (error != null) throw error!;
 
-    final totals = <(DateTime, TransactionType, String?), (double, int)>{};
+    final totals =
+        <(DateTime, String, TransactionType, String?), (double, int)>{};
     for (final t in transactions) {
       if (t.type == TransactionType.transfer) continue;
       final month = DateTime(t.date.year, t.date.month);
       if (month.isBefore(from) || month.isAfter(to)) continue;
 
-      final key = (month, t.type, t.categoryId);
+      final key = (month, currencyOf(t.accountId), t.type, t.categoryId);
       final (sum, count) = totals[key] ?? (0.0, 0);
       totals[key] = (sum + t.amount, count + 1);
     }
@@ -302,25 +324,39 @@ class FakeSummaryRepository implements SummaryRepository {
           add(month, t.accountId, -cents);
         case TransactionType.transfer:
           add(month, t.accountId, -cents);
-          add(month, t.destinationAccountId!, cents);
+          add(
+            month,
+            t.destinationAccountId!,
+            t.destinationAmount == null
+                ? cents
+                : (t.destinationAmount! * 100).round(),
+          );
       }
     }
 
     return [
       for (final MapEntry(key: (month, accountId), value: cents) in flows.entries)
-        AccountFlow(month: month, accountId: accountId, currency: 'COP', cents: cents),
+        AccountFlow(
+          month: month,
+          accountId: accountId,
+          currency: currencyOf(accountId),
+          cents: cents,
+        ),
     ];
   }
 
   List<MonthlyTotal> _monthlyTotals(
-    Map<(DateTime, TransactionType, String?), (double, int)> totals,
+    Map<(DateTime, String, TransactionType, String?), (double, int)> totals,
   ) {
     return [
-      for (final MapEntry(key: (month, type, categoryId), value: (sum, count))
+      for (final MapEntry(
+            key: (month, currency, type, categoryId),
+            value: (sum, count),
+          )
           in totals.entries)
         MonthlyTotal(
           month: month,
-          currency: 'COP',
+          currency: currency,
           type: type,
           categoryId: categoryId,
           total: sum,
@@ -337,12 +373,14 @@ class _StoredDebt {
     required this.counterparty,
     required this.amount,
     required this.startDate,
+    this.currency = 'COP',
     this.dueDate,
     this.notes,
     this.isArchived = false,
   });
 
   final String id;
+  final String currency;
   final DebtDirection direction;
   String counterparty;
   double amount;
@@ -364,10 +402,23 @@ class FakeDebtRepository implements DebtRepository {
   final _links = <({String debtId, String transactionId})>[];
   var _next = 1;
 
+  /// Los pagos recurrentes: un plan de cuotas se crea junto con su deuda.
+  late FakeRecurringRepository recurring;
+
   /// Error que lanzarán todas las operaciones mientras no sea null.
   Object? error;
 
   final calls = <String>[];
+
+  /// Lo que falta por pagar de una deuda (null si no existe).
+  double? remainingOf(String debtId) {
+    final debt = _debts.where((d) => d.id == debtId).firstOrNull;
+    return debt == null ? null : debt.amount - _paid(debt);
+  }
+
+  /// Cuántos abonos lleva una deuda.
+  int paymentsOf(String debtId) =>
+      _links.where((link) => link.debtId == debtId).length;
 
   /// Agrega una deuda ya hecha, con sus abonos, sin pasar por la interfaz.
   /// Devuelve su id.
@@ -381,6 +432,7 @@ class FakeDebtRepository implements DebtRepository {
     String? notes,
     bool archived = false,
     String accountId = 'id-Bancolombia',
+    String currency = 'COP',
   }) {
     final debt = _StoredDebt(
       id: 'debt-${_next++}',
@@ -388,6 +440,7 @@ class FakeDebtRepository implements DebtRepository {
       counterparty: counterparty,
       amount: amount,
       startDate: startDate ?? DateTime(2026, 1, 1),
+      currency: currency,
       dueDate: dueDate,
       notes: notes,
       isArchived: archived,
@@ -426,8 +479,10 @@ class FakeDebtRepository implements DebtRepository {
     return id;
   }
 
-  Never _fail(String message, String code) =>
-      throw PostgrestException(message: message, code: code);
+  /// Falla como la base de datos: con su código y, si lo trae, el código
+  /// estable de la validación en `details`.
+  Never _fail(String message, String code, [String? details]) =>
+      throw PostgrestException(message: message, code: code, details: details);
 
   @override
   Future<List<Debt>> fetchAll() async {
@@ -442,7 +497,7 @@ class FakeDebtRepository implements DebtRepository {
           amount: debt.amount,
           paid: _paid(debt),
           remaining: debt.amount - _paid(debt),
-          currency: 'COP',
+          currency: debt.currency,
           startDate: debt.startDate,
           dueDate: debt.dueDate,
           notes: debt.notes,
@@ -477,7 +532,7 @@ class FakeDebtRepository implements DebtRepository {
 
     final accountId = draft.accountId;
     if (accountId != null && !_accounts.accounts.any((a) => a.id == accountId)) {
-      _fail('La cuenta no existe', '23503');
+      _fail('La cuenta no existe', '23503', 'account_not_found');
     }
 
     final debt = _StoredDebt(
@@ -486,6 +541,9 @@ class FakeDebtRepository implements DebtRepository {
       counterparty: draft.counterparty,
       amount: double.parse(draft.amount),
       startDate: draft.startDate,
+      currency: accountId != null
+          ? _accounts.accounts.firstWhere((a) => a.id == accountId).currency
+          : draft.currency ?? 'COP',
       dueDate: draft.dueDate,
       notes: draft.notes,
     );
@@ -500,7 +558,9 @@ class FakeDebtRepository implements DebtRepository {
           accountId: accountId,
           amount: debt.amount,
           date: draft.startDate,
-          description: '${payable ? 'Préstamo de' : 'Préstamo a'} ${debt.counterparty}',
+          description:
+              draft.description ??
+              '${payable ? 'Préstamo de' : 'Préstamo a'} ${debt.counterparty}',
         ),
       );
     }
@@ -519,7 +579,11 @@ class FakeDebtRepository implements DebtRepository {
     final debt = _debts.firstWhere((d) => d.id == id);
     final newAmount = double.parse(amount);
     if (newAmount < _paid(debt)) {
-      _fail('El monto no puede ser menor a lo que ya se ha pagado', '23514');
+      _fail(
+        'El monto no puede ser menor a lo que ya se ha pagado',
+        '23514',
+        'debt_amount_below_paid',
+      );
     }
     debt
       ..counterparty = counterparty
@@ -543,17 +607,42 @@ class FakeDebtRepository implements DebtRepository {
     required DateTime date,
     String? description,
   }) async {
+    await _registerPayment(
+      debtId: debtId,
+      accountId: accountId,
+      amount: amount,
+      date: date,
+      description: description,
+    );
+  }
+
+  /// Registra el abono y devuelve el id de su movimiento.
+  Future<String> _registerPayment({
+    required String debtId,
+    required String accountId,
+    required String amount,
+    required DateTime date,
+    String? description,
+  }) async {
     calls.add('registerPayment:$debtId:$accountId:$amount');
     if (error != null) throw error!;
 
     final debt = _debts.where((d) => d.id == debtId).firstOrNull;
-    if (debt == null) _fail('La deuda no existe', '23503');
+    if (debt == null) _fail('La deuda no existe', '23503', 'debt_not_found');
     if (debt.isArchived) {
-      _fail('La deuda está archivada: restáurala para registrar abonos', '23514');
+      _fail(
+        'La deuda está archivada: restáurala para registrar abonos',
+        '23514',
+        'debt_archived',
+      );
     }
     final value = double.parse(amount);
     if (_paid(debt) + value > debt.amount) {
-      _fail('El abono supera lo que falta por pagar', '23514');
+      _fail(
+        'El abono supera lo que falta por pagar',
+        '23514',
+        'payment_exceeds_remaining',
+      );
     }
 
     final id = _addPayment(debt, accountId, value, date);
@@ -569,6 +658,43 @@ class FakeDebtRepository implements DebtRepository {
         description: description,
       );
     }
+    return id;
+  }
+
+  @override
+  Future<void> createWithInstallments(InstallmentPlanDraft draft) async {
+    calls.add(
+      'createInstallments:${draft.counterparty}:${draft.amount}:'
+      '${draft.installments}x${draft.installmentAmount}',
+    );
+    if (error != null) throw error!;
+
+    final account = _accounts.accounts
+        .where((a) => a.id == draft.accountId)
+        .firstOrNull;
+    if (account == null) {
+      _fail('La cuenta no existe', '23503', 'account_not_found');
+    }
+    final debt = _StoredDebt(
+      id: 'debt-${_next++}',
+      direction: DebtDirection.payable,
+      counterparty: draft.counterparty,
+      amount: double.parse(draft.amount),
+      startDate: draft.startDate,
+      currency: account.currency,
+      notes: draft.notes,
+    );
+    _debts.add(debt);
+    recurring.seed(
+      name: draft.counterparty,
+      amount: double.parse(draft.installmentAmount),
+      accountId: draft.accountId,
+      categoryId: draft.categoryId,
+      recurrence: draft.recurrence,
+      nextDueDate: draft.firstDue,
+      debtId: debt.id,
+      installments: draft.installments,
+    );
   }
 }
 
@@ -584,6 +710,20 @@ class FakeBudgetRepository implements BudgetRepository {
 
   /// Si se asigna, las consultas esperan a que se complete.
   Completer<void>? gate;
+
+  /// Cambia la moneda base: los montos pasan de la base de antes a la nueva
+  /// (1 nueva = [rate] viejas), como hace `set_base_currency`.
+  void rescale(double rate) {
+    for (var i = 0; i < rules.length; i++) {
+      final rule = rules[i];
+      rules[i] = BudgetRule(
+        id: rule.id,
+        categoryId: rule.categoryId,
+        month: rule.month,
+        cents: (rule.cents / rate).round(),
+      );
+    }
+  }
 
   @override
   Future<List<BudgetRule>> fetchAll() async {
@@ -620,6 +760,482 @@ class FakeBudgetRepository implements BudgetRepository {
   }
 }
 
+/// Imita la tabla `recurring_payments` y las funciones `confirm_recurring_payment`
+/// y `skip_recurring_payment`: confirmar crea un gasto de verdad (en la lista de
+/// movimientos compartida) y pasa la regla a la fecha siguiente.
+class FakeRecurringRepository implements RecurringRepository {
+  FakeRecurringRepository(this._transactions);
+
+  final List<Transaction> _transactions;
+
+  /// Las deudas de los planes de cuotas.
+  late FakeDebtRepository debts;
+  final _payments = <RecurringPayment>[];
+  final _links = <String, String>{}; // id del movimiento -> id de la regla
+  var _next = 1;
+
+  /// Error que lanzarán todas las operaciones mientras no sea null.
+  Object? error;
+
+  final calls = <String>[];
+
+  /// Si se asigna, las consultas esperan a que se complete.
+  Completer<void>? gate;
+
+  List<RecurringPayment> get payments => List.unmodifiable(_payments);
+
+  /// Agrega un pago ya hecho, sin pasar por la interfaz. Devuelve su id.
+  String seed({
+    String name = 'Netflix',
+    double amount = 30000,
+    String accountId = 'id-Bancolombia',
+    String? categoryId,
+    Recurrence recurrence = Recurrence.monthly,
+    DateTime? nextDueDate,
+    DateTime? endDate,
+    bool paused = false,
+    String? debtId,
+    int? installments,
+  }) {
+    final due = nextDueDate ?? DateTime(2026, 11, 5);
+    final payment = RecurringPayment(
+      id: 'rec-${_next++}',
+      name: name,
+      amount: amount,
+      accountId: accountId,
+      categoryId: categoryId,
+      recurrence: recurrence,
+      nextDueDate: due,
+      anchorDay: due.day,
+      endDate: endDate,
+      isPaused: paused,
+      debtId: debtId,
+      installments: installments,
+    );
+    _payments.add(payment);
+    return payment.id;
+  }
+
+  /// El borrador como lo devolvería la base: el monto como número.
+  Map<String, dynamic> _row(RecurringDraft draft) => {
+    ...draft.toJson(),
+    'amount': double.parse(draft.amount),
+  };
+
+  Never _fail(String message, String code, String details) =>
+      throw PostgrestException(message: message, code: code, details: details);
+
+  RecurringPayment _find(String id) {
+    final payment = _payments.where((p) => p.id == id).firstOrNull;
+    if (payment == null) {
+      _fail('El pago recurrente no existe', '23503', 'recurring_not_found');
+    }
+    return payment;
+  }
+
+  /// Como la vista `v_recurring_payments`: con lo que falta de la deuda de un
+  /// plan y los abonos que lleva.
+  RecurringPayment _view(RecurringPayment payment) {
+    final debtId = payment.debtId;
+    if (debtId == null) return payment;
+    return RecurringPayment(
+      id: payment.id,
+      name: payment.name,
+      amount: payment.amount,
+      accountId: payment.accountId,
+      categoryId: payment.categoryId,
+      recurrence: payment.recurrence,
+      nextDueDate: payment.nextDueDate,
+      anchorDay: payment.anchorDay,
+      endDate: payment.endDate,
+      isPaused: payment.isPaused,
+      debtId: debtId,
+      installments: payment.installments,
+      installmentsPaid: debts.paymentsOf(debtId),
+      debtRemaining: debts.remainingOf(debtId),
+    );
+  }
+
+  /// Si la deuda del plan ya quedó saldada, no hay más cuotas.
+  bool _settled(RecurringPayment payment) {
+    final debtId = payment.debtId;
+    if (debtId == null) return false;
+    return (debts.remainingOf(debtId) ?? 0) <= 0;
+  }
+
+  void _replace(RecurringPayment payment, {DateTime? nextDueDate, bool? paused, bool clearNext = false}) {
+    final index = _payments.indexWhere((p) => p.id == payment.id);
+    _payments[index] = RecurringPayment(
+      id: payment.id,
+      name: payment.name,
+      amount: payment.amount,
+      accountId: payment.accountId,
+      categoryId: payment.categoryId,
+      recurrence: payment.recurrence,
+      nextDueDate: clearNext ? null : (nextDueDate ?? payment.nextDueDate),
+      anchorDay: payment.anchorDay,
+      endDate: payment.endDate,
+      isPaused: paused ?? payment.isPaused,
+      debtId: payment.debtId,
+      installments: payment.installments,
+    );
+  }
+
+  /// La fecha que sigue, o null si pasa de la fecha final.
+  DateTime? _following(RecurringPayment payment) {
+    final next = payment.recurrence.advance(
+      payment.nextDueDate!,
+      anchorDay: payment.anchorDay,
+    );
+    final end = payment.endDate;
+    return end != null && next.isAfter(end) ? null : next;
+  }
+
+  @override
+  Future<List<RecurringPayment>> fetchAll() async {
+    calls.add('fetchAll');
+    await gate?.future;
+    if (error != null) throw error!;
+    return [for (final p in _payments) _view(p)]..sort((a, b) {
+      final dueA = a.nextDueDate;
+      final dueB = b.nextDueDate;
+      if (dueA == null || dueB == null) {
+        if (dueA == dueB) return a.name.compareTo(b.name);
+        return dueA == null ? 1 : -1; // los terminados, al final
+      }
+      final byDue = dueA.compareTo(dueB);
+      return byDue != 0 ? byDue : a.name.compareTo(b.name);
+    });
+  }
+
+  @override
+  Future<void> create(RecurringDraft draft) async {
+    calls.add('create:${draft.name}:${draft.amount}:${draft.recurrence.every}${draft.recurrence.unit.name}');
+    if (error != null) throw error!;
+    _payments.add(
+      RecurringPayment.fromJson({
+        'id': 'rec-${_next++}',
+        ..._row(draft),
+        'is_paused': false,
+      }),
+    );
+  }
+
+  @override
+  Future<void> update(String id, RecurringDraft draft) async {
+    calls.add('update:$id:${draft.name}:${draft.amount}');
+    if (error != null) throw error!;
+    final old = _find(id);
+    final index = _payments.indexWhere((p) => p.id == id);
+    _payments[index] = RecurringPayment.fromJson({
+      'id': id,
+      ..._row(draft),
+      'is_paused': old.isPaused,
+    });
+  }
+
+  @override
+  Future<void> setPaused(String id, {required bool paused}) async {
+    calls.add('setPaused:$id:$paused');
+    if (error != null) throw error!;
+    _replace(_find(id), paused: paused);
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    calls.add('delete:$id');
+    if (error != null) throw error!;
+    _find(id);
+    _payments.removeWhere((p) => p.id == id);
+    _links.removeWhere((_, rule) => rule == id); // los gastos se quedan
+  }
+
+  @override
+  Future<void> confirm({
+    required String id,
+    required String accountId,
+    required String amount,
+    required DateTime date,
+    String? description,
+  }) async {
+    calls.add('confirm:$id:$accountId:$amount');
+    if (error != null) throw error!;
+    final payment = _find(id);
+    if (payment.nextDueDate == null) {
+      _fail('Este pago recurrente ya terminó', '23514', 'recurring_finished');
+    }
+
+    final String transactionId;
+    if (payment.debtId == null) {
+      transactionId = 'rec-tx-${_next++}';
+      _transactions.add(
+        Transaction(
+          id: transactionId,
+          type: TransactionType.expense,
+          accountId: accountId,
+          categoryId: payment.categoryId,
+          amount: double.parse(amount),
+          date: date,
+          description: description ?? payment.name,
+        ),
+      );
+    } else {
+      // Un plan de cuotas registra un abono a su deuda (con sus validaciones) y
+      // después le pone la categoría del plan.
+      transactionId = await debts._registerPayment(
+        debtId: payment.debtId!,
+        accountId: accountId,
+        amount: amount,
+        date: date,
+        description: description ?? payment.name,
+      );
+      final index = _transactions.indexWhere((t) => t.id == transactionId);
+      final t = _transactions[index];
+      _transactions[index] = Transaction(
+        id: t.id,
+        type: t.type,
+        accountId: t.accountId,
+        categoryId: payment.categoryId,
+        amount: t.amount,
+        date: t.date,
+        description: t.description,
+      );
+    }
+    _links[transactionId] = id;
+
+    final following = _settled(payment) ? null : _following(payment);
+    _replace(payment, nextDueDate: following, clearNext: following == null);
+  }
+
+  @override
+  Future<void> skip(String id) async {
+    calls.add('skip:$id');
+    if (error != null) throw error!;
+    final payment = _find(id);
+    if (payment.nextDueDate == null) {
+      _fail('Este pago recurrente ya terminó', '23514', 'recurring_finished');
+    }
+    final following = _settled(payment) ? null : _following(payment);
+    _replace(payment, nextDueDate: following, clearNext: following == null);
+  }
+
+  @override
+  Future<List<Transaction>> fetchPayments(String id, {int limit = 24}) async {
+    calls.add('fetchPayments:$id');
+    await gate?.future;
+    if (error != null) throw error!;
+    return [
+      for (final t in _transactions)
+        if (_links[t.id] == id) t,
+    ]..sort((a, b) => b.date.compareTo(a.date));
+  }
+}
+
+/// Imita `user_settings`, `exchange_rates` y las funciones `set_exchange_rate` y
+/// `set_base_currency`.
+class FakeCurrencyRepository implements CurrencyRepository {
+  FakeCurrencyRepository({
+    this.base = 'COP',
+    List<ExchangeRate> rates = const [],
+    this.hasBudgets = _never,
+    this.rescaleBudgets = _ignore,
+  }) : rates = {for (final rate in rates) rate.currency: rate};
+
+  String base;
+  final Map<String, ExchangeRate> rates;
+
+  /// Si hay presupuestos que convertir al cambiar la base, y cómo convertirlos.
+  final bool Function() hasBudgets;
+  final void Function(double rate) rescaleBudgets;
+
+  static bool _never() => false;
+  static void _ignore(double rate) {}
+
+  /// Error que lanzarán todas las operaciones mientras no sea null.
+  Object? error;
+
+  final calls = <String>[];
+
+  /// Si se asigna, las consultas esperan a que se complete.
+  Completer<void>? gate;
+
+  Never _fail(String message, String code, String details) =>
+      throw PostgrestException(message: message, code: code, details: details);
+
+  @override
+  Future<String> fetchBaseCurrency() async {
+    calls.add('fetchBase');
+    await gate?.future;
+    if (error != null) throw error!;
+    return base;
+  }
+
+  @override
+  Future<List<ExchangeRate>> fetchRates() async {
+    calls.add('fetchRates');
+    await gate?.future;
+    if (error != null) throw error!;
+    return [...rates.values]..sort((a, b) => a.currency.compareTo(b.currency));
+  }
+
+  @override
+  Future<void> setRate(String currency, String rate) async {
+    calls.add('setRate:$currency:$rate');
+    if (error != null) throw error!;
+    if (currency == base) {
+      _fail(
+        'La moneda base no necesita tasa de cambio',
+        '23514',
+        'rate_for_base_currency',
+      );
+    }
+    rates[currency] = ExchangeRate(
+      currency: currency,
+      rate: double.parse(rate),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<void> deleteRate(String currency) async {
+    calls.add('deleteRate:$currency');
+    if (error != null) throw error!;
+    rates.remove(currency);
+  }
+
+  @override
+  Future<void> setBaseCurrency(String currency, {String? rate}) async {
+    calls.add('setBase:$currency:${rate ?? ''}');
+    if (error != null) throw error!;
+    if (currency == base) return;
+
+    final newRate = rate != null ? double.parse(rate) : rates[currency]?.rate;
+    if (newRate == null && (rates.isNotEmpty || hasBudgets())) {
+      _fail(
+        'Hace falta la tasa de la moneda nueva para convertir tus tasas y presupuestos',
+        '23514',
+        'base_rate_required',
+      );
+    }
+
+    rates.remove(currency);
+    final old = base;
+    base = currency;
+    if (newRate != null) {
+      rates.updateAll(
+        (code, r) => ExchangeRate(
+          currency: code,
+          rate: r.rate / newRate,
+          updatedAt: r.updatedAt,
+        ),
+      );
+      rates[old] = ExchangeRate(
+        currency: old,
+        rate: 1 / newRate,
+        updatedAt: DateTime.now(),
+      );
+      rescaleBudgets(newRate);
+    }
+  }
+}
+
+/// Imita la tabla `savings_goals` con sus reglas: una meta activa por cuenta y
+/// nunca una tarjeta. Lo ahorrado no se guarda: es el saldo de la cuenta.
+class FakeSavingsGoalRepository implements SavingsGoalRepository {
+  FakeSavingsGoalRepository(
+    this._accounts, [
+    List<SavingsGoal> initial = const [],
+  ]) : _goals = [...initial];
+
+  final FakeAccountRepository _accounts;
+  final List<SavingsGoal> _goals;
+  Object? error;
+  final calls = <String>[];
+
+  List<SavingsGoal> get goals => List.unmodifiable(_goals);
+
+  Never _fail(String message, String code, [String? details]) =>
+      throw PostgrestException(message: message, code: code, details: details);
+
+  /// Las reglas de la base: la cuenta existe, no es una tarjeta y no tiene ya
+  /// otra meta activa.
+  void _validate(String accountId, {String? ignoring, bool active = true}) {
+    final account = _accounts.accounts
+        .where((account) => account.id == accountId)
+        .firstOrNull;
+    if (account == null) _fail('foreign key violation', '23503');
+    if (account.type == AccountType.card) {
+      _fail(
+        'Una tarjeta no puede ser la cuenta de una meta de ahorro',
+        '23514',
+        'goal_account_card',
+      );
+    }
+    final taken = _goals.any(
+      (goal) =>
+          !goal.isArchived && goal.accountId == accountId && goal.id != ignoring,
+    );
+    if (active && taken) _fail('duplicate key', '23505');
+  }
+
+  SavingsGoal _from(String id, GoalDraft draft, {bool isArchived = false}) =>
+      SavingsGoal(
+        id: id,
+        name: draft.name.trim(),
+        targetCents: (double.parse(draft.targetAmount) * 100).round(),
+        accountId: draft.accountId,
+        isArchived: isArchived,
+        targetDate: draft.targetDate,
+      );
+
+  @override
+  Future<List<SavingsGoal>> fetchAll() async {
+    calls.add('fetchAll');
+    if (error != null) throw error!;
+    return [..._goals];
+  }
+
+  @override
+  Future<void> create(GoalDraft draft) async {
+    calls.add('create ${draft.name.trim()}');
+    if (error != null) throw error!;
+    _validate(draft.accountId);
+    _goals.add(_from('goal-${_goals.length + 1}', draft));
+  }
+
+  @override
+  Future<void> update(String id, GoalDraft draft) async {
+    calls.add('update $id');
+    if (error != null) throw error!;
+    final index = _goals.indexWhere((goal) => goal.id == id);
+    if (index < 0) return;
+    _validate(
+      draft.accountId,
+      ignoring: id,
+      active: !_goals[index].isArchived,
+    );
+    _goals[index] = _from(id, draft, isArchived: _goals[index].isArchived);
+  }
+
+  @override
+  Future<void> setArchived(String id, {required bool isArchived}) async {
+    calls.add('setArchived $id $isArchived');
+    if (error != null) throw error!;
+    final index = _goals.indexWhere((goal) => goal.id == id);
+    if (index < 0) return;
+    final goal = _goals[index];
+    if (!isArchived) _validate(goal.accountId, ignoring: id);
+    _goals[index] = SavingsGoal(
+      id: goal.id,
+      name: goal.name,
+      targetCents: goal.targetCents,
+      accountId: goal.accountId,
+      isArchived: isArchived,
+      targetDate: goal.targetDate,
+    );
+  }
+}
+
 /// Cuentas, categorías y movimientos enlazados, como la base de datos real.
 class FakeBackend {
   factory FakeBackend({
@@ -627,16 +1243,40 @@ class FakeBackend {
     List<Category> categories = const [],
     List<Transaction> transactions = const [],
     List<BudgetRule> budgets = const [],
+    List<SavingsGoal> goals = const [],
+    String baseCurrency = 'COP',
+    List<ExchangeRate> rates = const [],
   }) {
     final shared = [...transactions];
     final accountsRepository = FakeAccountRepository(accounts, shared);
+    final budgetsRepository = FakeBudgetRepository(budgets);
+    final debtsRepository = FakeDebtRepository(shared, accountsRepository);
+    final recurringRepository = FakeRecurringRepository(shared);
+    debtsRepository.recurring = recurringRepository;
+    recurringRepository.debts = debtsRepository;
     return FakeBackend._(
       accountsRepository,
       FakeTransactionRepository(shared),
       FakeCategoryRepository(categories),
-      FakeSummaryRepository(shared),
-      FakeDebtRepository(shared, accountsRepository),
-      FakeBudgetRepository(budgets),
+      FakeSummaryRepository(
+        shared,
+        (accountId) =>
+            accountsRepository.accounts
+                .where((account) => account.id == accountId)
+                .map((account) => account.currency)
+                .firstOrNull ??
+            'COP',
+      ),
+      debtsRepository,
+      budgetsRepository,
+      recurringRepository,
+      FakeSavingsGoalRepository(accountsRepository, goals),
+      FakeCurrencyRepository(
+        base: baseCurrency,
+        rates: rates,
+        hasBudgets: () => budgetsRepository.rules.isNotEmpty,
+        rescaleBudgets: budgetsRepository.rescale,
+      ),
     );
   }
 
@@ -647,6 +1287,9 @@ class FakeBackend {
     this.summary,
     this.debts,
     this.budgets,
+    this.recurring,
+    this.goals,
+    this.currency,
   );
 
   final FakeAccountRepository accounts;
@@ -655,4 +1298,7 @@ class FakeBackend {
   final FakeSummaryRepository summary;
   final FakeDebtRepository debts;
   final FakeBudgetRepository budgets;
+  final FakeRecurringRepository recurring;
+  final FakeSavingsGoalRepository goals;
+  final FakeCurrencyRepository currency;
 }

@@ -1,3 +1,4 @@
+import '../../currency/domain/currency.dart';
 import '../../summary/domain/month_summary.dart';
 import 'budget_rule.dart';
 
@@ -48,7 +49,18 @@ class UnbudgetedSpending {
 
 /// El estado de los presupuestos de un mes.
 class BudgetOverview {
-  const BudgetOverview({required this.budgeted, required this.unbudgeted});
+  const BudgetOverview({
+    required this.budgeted,
+    required this.unbudgeted,
+    this.currency = defaultCurrency,
+    this.missingCurrencies = const {},
+  });
+
+  /// La moneda de todos los montos: la moneda base del usuario.
+  final String currency;
+
+  /// Las monedas con gastos este mes que no se sumaron por no tener tasa.
+  final Set<String> missingCurrencies;
 
   /// Las categorías con presupuesto: las que se pasaron o van cerca, primero.
   final List<BudgetProgress> budgeted;
@@ -131,6 +143,8 @@ class BudgetCalculator {
     required Iterable<BudgetRule> rules,
     required DateTime month,
     required Map<String?, int> expenseCentsByCategory,
+    String currency = defaultCurrency,
+    Set<String> missingCurrencies = const {},
   }) {
     final limits = effectiveLimits(rules, month);
 
@@ -150,7 +164,12 @@ class BudgetCalculator {
           UnbudgetedSpending(categoryId: entry.key, spentCents: entry.value),
     ]..sort((a, b) => b.spentCents.compareTo(a.spentCents));
 
-    return BudgetOverview(budgeted: budgeted, unbudgeted: unbudgeted);
+    return BudgetOverview(
+      budgeted: budgeted,
+      unbudgeted: unbudgeted,
+      currency: currency,
+      missingCurrencies: missingCurrencies,
+    );
   }
 
   /// Los más pasados o cerca del límite, primero; con igual avance, por id.

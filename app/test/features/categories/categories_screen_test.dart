@@ -15,8 +15,7 @@ Future<FakeCategoryRepository> openCategories(
 }) async {
   final backend = FakeBackend(categories: categories);
   await pumpMiPlata(tester, backend: backend);
-  await tester.tap(find.byTooltip('Categorías'));
-  await tester.pumpAndSettle();
+  await openFromMore(tester, 'Categorías');
   return backend.categories;
 }
 
@@ -112,8 +111,7 @@ void main() {
         code: '500',
       );
       await pumpMiPlata(tester, backend: backend);
-      await tester.tap(find.byTooltip('Categorías'));
-      await tester.pumpAndSettle();
+      await openFromMore(tester, 'Categorías');
 
       expect(find.textContaining('No se pudo completar'), findsOneWidget);
 

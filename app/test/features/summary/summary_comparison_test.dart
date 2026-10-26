@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mi_plata/features/summary/presentation/summary_comparison.dart';
+import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
+import 'package:mi_plata/l10n/l10n.dart';
+
+import '../../support/test_app.dart';
 
 ComparisonCaption? compare(
   int current,
   int previous, {
   bool previousHasData = true,
 }) => compareWithPrevious(
+  l10n,
   current: current,
   previous: previous,
   previousHasData: previousHasData,
   previousMonthName: 'septiembre',
 );
 
+late AppLocalizations l10n;
+
 void main() {
+  setUpAll(() async {
+    l10n = await loadL10n();
+    await initDates();
+  });
+
   group('frases', () {
     test('subir: porcentaje redondeado, "más que en <mes>" y flecha hacia arriba', () {
       final caption = compare(11240, 10000)!;
@@ -50,11 +62,12 @@ void main() {
 
     test('con un sustantivo, el caso "antes no había" se dice con palabras', () {
       final caption = compareWithPrevious(
+        l10n,
         current: 5000,
         previous: 0,
         previousHasData: true,
         previousMonthName: 'septiembre',
-        noneNoun: 'gastos',
+        noneKind: TransactionType.expense,
       )!;
 
       expect(caption.text, 'Sin gastos en septiembre');

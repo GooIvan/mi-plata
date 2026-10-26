@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/format/date_format.dart';
+import '../../../../core/format/formats.dart';
+import '../../../../l10n/l10n.dart';
 import '../../../accounts/domain/account.dart';
 import '../../../accounts/presentation/accounts_providers.dart';
 import '../../../categories/domain/category.dart';
@@ -15,6 +16,7 @@ import '../transaction_type_ui.dart';
 Future<void> showTransactionFilterSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,
@@ -48,8 +50,8 @@ class _TransactionFilterSheetState
       initialDateRange: from != null && to != null
           ? DateTimeRange(start: from, end: to)
           : null,
-      helpText: 'Rango de fechas',
-      saveText: 'Aplicar',
+      helpText: context.l10n.transactionsFilterRangeHelp,
+      saveText: context.l10n.commonApply,
     );
     if (picked != null) {
       setState(() => _draft = _draft.withRange(picked.start, picked.end));
@@ -64,6 +66,7 @@ class _TransactionFilterSheetState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final accounts = ref.watch(accountsProvider).value ?? const <Account>[];
     final categories = ref.watch(categoriesProvider).value ?? const <Category>[];
 
@@ -83,23 +86,23 @@ class _TransactionFilterSheetState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Filtrar movimientos', style: theme.textTheme.titleLarge),
+          Text(l10n.transactionsFilterTitle, style: theme.textTheme.titleLarge),
           const SizedBox(height: 20),
-          Text('Tipo', style: theme.textTheme.labelLarge),
+          Text(l10n.accountsTypeLabel, style: theme.textTheme.labelLarge),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
               ChoiceChip(
-                label: const Text('Todos'),
+                label: Text(l10n.commonAll),
                 selected: _draft.type == null,
                 onSelected: (_) => setState(() => _draft = _draft.withType(null)),
               ),
               for (final type in TransactionType.values)
                 ChoiceChip(
                   avatar: Icon(type.icon, size: 18),
-                  label: Text(type.pluralLabel),
+                  label: Text(type.pluralLabel(l10n)),
                   selected: _draft.type == type,
                   onSelected: (_) =>
                       setState(() => _draft = _draft.withType(type)),
@@ -111,25 +114,25 @@ class _TransactionFilterSheetState
             initialValue: _draft.accountId,
             isExpanded: true,
             items: [
-              const DropdownMenuItem<String?>(
+              DropdownMenuItem<String?>(
                 value: null,
-                child: Text('Todas las cuentas'),
+                child: Text(l10n.transactionsFilterAllAccounts),
               ),
               for (final account in accounts)
                 DropdownMenuItem<String?>(
                   value: account.id,
                   child: Text(
                     account.isArchived
-                        ? '${account.name} (archivada)'
+                        ? l10n.accountsArchivedName(account.name)
                         : account.name,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
             ],
             onChanged: (id) => setState(() => _draft = _draft.withAccount(id)),
-            decoration: const InputDecoration(
-              labelText: 'Cuenta',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.commonAccount,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 16),
@@ -137,20 +140,20 @@ class _TransactionFilterSheetState
             initialValue: categoryValue,
             isExpanded: true,
             items: [
-              const DropdownMenuItem<String?>(
+              DropdownMenuItem<String?>(
                 value: null,
-                child: Text('Todas las categorías'),
+                child: Text(l10n.transactionsFilterAllCategories),
               ),
-              const DropdownMenuItem<String?>(
+              DropdownMenuItem<String?>(
                 value: _uncategorizedValue,
-                child: Text('Sin categoría'),
+                child: Text(l10n.commonNoCategory),
               ),
               for (final category in categories)
                 DropdownMenuItem<String?>(
                   value: category.id,
                   child: Text(
                     category.isArchived
-                        ? '${category.name} (archivada)'
+                        ? l10n.accountsArchivedName(category.name)
                         : category.name,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -161,9 +164,9 @@ class _TransactionFilterSheetState
                   ? _draft.withUncategorized()
                   : _draft.withCategory(value),
             ),
-            decoration: const InputDecoration(
-              labelText: 'Categoría',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.commonCategory,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 16),
@@ -172,11 +175,11 @@ class _TransactionFilterSheetState
             borderRadius: BorderRadius.circular(4),
             child: InputDecorator(
               decoration: InputDecoration(
-                labelText: 'Fechas',
+                labelText: l10n.transactionsFilterDates,
                 border: const OutlineInputBorder(),
                 suffixIcon: hasRange
                     ? IconButton(
-                        tooltip: 'Quitar las fechas',
+                        tooltip: l10n.transactionsFilterRemoveDates,
                         icon: const Icon(Icons.close),
                         onPressed: () => setState(
                           () => _draft = _draft.withRange(null, null),
@@ -184,7 +187,10 @@ class _TransactionFilterSheetState
                       )
                     : const Icon(Icons.date_range_outlined),
               ),
-              child: Text(describeRange(_draft.from, _draft.to) ?? 'Cualquier fecha'),
+              child: Text(
+                describeRange(l10n, _draft.from, _draft.to) ??
+                    l10n.transactionsFilterAnyDate,
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -193,7 +199,7 @@ class _TransactionFilterSheetState
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => _apply(TransactionFilter.empty),
-                  child: const Text('Limpiar'),
+                  child: Text(l10n.commonClear),
                 ),
               ),
               const SizedBox(width: 12),
@@ -201,7 +207,7 @@ class _TransactionFilterSheetState
                 flex: 2,
                 child: FilledButton(
                   onPressed: () => _apply(_draft),
-                  child: const Text('Aplicar'),
+                  child: Text(l10n.commonApply),
                 ),
               ),
             ],
@@ -213,11 +219,15 @@ class _TransactionFilterSheetState
 }
 
 /// "del 1 oct al 31 oct", "desde el 1 oct", "hasta el 31 oct"; null sin fechas.
-String? describeRange(DateTime? from, DateTime? to) {
+String? describeRange(AppLocalizations l10n, DateTime? from, DateTime? to) {
+  final formats = Formats(l10n);
   if (from != null && to != null) {
-    return 'del ${formatDayMonth(from)} al ${formatDayMonth(to)}';
+    return l10n.transactionsRangeBetween(
+      formats.dayMonth(from),
+      formats.dayMonth(to),
+    );
   }
-  if (from != null) return 'desde el ${formatDayMonth(from)}';
-  if (to != null) return 'hasta el ${formatDayMonth(to)}';
+  if (from != null) return l10n.transactionsRangeSince(formats.dayMonth(from));
+  if (to != null) return l10n.transactionsRangeUntil(formats.dayMonth(to));
   return null;
 }

@@ -1,0 +1,1304 @@
+{
+  "@@locale": "en",
+  "commonRetry": "Retry",
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonSaveChanges": "Save changes",
+  "commonEdit": "Edit",
+  "commonDelete": "Delete",
+  "commonArchive": "Archive",
+  "commonRestore": "Restore",
+  "commonUndo": "Undo",
+  "commonOptions": "Options",
+  "commonSeeAll": "See all",
+  "commonSeeAllMasculine": "See all",
+  "commonShowArchived": "Show archived",
+  "commonHideArchived": "Hide archived",
+  "commonIncomes": "Income",
+  "commonExpenses": "Expenses",
+  "commonNoCategory": "No category",
+  "commonLoadError": "The operation could not be completed. Check your connection and try again.",
+  "commonSessionExpired": "Your session expired. Please sign in again.",
+  "commonNameTooLong": "Use {max} characters or fewer",
+  "@commonNameTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "commonInvalidAmount": "Invalid amount. Example: 1,500,000 or 1500.50",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "authEmailLabel": "Email",
+  "authPasswordLabel": "Password",
+  "authPasswordRepeatLabel": "Repeat the password",
+  "authShowPassword": "Show password",
+  "authHidePassword": "Hide password",
+  "authLoginSubtitle": "Sign in to continue",
+  "authRegisterSubtitle": "Create your account to get started",
+  "authLoginButton": "Sign in",
+  "authRegisterButton": "Create account",
+  "authGoToRegister": "Don't have an account? Sign up",
+  "authGoToLogin": "Already have an account? Sign in",
+  "authConfirmEmailSent": "We sent you an email to confirm your account. After that you can sign in.",
+  "authEmailRequired": "Enter your email",
+  "authEmailInvalid": "The email is not valid",
+  "authPasswordRequired": "Enter your password",
+  "authNewPasswordRequired": "Create a password",
+  "authPasswordTooShort": "Use at least {min} characters",
+  "@authPasswordTooShort": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "authPasswordRepeatRequired": "Repeat your password",
+  "authPasswordMismatch": "The passwords don't match",
+  "authErrorOffline": "Could not reach the server. Check your internet and try again.",
+  "authErrorInvalidCredentials": "Wrong email or password.",
+  "authErrorEmailExists": "An account with that email already exists.",
+  "authErrorWeakPassword": "The password is too weak. Use a longer or more varied one.",
+  "authErrorEmailNotConfirmed": "Confirm your email before signing in.",
+  "authErrorRateLimit": "Too many attempts. Wait a moment and try again.",
+  "authErrorSignupDisabled": "Sign-ups are disabled.",
+  "authErrorGeneric": "The operation could not be completed. Please try again.",
+  "dashboardTotalMoney": "Total money",
+  "dashboardLoadMoneyError": "Couldn't load your money.",
+  "dashboardNoAccounts": "You don't have any accounts yet",
+  "dashboardAccountsCount": "{count, plural, one{In {count} account} other{In {count} accounts}}",
+  "@dashboardAccountsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardRecentTransactions": "Recent transactions",
+  "dashboardNoTransactions": "You haven't recorded any transactions yet.",
+  "dashboardDebtsLoadError": "Couldn't load your debts.",
+  "dashboardDebtsEmpty": "Record what you owe or are owed",
+  "dashboardYouOwe": "You owe",
+  "dashboardOwedToYou": "Owed to you",
+  "dashboardSummaryTooltip": "Monthly summary",
+  "settingsTitle": "Settings",
+  "settingsLanguage": "Language",
+  "settingsLanguageSystem": "Phone language",
+  "settingsLanguageSpanish": "Español",
+  "settingsLanguageEnglish": "English",
+  "settingsSession": "Session",
+  "settingsSignedInAs": "Signed in as {email}",
+  "@settingsSignedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSignOut": "Sign out",
+  "budgetsTitle": "Budgets",
+  "budgetsStatusOk": "{amount} left",
+  "@budgetsStatusOk": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsStatusAtLimit": "You reached the limit",
+  "budgetsStatusNear": "Close to the limit: {amount} left",
+  "@budgetsStatusNear": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsStatusOver": "You went over by {amount}",
+  "@budgetsStatusOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertOver": "You went over the {category} budget: {spent} of {limit}.",
+  "@budgetsAlertOver": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsAlertNear": "You're at {percent}% of the {category} budget ({spent} of {limit}).",
+  "@budgetsAlertNear": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      },
+      "category": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsThisCategory": "this category",
+  "budgetsOverCount": "{count, plural, one{{count} category over budget} other{{count} categories over budget}}",
+  "@budgetsOverCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsNearCount": "{count} close to the limit",
+  "@budgetsNearCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsOfLimit": "of {limit}",
+  "@budgetsOfLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsTitle": "Accounts",
+  "accountsNew": "New account",
+  "accountsEdit": "Edit account",
+  "accountsCreateButton": "Create account",
+  "accountsEmpty": "You don't have any accounts yet.\nCreate the first one to get started.",
+  "accountsAllArchived": "All your accounts are archived.",
+  "accountsArchivedMessage": "Account archived",
+  "accountsRestoredMessage": "Account restored",
+  "accountsArchivedTag": "Archived",
+  "accountsArchivedName": "{name} (archived)",
+  "@accountsArchivedName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsNameLabel": "Name",
+  "accountsNameHint": "e.g. Savings account",
+  "accountsTypeLabel": "Type",
+  "accountsInitialBalanceLabel": "Initial balance",
+  "accountsInitialBalanceHint": "e.g. 1,500,000",
+  "accountsInitialBalanceHelper": "Leave it empty if it starts at zero",
+  "accountsChoose": "Choose an account",
+  "accountTypeCash": "Cash",
+  "accountTypeBank": "Bank",
+  "accountTypeWallet": "Digital wallet",
+  "accountTypeCard": "Card",
+  "accountsNameRequired": "Give the account a name",
+  "accountsErrorDuplicateName": "You already have an active account with that name.",
+  "accountsErrorInvalidData": "Check the data: the name cannot be empty.",
+  "accountsErrorAmountTooLarge": "The amount is too large.",
+  "commonArchivedTag": "Archived",
+  "categoriesTitle": "Categories",
+  "categoriesNew": "New category",
+  "categoriesCreateButton": "Create category",
+  "categoriesArchivedMessage": "Category archived",
+  "categoriesRestoredMessage": "Category restored",
+  "categoriesNewOfType": "{type, select, expense{New expense category} income{New income category} other{New category}}",
+  "@categoriesNewOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesEditOfType": "{type, select, expense{Edit expense category} income{Edit income category} other{Edit category}}",
+  "@categoriesEditOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesEmptyOfType": "{type, select, expense{You don't have any expense categories yet.} income{You don't have any income categories yet.} other{You don't have any categories yet.}}",
+  "@categoriesEmptyOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesAllArchivedOfType": "{type, select, expense{All your expense categories are archived.} income{All your income categories are archived.} other{All your categories are archived.}}",
+  "@categoriesAllArchivedOfType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "categoriesNameLabel": "Name",
+  "categoriesNameHint": "e.g. Pets",
+  "categoriesNameRequired": "Give the category a name",
+  "categoriesErrorDuplicateName": "You already have an active category with that name.",
+  "categoriesErrorInvalidData": "Check the data: the name cannot be empty.",
+  "commonAccount": "Account",
+  "commonCategory": "Category",
+  "commonAmount": "Amount",
+  "commonDate": "Date",
+  "commonAll": "All",
+  "commonTransfers": "Transfers",
+  "commonClear": "Clear",
+  "commonApply": "Apply",
+  "transactionTypeIncome": "Income",
+  "transactionTypeExpense": "Expense",
+  "transactionTypeTransfer": "Transfer",
+  "transactionsTitle": "Transactions",
+  "transactionsNew": "New transaction",
+  "transactionsEdit": "Edit transaction",
+  "transactionsRecord": "Record",
+  "transactionsRecordOne": "Record a transaction",
+  "transactionsEmpty": "You haven't recorded any transactions yet.\nAdd the first one.",
+  "transactionsNoMatches": "No transactions match these filters.",
+  "transactionsClearFilters": "Clear filters",
+  "transactionsSearch": "Search",
+  "transactionsSearchHint": "Search descriptions",
+  "transactionsSearchClose": "Close search",
+  "transactionsFilter": "Filter",
+  "transactionsRemoveFilter": "Remove filter: {label}",
+  "@transactionsRemoveFilter": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsLoadMoreError": "Couldn't load more transactions.",
+  "transactionsDateHelp": "Transaction date",
+  "transactionsAmountHint": "e.g. 150,000",
+  "transactionsFrom": "From",
+  "transactionsTo": "To",
+  "transactionsNeedAnotherAccount": "You need another account to transfer",
+  "transactionsChooseDestination": "Choose the destination account",
+  "transactionsNeedAccountFirst": "Create an account first to record transactions.",
+  "transactionsDescriptionLabel": "Description (optional)",
+  "transactionsDescriptionHint": "e.g. Weekly groceries",
+  "transactionsDeleteTooltip": "Delete transaction",
+  "transactionsDeleteTitle": "Delete this transaction?",
+  "transactionsDeleteBody": "Your account balances will be recalculated without this transaction.",
+  "transactionsDeleteBodyWithWarning": "Your account balances will be recalculated without this transaction.\n\nHeads up:\n{warnings}",
+  "@transactionsDeleteBodyWithWarning": {
+    "placeholders": {
+      "warnings": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsDeleted": "Transaction deleted",
+  "negativeBalanceMessage": "{account} will be left at {balance}.",
+  "@negativeBalanceMessage": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "negativeBalanceAdvice": "If the amount is right, you can continue.",
+  "negativeBalanceFix": "Fix it",
+  "negativeBalanceRecordTitle": "Record it anyway?",
+  "negativeBalanceSaveTitle": "Save it anyway?",
+  "negativeBalanceRecordAnyway": "Record anyway",
+  "negativeBalanceSaveAnyway": "Save anyway",
+  "transactionsFilterTitle": "Filter transactions",
+  "transactionsFilterAllAccounts": "All accounts",
+  "transactionsFilterAllCategories": "All categories",
+  "transactionsFilterDates": "Dates",
+  "transactionsFilterRemoveDates": "Remove the dates",
+  "transactionsFilterAnyDate": "Any date",
+  "transactionsFilterRangeHelp": "Date range",
+  "transactionsRangeBetween": "from {from} to {to}",
+  "@transactionsRangeBetween": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsRangeSince": "since {from}",
+  "@transactionsRangeSince": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsRangeUntil": "until {to}",
+  "@transactionsRangeUntil": {
+    "placeholders": {
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsAmountRequired": "Enter the amount",
+  "transactionsAmountNegative": "The amount cannot be negative",
+  "transactionsAmountZero": "The amount must be greater than zero",
+  "transactionsErrorInvalid": "Check the transaction data: the amount, accounts and category.",
+  "transactionsErrorMissingReference": "The account or category no longer exists. Reopen the form.",
+  "commonBack": "Back",
+  "debtsTitle": "Debts",
+  "debtsTabOwe": "I owe",
+  "debtsTabOwed": "Owed to me",
+  "debtsNew": "New debt",
+  "debtsEdit": "Edit debt",
+  "debtsRegister": "Record a debt",
+  "debtsEmptyPayable": "You haven't recorded any debts you owe yet.",
+  "debtsEmptyReceivable": "You haven't recorded any debts owed to you yet.",
+  "debtsAllArchived": "All the debts in this list are archived.",
+  "debtsTotalPayable": "You owe in total",
+  "debtsTotalReceivable": "Owed to you in total",
+  "debtsOfAmount": "of {amount}",
+  "@debtsOfAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtStatusSettled": "Settled",
+  "debtStatusNoDueDate": "No due date",
+  "debtStatusOverdue": "{days, plural, one{Overdue by {days} day} other{Overdue by {days} days}}",
+  "@debtStatusOverdue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "debtStatusDueToday": "Due today",
+  "debtStatusDueTomorrow": "Due tomorrow",
+  "debtStatusDueInDays": "Due in {days} days",
+  "@debtStatusDueInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "debtStatusDueOn": "Due {date}",
+  "@debtStatusDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPickStartHelp": "Start date",
+  "debtsPickDueHelp": "Due date",
+  "debtsCounterpartyPayable": "Who you owe",
+  "debtsCounterpartyReceivable": "Who owes you",
+  "debtsCounterpartyHint": "e.g. John",
+  "debtsAmountLabel": "Total amount",
+  "debtsAmountHint": "e.g. 500,000",
+  "debtsStartLabel": "Start",
+  "debtsDueLabel": "Due date (optional)",
+  "debtsNoDate": "No date",
+  "debtsRemoveDue": "Remove the due date",
+  "debtsNotesLabel": "Notes (optional)",
+  "debtsRegisterMoney": "Record the money in an account",
+  "debtsRegisterMoneyNeedAccount": "Create an account first.",
+  "debtsRegisterMoneyPayable": "The money you borrowed goes into the account.",
+  "debtsRegisterMoneyReceivable": "The money you lent comes out of the account.",
+  "debtsReceiveIn": "Receive in",
+  "debtsTakeFrom": "Take from",
+  "debtsCreate": "Create debt",
+  "debtsLockedNote": "The direction and start date can't be changed. The amount can't be less than what's already been paid.",
+  "debtsCounterpartyRequired": "Enter the person's name",
+  "debtsDueBeforeStart": "The due date cannot be before the start date",
+  "debtsPaymentExceeds": "It can't exceed what's remaining ({remaining})",
+  "@debtsPaymentExceeds": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsAmountBelowPaid": "It can't be less than what's already paid ({paid})",
+  "@debtsAmountBelowPaid": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsArchivedMessage": "Debt archived",
+  "debtsRestoredMessage": "Debt restored",
+  "debtsGone": "This debt no longer exists.",
+  "debtsRecordPayment": "Record payment",
+  "debtsIsSettledNote": "This debt is already settled.",
+  "debtsIsArchivedNote": "It's archived: restore it to record payments.",
+  "debtsPaymentsTitle": "Payments",
+  "debtsYouOweTo": "You owe {name}",
+  "@debtsYouOweTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsOwesYou": "{name} owes you",
+  "@debtsOwesYou": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsRemainingWord": "remaining",
+  "debtsPaidAmount": "Paid {amount}",
+  "@debtsPaidAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsTotalAmount": "Total {amount}",
+  "@debtsTotalAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsSince": "Since {date}",
+  "@debtsSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPaymentDeleteTitle": "Delete this payment?",
+  "debtsPaymentDeleteBody": "Its transaction is deleted too and the account balance is recalculated.",
+  "debtsPaymentDeleted": "Payment deleted",
+  "debtsPaymentsEmpty": "No payments yet.",
+  "debtsPaymentDeleteTooltip": "Delete payment",
+  "debtsPaySheetTitlePayable": "Pay {name}",
+  "@debtsPaySheetTitlePayable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPaymentDescriptionPayable": "Payment to {name}",
+  "@debtsPaymentDescriptionPayable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPaymentDescriptionReceivable": "Payment from {name}",
+  "@debtsPaymentDescriptionReceivable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPendingAmount": "Remaining: {amount}",
+  "@debtsPendingAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPaymentAmountLabel": "Payment amount",
+  "debtsPaymentAmountHint": "e.g. 100,000",
+  "debtsPayAll": "Pay all",
+  "debtsCollectAll": "Collect all",
+  "debtsNeedCurrencyAccount": "Create an account in {currency} first to record the payment.",
+  "@debtsNeedCurrencyAccount": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsPayFrom": "Pay from",
+  "debtsPaymentDateHelp": "Payment date",
+  "debtsErrorInvalid": "Check the debt data: the amount and dates.",
+  "debtsErrorMissingReference": "The account or debt no longer exists. Reopen the screen.",
+  "commonPercent": "{percent}%",
+  "@commonPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "commonPercentUnderOne": "<1%",
+  "summaryTitle": "Monthly summary",
+  "summaryNoData": "There are no transactions to summarize yet.\nRecord income and expenses to see your summary.",
+  "summaryPreviousMonth": "Previous month",
+  "summaryNextMonth": "Next month",
+  "summaryBalanceOfMonth": "Balance for the month",
+  "summaryBalanceUp": "You earned more than you spent",
+  "summaryBalanceDown": "You spent more than you earned",
+  "summaryBalanceEven": "Income and expenses are equal",
+  "summaryWhereMoneyGoes": "Where does the money go?",
+  "summaryWhereMoneyComes": "Where does it come from?",
+  "summaryNoExpensesMonth": "There are no expenses this month.",
+  "summaryNoIncomeMonth": "There is no income this month.",
+  "summaryOtherCategories": "Other",
+  "summaryBudgetsLink": "How much you have spent of what you planned",
+  "summaryHistoryError": "Couldn't load the money evolution.",
+  "summaryLoadError": "Couldn't load the summary. Check your connection and try again.",
+  "summarySameAs": "Same as in {month}",
+  "@summarySameAs": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryZeroIn": "$0 in {month}",
+  "@summaryZeroIn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryNoExpensesIn": "No expenses in {month}",
+  "@summaryNoExpensesIn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryNoIncomeIn": "No income in {month}",
+  "@summaryNoIncomeIn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryMoreThan": "{amount} more than in {month}",
+  "@summaryMoreThan": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryLessThan": "{amount} less than in {month}",
+  "@summaryLessThan": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryPaceTitle": "Spending pace",
+  "summaryDailyAverage": "Daily average",
+  "summaryProjectedClose": "At this pace, the month will close at",
+  "summaryProjection": "Projection: {comparison}",
+  "@summaryProjection": {
+    "placeholders": {
+      "comparison": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryCalculatedPartial": "Calculated over {counted} of {total} days of the month.",
+  "@summaryCalculatedPartial": {
+    "placeholders": {
+      "counted": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryCalculatedFull": "Calculated over the {total} days of the month.",
+  "@summaryCalculatedFull": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryTrendTitle": "Income vs. expenses",
+  "summaryLastMonths": "Last {count} months",
+  "@summaryLastMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryTrendSemantics": "Bar chart with income and expenses for the last {count} months. The same information is available as a table.",
+  "@summaryTrendSemantics": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryTrendTooltip": "{month}\n{series}: {amount}",
+  "@summaryTrendTooltip": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "series": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryHideTable": "Hide table",
+  "summaryShowTable": "View as table",
+  "summaryTableMonth": "Month",
+  "summaryHistorySubtitle": "At the end of each month",
+  "summaryHistorySemantics": "Line chart with the total money at the end of each of the last {count} months. The same information is available as a table.",
+  "@summaryHistorySemantics": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryHistoryHideTable": "Hide balance table",
+  "summaryHistoryShowTable": "View balances as table",
+  "summaryHistoryTableClosing": "Closing of",
+  "summarySincePrevious": "the previous month",
+  "summarySinceMonths": "{months} months ago",
+  "@summarySinceMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryDeltaUp": "{amount} more than {since}",
+  "@summaryDeltaUp": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "since": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryDeltaDown": "{amount} less than {since}",
+  "@summaryDeltaDown": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "since": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryDeltaSame": "Same as {since}",
+  "@summaryDeltaSame": {
+    "placeholders": {
+      "since": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsNew": "New budget",
+  "budgetsEmptyEditable": "Set how much you want to spend each month in each category and see how you are doing.",
+  "budgetsEmptyPast": "There were no budgets or expenses this month.",
+  "budgetsDefine": "Set a budget",
+  "budgetsGoToCurrentMonth": "Go to the current month",
+  "budgetsWithBudget": "With a budget",
+  "budgetsWithoutBudget": "Spending without a budget",
+  "budgetsTapToDefine": "Tap to set a budget",
+  "budgetsTotalTitle": "Total budget",
+  "budgetsTotalOf": "of {amount} budgeted",
+  "@budgetsTotalOf": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsFormTitleFixed": "Budget for {name}",
+  "@budgetsFormTitleFixed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetsFormTheCategory": "the category",
+  "budgetsFormAppliesFrom": "Applies from {month} {year} onward, until you change it. Earlier months are not touched.",
+  "@budgetsFormAppliesFrom": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetsFormAllBudgeted": "All your expense categories already have a budget.",
+  "budgetsFormChooseCategory": "Choose a category",
+  "budgetsFormCategoryLabel": "Expense category",
+  "budgetsFormAmountLabel": "Monthly amount",
+  "budgetsFormAmountHint": "e.g. 800,000",
+  "budgetsFormRemove": "Remove the budget",
+  "budgetsErrorInvalid": "Check the budget amount.",
+  "budgetsErrorMissingCategory": "The category no longer exists. Reopen the screen.",
+  "budgetsPercent": "{percent}%",
+  "@budgetsPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "dbErrorTransactionCategoryMismatch": "The chosen category does not match this type of transaction",
+  "dbErrorTransferCurrencyMismatch": "A transfer requires accounts in the same currency",
+  "dbErrorBudgetExpenseOnly": "Only expense categories can have a budget",
+  "dbErrorPaymentDirectionMismatch": "The payment doesn't match the type of debt",
+  "dbErrorPaymentCurrencyMismatch": "The payment must come from an account in the debt's currency",
+  "dbErrorPaymentExceedsRemaining": "The payment exceeds what is left to pay",
+  "dbErrorDebtAmountBelowPaid": "The amount can't be less than what has already been paid",
+  "dbErrorDebtDirectionLocked": "A debt's direction can't be changed once it has payments",
+  "dbErrorPaymentTypeLocked": "This transaction is a debt payment: its type can't be changed",
+  "dbErrorDebtArchived": "The debt is archived: restore it to record payments",
+  "debtsLoanDescriptionPayable": "Loan from {name}",
+  "@debtsLoanDescriptionPayable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtsLoanDescriptionReceivable": "Loan to {name}",
+  "@debtsLoanDescriptionReceivable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyNameCop": "Colombian peso",
+  "currencyNameUsd": "US dollar",
+  "currencyNameEur": "Euro",
+  "currencyNameMxn": "Mexican peso",
+  "currencyNameArs": "Argentine peso",
+  "currencyNameBrl": "Brazilian real",
+  "currencyNameClp": "Chilean peso",
+  "currencyNamePen": "Peruvian sol",
+  "currencyNameGbp": "Pound sterling",
+  "currencyNameCad": "Canadian dollar",
+  "currencyLabel": "Currency",
+  "currencyOption": "{code} · {name}",
+  "@currencyOption": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyMissingRates": "No exchange rate for {currencies}: not included in the total.",
+  "@currencyMissingRates": {
+    "placeholders": {
+      "currencies": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyMissingRatesAction": "Set rate",
+  "settingsCurrency": "Currency",
+  "settingsBaseCurrency": "Base currency",
+  "settingsBaseCurrencyValue": "{code} · {name}",
+  "@settingsBaseCurrencyValue": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsExchangeRates": "Exchange rates",
+  "settingsExchangeRatesHelp": "What each currency is worth in your base currency",
+  "baseCurrencyTitle": "Base currency",
+  "baseCurrencyIntro": "All your money, summaries and budgets are shown in this currency.",
+  "baseCurrencyRateLabel": "1 {next} is worth ({previous})",
+  "@baseCurrencyRateLabel": {
+    "placeholders": {
+      "next": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "baseCurrencyRateHelp": "Needed to convert your rates and budgets to {next}.",
+  "@baseCurrencyRateHelp": {
+    "placeholders": {
+      "next": {
+        "type": "String"
+      }
+    }
+  },
+  "baseCurrencyChangeButton": "Change base currency",
+  "ratesTitle": "Exchange rates",
+  "ratesIntro": "To add up the money in your accounts in other currencies, set what each one is worth in {base}. Totals use today's rate.",
+  "@ratesIntro": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesEmpty": "You have no accounts or debts in other currencies.\nWhen you do, set their rates here.",
+  "ratesNoRate": "No rate",
+  "ratesOneEquals": "1 {currency} = {amount}",
+  "@ratesOneEquals": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesUpdatedToday": "Updated today",
+  "ratesUpdatedYesterday": "Updated yesterday",
+  "ratesUpdatedDaysAgo": "Updated {days} days ago",
+  "@ratesUpdatedDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "ratesAdd": "Add rate",
+  "ratesFormTitle": "{currency} rate",
+  "@ratesFormTitle": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesFormAmountLabel": "1 {currency} is worth",
+  "@ratesFormAmountLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "ratesFormHint": "e.g. 4,000",
+  "ratesFormInvalid": "Enter a rate greater than zero. Example: 4,012.5",
+  "ratesFormRemove": "Remove the rate",
+  "ratesFormChooseCurrency": "Choose a currency",
+  "ratesErrorInvalid": "Check the rate: it must be greater than zero.",
+  "accountsCurrencyLocked": "An account's currency can't be changed.",
+  "accountsRateLabel": "1 {currency} is worth (optional)",
+  "@accountsRateLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsRateHelp": "Without a rate, this account isn't added to your total money.",
+  "transactionsAmountOut": "Amount sent ({currency})",
+  "@transactionsAmountOut": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsAmountIn": "Amount received ({currency})",
+  "@transactionsAmountIn": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsImpliedRate": "1 {from} = {rate} {to}",
+  "@transactionsImpliedRate": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsReceives": "receives {amount}",
+  "@transactionsReceives": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryConvertedNote": "Amounts in other currencies are converted to {base} at today's rate.",
+  "@summaryConvertedNote": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      }
+    }
+  },
+  "dbErrorRateForBaseCurrency": "The base currency does not need an exchange rate",
+  "dbErrorBaseRateRequired": "The new currency needs a rate to convert your rates and budgets",
+  "dbErrorTransferDestinationRequired": "A transfer between different currencies needs the amount received",
+  "dbErrorTransferDestinationUnexpected": "The amount received is only given for transfers between different currencies",
+  "recurringTitle": "Recurring payments",
+  "recurringNew": "New recurring payment",
+  "recurringEdit": "Edit recurring payment",
+  "recurringCreateButton": "Create recurring payment",
+  "recurringEmpty": "You haven't recorded any recurring payments yet.\nAdd your subscriptions, rent and anything you pay regularly.",
+  "recurringEmptyAction": "Record a recurring payment",
+  "recurringDashboardEmpty": "Record your subscriptions and rent",
+  "recurringNothingSoon": "You have no upcoming payments.",
+  "recurringNextOne": "Next: {name} · {date}",
+  "@recurringNextOne": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringSectionActive": "Active",
+  "recurringSectionOther": "Paused or finished",
+  "recurringStatusOverdue": "{days, plural, one{Overdue by {days} day} other{Overdue by {days} days}}",
+  "@recurringStatusOverdue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringStatusToday": "Upcoming payment: due today",
+  "recurringStatusTomorrow": "Upcoming payment: due tomorrow",
+  "recurringStatusSoon": "Upcoming payment: due in {days} days",
+  "@recurringStatusSoon": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringStatusLater": "Next payment on {date}",
+  "@recurringStatusLater": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringStatusPaused": "Paused",
+  "recurringStatusFinished": "Finished",
+  "recurrenceEveryWeek": "{n, plural, one{Every week} other{Every {n} weeks}}",
+  "@recurrenceEveryWeek": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceEveryMonth": "{n, plural, one{Every month} other{Every {n} months}}",
+  "@recurrenceEveryMonth": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrenceEveryYear": "{n, plural, one{Every year} other{Every {n} years}}",
+  "@recurrenceEveryYear": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringNameLabel": "Name",
+  "recurringNameHint": "e.g. Netflix, Rent",
+  "recurringNameRequired": "Give the payment a name",
+  "recurringAccountLabel": "Paid from",
+  "recurringFrequencyLabel": "Frequency",
+  "recurringNextLabel": "Next payment",
+  "recurringNextHelp": "The date it's due. After that it's worked out for you.",
+  "recurringEndLabel": "Ends (optional)",
+  "recurringNoEnd": "No end date",
+  "recurringRemoveEnd": "Remove the end date",
+  "recurringPickNextHelp": "Next payment date",
+  "recurringPickEndHelp": "End date",
+  "recurringEndBeforeNext": "The end date cannot be before the next payment",
+  "recurringReminderNote": "Nothing is deducted until you confirm you paid.",
+  "recurringPayAction": "I paid",
+  "recurringSkipAction": "Skip this payment",
+  "recurringPause": "Pause",
+  "recurringResume": "Resume",
+  "recurringDelete": "Delete",
+  "recurringDeleteTitle": "Delete this recurring payment?",
+  "recurringDeleteBody": "The payments you already recorded are kept.",
+  "recurringPausedMessage": "Payment paused",
+  "recurringResumedMessage": "Payment resumed",
+  "recurringDeletedMessage": "Recurring payment deleted",
+  "recurringGone": "This recurring payment no longer exists.",
+  "recurringHistoryTitle": "Recorded payments",
+  "recurringHistoryEmpty": "You haven't recorded any payments yet.",
+  "recurringEndsOn": "Ends on {date}",
+  "@recurringEndsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringConfirmTitle": "Payment for {name}",
+  "@recurringConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringConfirmButton": "Confirm payment",
+  "recurringConfirmDateHelp": "Payment date",
+  "recurringConfirmedMessage": "Payment recorded",
+  "recurringSkippedMessage": "Payment skipped",
+  "recurringErrorGone": "The recurring payment no longer exists. Reopen the screen.",
+  "recurringErrorInvalid": "Check the payment data: the name, amount and dates.",
+  "dbErrorRecurringFinished": "This recurring payment has already ended",
+  "dbErrorRecurringCategory": "Only expense categories can be used in a recurring payment",
+  "debtsInstallmentsSwitch": "Pay in installments",
+  "debtsInstallmentsSwitchHelp": "We'll remind you when each installment is due, and you record it as a payment on the debt.",
+  "debtsInstallmentsCount": "Number of installments",
+  "debtsInstallmentsCountHint": "e.g. 12",
+  "debtsInstallmentsCountInvalid": "Enter how many installments (1 to 360)",
+  "debtsInstallmentsAmount": "Installment amount",
+  "debtsInstallmentsAmountHelp": "Usually the total divided by the number of installments.",
+  "debtsInstallmentsFrequency": "How often",
+  "debtsInstallmentsFirst": "First installment",
+  "debtsInstallmentsFirstHelp": "First installment date",
+  "debtsInstallmentsPayFrom": "Pay installments from",
+  "installmentNumber": "Installment {number} of {total}",
+  "@installmentNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "debtsPlanTitle": "Installment plan",
+  "recurringDebtRemaining": "Left to pay: {amount}",
+  "@recurringDebtRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringDeletePlanBody": "The debt and the payments you already recorded are kept.",
+  "dbErrorInstallmentDirection": "Only debts you owe can be paid in installments",
+  "dbErrorInstallmentCurrency": "The installments' account must be in the debt's currency",
+  "goalsTitle": "Savings goals",
+  "goalsNew": "New goal",
+  "goalsEdit": "Edit goal",
+  "goalsCreateButton": "Create goal",
+  "goalsEmpty": "You have no goals yet. A goal is an amount you want to save up in an account: what you've saved is that account's balance.",
+  "goalsAllArchived": "All your goals are archived.",
+  "goalsDashboardEmpty": "Save up for something: create a savings goal.",
+  "goalsNameLabel": "Name",
+  "goalsNameHint": "Trip, bike, emergency fund",
+  "goalsNameRequired": "Enter the goal's name",
+  "goalsTargetLabel": "How much do you want to save",
+  "goalsTargetPositive": "The goal must be greater than zero",
+  "goalsAccountLabel": "Account where you save",
+  "goalsAccountHelp": "What you've saved is this account's balance. To save, move money into it.",
+  "goalsAccountLocked": "A goal's account can't be changed.",
+  "goalsAccountRequired": "Choose the goal's account",
+  "goalsNoFreeAccount": "You have no free account: each account can back only one goal, and cards can't.",
+  "goalsNewAccount": "Create a new account",
+  "goalsDeadlineLabel": "Deadline (optional)",
+  "goalsDeadlineNone": "No deadline",
+  "goalsDeadlineClear": "Remove the date",
+  "goalsSavedOf": "{saved} of {target}",
+  "@goalsSavedOf": {
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsRemaining": "{amount} to go",
+  "@goalsRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsDaysLeft": "{count, plural, =0{due today} one{{count} day left} other{{count} days left}}",
+  "@goalsDaysLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsStatusReached": "Goal reached!",
+  "goalsStatusOverdue": "Was due {date} · {amount} to go",
+  "@goalsStatusOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsArchivedLabel": "Archived",
+  "goalsAccountArchivedNote": "The account {name} is archived: you can't save into it anymore.",
+  "@goalsAccountArchivedNote": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsSuggestMonthly": "To get there on time, save {amount} a month.",
+  "@goalsSuggestMonthly": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsSuggestBefore": "To get there on time, save {amount} by {date}.",
+  "@goalsSuggestBefore": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsDeadlineOn": "By {date}",
+  "@goalsDeadlineOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsReachedHint": "When you no longer need it, archive it to free up its account.",
+  "goalsSave": "Save",
+  "goalsWithdraw": "Withdraw",
+  "goalsAccountRow": "Account: {name}",
+  "@goalsAccountRow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsHistoryTitle": "Goal activity",
+  "goalsHistoryEmpty": "You haven't saved anything in this account yet.",
+  "goalsMovementFrom": "From {account}",
+  "@goalsMovementFrom": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsMovementTo": "To {account}",
+  "@goalsMovementTo": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "goalsArchive": "Archive",
+  "goalsRestore": "Restore",
+  "goalsArchivedMessage": "Goal archived",
+  "goalsRestoredMessage": "Goal restored",
+  "goalsGone": "This goal no longer exists.",
+  "goalsErrorInvalid": "Check the goal's details.",
+  "goalsErrorAccountTaken": "That account already has another active goal.",
+  "goalsErrorMissingAccount": "The chosen account no longer exists.",
+  "dbErrorGoalAccountCard": "A card can't be the account of a savings goal",
+  "navHome": "Home",
+  "navGoals": "Goals",
+  "navMore": "More",
+  "navTransactions": "Activity"
+}

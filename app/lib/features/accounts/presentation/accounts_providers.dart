@@ -31,11 +31,13 @@ class AccountsNotifier extends AsyncNotifier<List<Account>> {
     required String name,
     required AccountType type,
     required String initialBalance,
+    required String currency,
   }) async {
     await _repository.create(
       name: name,
       type: type,
       initialBalance: initialBalance,
+      currency: currency,
     );
     ref.invalidateSelf();
   }

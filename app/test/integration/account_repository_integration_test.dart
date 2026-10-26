@@ -6,11 +6,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mi_plata/features/accounts/data/account_repository.dart';
 import 'package:mi_plata/features/accounts/domain/account_type.dart';
 import 'package:mi_plata/features/accounts/presentation/account_error_message.dart';
+import 'package:mi_plata/l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../support/test_app.dart';
 
 import '../support/integration_harness.dart';
 
+late AppLocalizations l10n;
+
 void main() {
+  setUpAll(() async {
+    l10n = await loadL10n();
+    await initDates();
+  });
+
   group(
     'AccountRepository contra Supabase local',
     skip: integrationEnabled ? false : integrationSkipReason,
@@ -33,7 +43,7 @@ void main() {
         await repository.create(
           name: 'Bancolombia',
           type: AccountType.bank,
-          initialBalance: '1500000.50',
+          initialBalance: '1500000.50', currency: 'COP',
         );
         var accounts = await repository.fetchAll();
         expect(accounts, hasLength(1));
@@ -67,20 +77,20 @@ void main() {
         await repository.create(
           name: 'Duplicada',
           type: AccountType.cash,
-          initialBalance: '0',
+          initialBalance: '0', currency: 'COP',
         );
 
         await expectLater(
           repository.create(
             name: 'DUPLICADA',
             type: AccountType.cash,
-            initialBalance: '0',
+            initialBalance: '0', currency: 'COP',
           ),
           throwsA(
             isA<PostgrestException>()
                 .having((e) => e.code, 'code', '23505')
                 .having(
-                  (e) => accountErrorMessage(e),
+                  (e) => accountErrorMessage(l10n, e),
                   'mensaje',
                   'Ya tienes una cuenta activa con ese nombre.',
                 ),
@@ -95,7 +105,7 @@ void main() {
         await repository.create(
           name: 'Duplicada',
           type: AccountType.cash,
-          initialBalance: '0',
+          initialBalance: '0', currency: 'COP',
         );
       });
 
@@ -104,7 +114,7 @@ void main() {
           repository.create(
             name: '   ',
             type: AccountType.cash,
-            initialBalance: '0',
+            initialBalance: '0', currency: 'COP',
           ),
           throwsA(
             isA<PostgrestException>().having((e) => e.code, 'code', '23514'),
@@ -115,7 +125,7 @@ void main() {
           repository.create(
             name: 'Enorme',
             type: AccountType.cash,
-            initialBalance: '1000000000000',
+            initialBalance: '1000000000000', currency: 'COP',
           ),
           throwsA(
             isA<PostgrestException>().having((e) => e.code, 'code', '22003'),
@@ -127,7 +137,7 @@ void main() {
         await repository.create(
           name: 'Visa',
           type: AccountType.card,
-          initialBalance: '-350000.25',
+          initialBalance: '-350000.25', currency: 'COP',
         );
 
         final visa = (await repository.fetchAll()).firstWhere(
@@ -140,7 +150,7 @@ void main() {
         await repository.create(
           name: 'Solo de Ana',
           type: AccountType.bank,
-          initialBalance: '1',
+          initialBalance: '1', currency: 'COP',
         );
 
         expect(await AccountRepository(beto).fetchAll(), isEmpty);

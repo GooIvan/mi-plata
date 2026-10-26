@@ -13,11 +13,21 @@ import 'package:mi_plata/features/transactions/data/transaction_repository.dart'
 import 'package:mi_plata/features/transactions/domain/transaction_draft.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 import 'package:mi_plata/features/transactions/presentation/transaction_error_message.dart';
+import 'package:mi_plata/l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../support/test_app.dart';
 
 import '../support/integration_harness.dart';
 
+late AppLocalizations l10n;
+
 void main() {
+  setUpAll(() async {
+    l10n = await loadL10n();
+    await initDates();
+  });
+
   group(
     'TransactionRepository contra Supabase local',
     skip: integrationEnabled ? false : integrationSkipReason,
@@ -66,12 +76,12 @@ void main() {
         await accounts.create(
           name: 'Bancolombia',
           type: AccountType.bank,
-          initialBalance: '1000000',
+          initialBalance: '1000000', currency: 'COP',
         );
         await accounts.create(
           name: 'Efectivo',
           type: AccountType.cash,
-          initialBalance: '50000',
+          initialBalance: '50000', currency: 'COP',
         );
         final all = await accounts.fetchAll();
         bancolombia = all.firstWhere((a) => a.name == 'Bancolombia');
@@ -215,8 +225,9 @@ void main() {
             throwsA(
               isA<PostgrestException>()
                   .having((e) => e.code, 'code', '23514')
+                  .having((e) => e.details, 'detalle', 'transaction_category_mismatch')
                   .having(
-                    (e) => transactionErrorMessage(e),
+                    (e) => transactionErrorMessage(l10n, e),
                     'mensaje',
                     'La categoría elegida no corresponde a este tipo de movimiento',
                   ),
@@ -246,7 +257,7 @@ void main() {
             fail('debía fallar');
           } on PostgrestException catch (error) {
             expect(
-              transactionErrorMessage(error),
+              transactionErrorMessage(l10n, error),
               startsWith('Revisa los datos del movimiento'),
             );
           }

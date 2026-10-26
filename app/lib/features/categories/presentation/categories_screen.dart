@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/state_message.dart';
+import '../../../l10n/l10n.dart';
 import '../domain/category.dart';
 import '../domain/category_type.dart';
 import 'categories_providers.dart';
@@ -35,21 +36,28 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
 
   Future<void> _setArchived(Category category, {required bool archived}) async {
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
 
     try {
       await ref
           .read(categoriesProvider.notifier)
           .setArchived(category.id, isArchived: archived);
     } catch (error) {
-      messenger.showSnackBar(SnackBar(content: Text(categoryErrorMessage(error))));
+      messenger.showSnackBar(
+        SnackBar(content: Text(categoryErrorMessage(l10n, error))),
+      );
       return;
     }
 
     messenger.showSnackBar(
       SnackBar(
-        content: Text(archived ? 'Categoría archivada' : 'Categoría restaurada'),
+        content: Text(
+          archived
+              ? l10n.categoriesArchivedMessage
+              : l10n.categoriesRestoredMessage,
+        ),
         action: SnackBarAction(
-          label: 'Deshacer',
+          label: l10n.commonUndo,
           onPressed: () => _setArchived(category, archived: !archived),
         ),
       ),
@@ -59,13 +67,16 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
   @override
   Widget build(BuildContext context) {
     final categories = ref.watch(categoriesProvider);
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Categorías'),
+        title: Text(l10n.categoriesTitle),
         actions: [
           IconButton(
-            tooltip: _showArchived ? 'Ocultar archivadas' : 'Mostrar archivadas',
+            tooltip: _showArchived
+                ? l10n.commonHideArchived
+                : l10n.commonShowArchived,
             icon: Icon(
               _showArchived ? Icons.inventory_2 : Icons.inventory_2_outlined,
             ),
@@ -74,15 +85,18 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
         ],
         bottom: TabBar(
           controller: _tabs,
-          tabs: const [Tab(text: 'Gastos'), Tab(text: 'Ingresos')],
+          tabs: [
+            Tab(text: l10n.commonExpenses),
+            Tab(text: l10n.commonIncomes),
+          ],
         ),
       ),
       body: categories.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => StateMessage(
           icon: Icons.cloud_off_outlined,
-          text: categoryErrorMessage(error),
-          actionLabel: 'Reintentar',
+          text: categoryErrorMessage(l10n, error),
+          actionLabel: l10n.commonRetry,
           onAction: () => ref.invalidate(categoriesProvider),
         ),
         data: (all) => TabBarView(
@@ -93,19 +107,20 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showCategoryForm(context, type: _currentType),
         icon: const Icon(Icons.add),
-        label: const Text('Nueva categoría'),
+        label: Text(l10n.categoriesNew),
       ),
     );
   }
 
   Widget _buildList(List<Category> all, CategoryType type) {
+    final l10n = context.l10n;
     final ofType = all.where((category) => category.type == type).toList();
 
     if (ofType.isEmpty) {
       return StateMessage(
         icon: type.icon,
-        text: 'Aún no tienes categorías de ${type.label}.',
-        actionLabel: 'Crear categoría',
+        text: l10n.categoriesEmptyOfType(type.name),
+        actionLabel: l10n.categoriesCreateButton,
         onAction: () => showCategoryForm(context, type: type),
       );
     }
@@ -119,8 +134,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
     if (visible.isEmpty) {
       return StateMessage(
         icon: Icons.inventory_2_outlined,
-        text: 'Todas tus categorías de ${type.label} están archivadas.',
-        actionLabel: 'Mostrar archivadas',
+        text: l10n.categoriesAllArchivedOfType(type.name),
+        actionLabel: l10n.commonShowArchived,
         onAction: () => setState(() => _showArchived = true),
       );
     }

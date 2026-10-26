@@ -1,8 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/format/date_format.dart';
-import '../../../../core/format/money_format.dart';
+import '../../../../core/format/formats.dart';
+import '../../../../l10n/l10n.dart';
 import '../../domain/balance_history.dart';
 import '../summary_colors.dart';
 
@@ -16,9 +16,13 @@ class BalanceHistoryCard extends StatefulWidget {
     super.key,
     required this.points,
     required this.selectedMonth,
+    required this.currency,
   });
 
   final List<BalancePoint> points;
+
+  /// La moneda de los montos (la base del usuario).
+  final String currency;
 
   /// El mes que se está mirando: su etiqueta va en negrita.
   final DateTime selectedMonth;
@@ -33,6 +37,8 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
     final colors = SummaryColors.of(context);
     final points = widget.points;
     final first = points.first.cents;
@@ -52,29 +58,30 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Dinero total', style: theme.textTheme.titleMedium),
+            Text(l10n.dashboardTotalMoney, style: theme.textTheme.titleMedium),
             const SizedBox(height: 2),
             Text(
-              'Al cierre de cada mes',
+              l10n.summaryHistorySubtitle,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 12),
             Text(
-              formatMoney(last / 100),
+              formats.money(last / 100, currency: widget.currency),
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 2),
-            _DeltaLine(delta: delta, months: points.length),
+            _DeltaLine(
+              delta: delta,
+              months: points.length,
+              currency: widget.currency,
+            ),
             const SizedBox(height: 16),
             Semantics(
-              label:
-                  'Gráfico de línea con el dinero total al cierre de cada uno '
-                  'de los últimos ${points.length} meses. La misma información '
-                  'está disponible como tabla.',
+              label: l10n.summaryHistorySemantics(points.length),
               excludeSemantics: true,
               child: SizedBox(
                 height: 200,
@@ -102,7 +109,7 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
                           getTitlesWidget: (value, meta) => SideTitleWidget(
                             meta: meta,
                             child: Text(
-                              formatCompactMoney(value),
+                              formats.compactMoney(value, currency: widget.currency),
                               style: labelStyle,
                               maxLines: 1,
                               softWrap: false,
@@ -126,7 +133,7 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
                               meta: meta,
                               space: 8,
                               child: Text(
-                                formatMonthShort(month),
+                                formats.monthShort(month),
                                 style: labelStyle?.copyWith(
                                   fontWeight: selected ? FontWeight.bold : null,
                                   color: selected ? theme.colorScheme.onSurface : null,
@@ -143,8 +150,8 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
                         getTooltipItems: (spots) => [
                           for (final spot in spots)
                             LineTooltipItem(
-                              '${formatMonth(points[spot.x.toInt()].month)}\n'
-                              '${formatMoney(spot.y)}',
+                              '${formats.month(points[spot.x.toInt()].month)}\n'
+                              '${formats.money(spot.y, currency: widget.currency)}',
                               TextStyle(
                                 color: theme.colorScheme.onInverseSurface,
                                 fontSize: 12,
@@ -183,11 +190,14 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
                 onPressed: () => setState(() => _showTable = !_showTable),
                 icon: Icon(_showTable ? Icons.expand_less : Icons.table_rows),
                 label: Text(
-                  _showTable ? 'Ocultar tabla de saldos' : 'Ver saldos como tabla',
+                  _showTable
+                      ? l10n.summaryHistoryHideTable
+                      : l10n.summaryHistoryShowTable,
                 ),
               ),
             ),
-            if (_showTable) _BalanceTable(points: points),
+            if (_showTable)
+              _BalanceTable(points: points, currency: widget.currency),
           ],
         ),
       ),
@@ -197,30 +207,45 @@ class _BalanceHistoryCardState extends State<BalanceHistoryCard> {
 
 /// "▲ $320.000 más que hace 5 meses": cuánto cambió el dinero en la ventana.
 class _DeltaLine extends StatelessWidget {
-  const _DeltaLine({required this.delta, required this.months});
+  const _DeltaLine({
+    required this.delta,
+    required this.months,
+    required this.currency,
+  });
 
   final int delta;
   final int months;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
     final span = months - 1;
-    final since = span == 1 ? 'el mes anterior' : 'hace $span meses';
+    final since = span == 1
+        ? l10n.summarySincePrevious
+        : l10n.summarySinceMonths(span);
 
     final (IconData icon, Color? color, String text) = delta > 0
         ? (
             Icons.arrow_upward,
             theme.colorScheme.primary,
-            '${formatMoney(delta / 100)} más que $since',
+            l10n.summaryDeltaUp(
+              formats.money(delta / 100, currency: currency),
+              since,
+            ),
           )
         : delta < 0
         ? (
             Icons.arrow_downward,
             theme.colorScheme.error,
-            '${formatMoney(-delta / 100)} menos que $since',
+            l10n.summaryDeltaDown(
+              formats.money(-delta / 100, currency: currency),
+              since,
+            ),
           )
-        : (Icons.remove, null, 'Igual que $since');
+        : (Icons.remove, null, l10n.summaryDeltaSame(since));
 
     return Row(
       children: [
@@ -233,13 +258,16 @@ class _DeltaLine extends StatelessWidget {
 }
 
 class _BalanceTable extends StatelessWidget {
-  const _BalanceTable({required this.points});
+  const _BalanceTable({required this.points, required this.currency});
 
   final List<BalancePoint> points;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
     final header = theme.textTheme.labelMedium?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
@@ -256,14 +284,21 @@ class _BalanceTable extends StatelessWidget {
       child: Table(
         children: [
           row(
-            Text('Cierre de', style: header),
-            Text('Dinero total', textAlign: TextAlign.end, style: header),
+            Text(l10n.summaryHistoryTableClosing, style: header),
+            Text(
+              l10n.dashboardTotalMoney,
+              textAlign: TextAlign.end,
+              style: header,
+            ),
           ),
           for (final point in points)
             row(
-              Text(formatMonth(point.month), style: theme.textTheme.bodySmall),
               Text(
-                formatMoney(point.cents / 100),
+                formats.month(point.month),
+                style: theme.textTheme.bodySmall,
+              ),
+              Text(
+                formats.money(point.cents / 100, currency: currency),
                 textAlign: TextAlign.end,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontFeatures: const [FontFeature.tabularFigures()],

@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/format/date_format.dart';
+import '../../../core/format/formats.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/widgets/error_banner.dart';
 import '../../../core/widgets/state_message.dart';
+import '../../../l10n/l10n.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/domain/amount_parser.dart';
+import '../../accounts/presentation/account_label.dart';
 import '../../accounts/presentation/accounts_providers.dart';
 import '../../budgets/presentation/budget_expense_alert.dart';
+import '../../currency/domain/currency.dart';
+import '../../currency/domain/currency_converter.dart';
+import '../../currency/presentation/currency_providers.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/domain/category_type.dart';
 import '../../categories/presentation/categories_providers.dart';
@@ -25,22 +30,45 @@ import 'transaction_type_ui.dart';
 import 'transactions_providers.dart';
 
 /// Abre el formulario para registrar un movimiento, o para editar [transaction].
+///
+/// Para uno nuevo se puede empezar con el tipo y las cuentas ya elegidos (por
+/// ejemplo, "ahorrar" es una transferencia hacia la cuenta de una meta).
 Future<void> showTransactionForm(
   BuildContext context, {
   Transaction? transaction,
+  TransactionType? initialType,
+  String? initialAccountId,
+  String? initialDestinationId,
 }) {
-  return Navigator.of(context).push(
+  // En el navegador raíz: el formulario cubre la barra de navegación.
+  return Navigator.of(context, rootNavigator: true).push(
     MaterialPageRoute<void>(
       fullscreenDialog: true,
-      builder: (_) => TransactionFormScreen(transaction: transaction),
+      builder: (_) => TransactionFormScreen(
+        transaction: transaction,
+        initialType: initialType,
+        initialAccountId: initialAccountId,
+        initialDestinationId: initialDestinationId,
+      ),
     ),
   );
 }
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
-  const TransactionFormScreen({super.key, this.transaction});
+  const TransactionFormScreen({
+    super.key,
+    this.transaction,
+    this.initialType,
+    this.initialAccountId,
+    this.initialDestinationId,
+  });
 
   final Transaction? transaction;
+
+  /// Con qué se abre un movimiento nuevo; al editar no se usan.
+  final TransactionType? initialType;
+  final String? initialAccountId;
+  final String? initialDestinationId;
 
   @override
   ConsumerState<TransactionFormScreen> createState() =>
@@ -49,29 +77,67 @@ class TransactionFormScreen extends ConsumerStatefulWidget {
 
 class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final _amount = TextEditingController(
-    text: widget.transaction == null
-        ? ''
-        : AmountParser.toInput(widget.transaction!.amount),
-  );
+  final _amount = TextEditingController();
+  final _destinationAmount = TextEditingController();
   late final _description = TextEditingController(
     text: widget.transaction?.description,
   );
   late TransactionType _type =
-      widget.transaction?.type ?? TransactionType.expense;
-  late String? _accountId = widget.transaction?.accountId;
-  late String? _destinationId = widget.transaction?.destinationAccountId;
+      widget.transaction?.type ?? widget.initialType ?? TransactionType.expense;
+  late String? _accountId =
+      widget.transaction?.accountId ?? widget.initialAccountId;
+  late String? _destinationId =
+      widget.transaction?.destinationAccountId ?? widget.initialDestinationId;
   late String? _categoryId = widget.transaction?.categoryId;
   late DateTime _date = widget.transaction?.date ?? DateTime.now();
   bool _saving = false;
+  bool _amountReady = false;
   String? _error;
 
   bool get _isEditing => widget.transaction != null;
   bool get _isTransfer => _type == TransactionType.transfer;
 
+  /// Si es una transferencia entre cuentas de monedas distintas: entonces hay
+  /// un monto que sale y otro que llega.
+  bool _isCrossCurrency(List<Account> accounts) {
+    if (!_isTransfer) return false;
+    final source = accounts.where((a) => a.id == _accountId).firstOrNull;
+    final destination = accounts
+        .where((a) => a.id == _destinationId)
+        .firstOrNull;
+    return source != null &&
+        destination != null &&
+        source.currency != destination.currency;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // El monto se escribe según el idioma, así que el texto inicial espera a
+    // tener el contexto.
+    if (!_amountReady) {
+      _amountReady = true;
+      final transaction = widget.transaction;
+      if (transaction != null) {
+        _amount.text = AmountParser.toInput(
+          transaction.amount,
+          context.formats,
+        );
+        final received = transaction.destinationAmount;
+        if (received != null) {
+          _destinationAmount.text = AmountParser.toInput(
+            received,
+            context.formats,
+          );
+        }
+      }
+    }
+  }
+
   @override
   void dispose() {
     _amount.dispose();
+    _destinationAmount.dispose();
     _description.dispose();
     super.dispose();
   }
@@ -82,7 +148,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       initialDate: _date,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      helpText: 'Fecha del movimiento',
+      helpText: context.l10n.transactionsDateHelp,
     );
     if (picked != null) setState(() => _date = picked);
   }
@@ -91,18 +157,24 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final description = _description.text.trim();
+    final accounts = ref.read(accountsProvider).value ?? const <Account>[];
+    final formats = context.formats;
     final draft = TransactionDraft(
       type: _type,
       accountId: _accountId!,
       destinationAccountId: _isTransfer ? _destinationId : null,
       categoryId: _isTransfer ? null : _categoryId,
-      amount: AmountParser.parse(_amount.text)!,
+      amount: AmountParser.parse(_amount.text, formats)!,
+      // Solo una transferencia entre monedas distintas dice cuánto llega.
+      destinationAmount: _isCrossCurrency(accounts)
+          ? AmountParser.parse(_destinationAmount.text, formats)
+          : null,
       date: _date,
       description: description.isEmpty ? null : description,
     );
 
     final warnings = NegativeBalanceCheck.after(
-      accounts: ref.read(accountsProvider).value ?? const <Account>[],
+      accounts: accounts,
       draft: draft,
       previous: widget.transaction,
     );
@@ -116,10 +188,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
     final transactions = ref.read(transactionsProvider.notifier);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
     try {
       // Antes de guardar: después, el gasto ya estaría sumado en el mes.
       final budgetAlert = await budgetAlertBeforeSaving(
         ref,
+        l10n,
         draft: draft,
         previous: widget.transaction,
       );
@@ -141,7 +215,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _error = transactionErrorMessage(error);
+        _error = transactionErrorMessage(l10n, error);
       });
     }
   }
@@ -153,9 +227,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         context,
         warnings,
         title: _isEditing
-            ? '¿Guardar de todos modos?'
-            : '¿Registrar de todos modos?',
-        confirmLabel: _isEditing ? 'Guardar igual' : 'Registrar igual',
+            ? context.l10n.negativeBalanceSaveTitle
+            : context.l10n.negativeBalanceRecordTitle,
+        confirmLabel: _isEditing
+            ? context.l10n.negativeBalanceSaveAnyway
+            : context.l10n.negativeBalanceRecordAnyway,
       );
 
   Future<void> _confirmDelete() async {
@@ -166,19 +242,22 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('¿Eliminar este movimiento?'),
+        title: Text(context.l10n.transactionsDeleteTitle),
         content: Text(
-          'El saldo de tus cuentas se recalculará sin este movimiento.'
-          '${warnings.isEmpty ? '' : '\n\nAtención:\n${negativeBalanceMessage(warnings)}'}',
+          warnings.isEmpty
+              ? context.l10n.transactionsDeleteBody
+              : context.l10n.transactionsDeleteBodyWithWarning(
+                  negativeBalanceMessage(context.l10n, warnings),
+                ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Eliminar'),
+            child: Text(context.l10n.commonDelete),
           ),
         ],
       ),
@@ -191,6 +270,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     });
 
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
     try {
       await ref
           .read(transactionsProvider.notifier)
@@ -199,28 +279,31 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _error = transactionErrorMessage(error);
+        _error = transactionErrorMessage(l10n, error);
       });
       return;
     }
 
     if (!mounted) return;
     Navigator.of(context).pop();
-    messenger.showSnackBar(const SnackBar(content: Text('Movimiento eliminado')));
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.transactionsDeleted)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final accounts = ref.watch(accountsProvider);
     final categories = ref.watch(categoriesProvider);
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Editar movimiento' : 'Nuevo movimiento'),
+        title: Text(_isEditing ? l10n.transactionsEdit : l10n.transactionsNew),
         actions: [
           if (_isEditing)
             IconButton(
-              tooltip: 'Eliminar movimiento',
+              tooltip: l10n.transactionsDeleteTooltip,
               icon: const Icon(Icons.delete_outline),
               onPressed: _saving ? null : _confirmDelete,
             ),
@@ -230,8 +313,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         (AsyncError(:final error), _) || (_, AsyncError(:final error)) =>
           StateMessage(
             icon: Icons.cloud_off_outlined,
-            text: transactionErrorMessage(error),
-            actionLabel: 'Reintentar',
+            text: transactionErrorMessage(l10n, error),
+            actionLabel: l10n.commonRetry,
             onAction: () {
               ref.invalidate(accountsProvider);
               ref.invalidate(categoriesProvider);
@@ -245,6 +328,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   }
 
   Widget _buildForm(List<Account> allAccounts, List<Category> allCategories) {
+    final l10n = context.l10n;
     // Una cuenta archivada solo se ofrece si el movimiento que se edita ya la usa.
     final usedIds = {
       widget.transaction?.accountId,
@@ -257,8 +341,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     if (accounts.isEmpty) {
       return StateMessage(
         icon: Icons.account_balance_wallet_outlined,
-        text: 'Primero crea una cuenta para registrar movimientos.',
-        actionLabel: 'Crear cuenta',
+        text: l10n.transactionsNeedAccountFirst,
+        actionLabel: l10n.accountsCreateButton,
         onAction: () {
           final router = GoRouter.of(context);
           Navigator.of(context).pop();
@@ -287,11 +371,29 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         .where((account) => account.id != _accountId)
         .toList();
     final theme = Theme.of(context);
+    final formats = context.formats;
+    final source = accounts.where((a) => a.id == _accountId).firstOrNull;
+    final destination = accounts
+        .where((a) => a.id == _destinationId)
+        .firstOrNull;
+    final crossCurrency = _isCrossCurrency(accounts);
+    final baseCurrency = ref.watch(currencyConverterProvider).value?.base;
+    // El monto va en la moneda de la cuenta; mientras no hay cuenta, en la base.
+    final currency = source?.currency ?? baseCurrency ?? defaultCurrency;
+    final sent = AmountParser.parse(_amount.text, formats);
+    final received = AmountParser.parse(_destinationAmount.text, formats);
+    final impliedRate = !crossCurrency || sent == null || received == null
+        ? null
+        : CurrencyConverter.impliedRate(
+            fromCents: (double.parse(sent) * 100).round(),
+            toCents: (double.parse(received) * 100).round(),
+          );
 
+    // Las cuentas de otra moneda la dicen: así no se confunden en la lista.
     DropdownMenuItem<String> accountItem(Account account) => DropdownMenuItem(
       value: account.id,
       child: Text(
-        account.isArchived ? '${account.name} (archivada)' : account.name,
+        accountLabel(l10n, account, baseCurrency: baseCurrency),
         overflow: TextOverflow.ellipsis,
       ),
     );
@@ -311,7 +413,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   TransactionType.income,
                   TransactionType.transfer,
                 ])
-                  ButtonSegment(value: type, label: Text(type.label)),
+                  ButtonSegment(value: type, label: Text(type.label(l10n))),
               ],
               selected: {_type},
               onSelectionChanged: _saving
@@ -329,13 +431,16 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               autofocus: !_isEditing,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               textInputAction: TextInputAction.next,
-              validator: TransactionValidators.amount,
+              validator: (value) => TransactionValidators.amount(l10n, value),
               style: theme.textTheme.headlineSmall,
-              decoration: const InputDecoration(
-                labelText: 'Monto',
-                hintText: 'Ej: 150.000',
-                prefixText: r'$ ',
-                border: OutlineInputBorder(),
+              onChanged: crossCurrency ? (_) => setState(() {}) : null,
+              decoration: InputDecoration(
+                labelText: crossCurrency
+                    ? l10n.transactionsAmountOut(currency)
+                    : l10n.commonAmount,
+                hintText: l10n.transactionsAmountHint,
+                prefixText: '${currencySymbol(currency)} ',
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -349,9 +454,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       _accountId = id;
                       if (_destinationId == id) _destinationId = null;
                     }),
-              validator: (id) => id == null ? 'Elige una cuenta' : null,
+              validator: (id) => id == null ? l10n.accountsChoose : null,
               decoration: InputDecoration(
-                labelText: _isTransfer ? 'Desde' : 'Cuenta',
+                labelText: _isTransfer
+                    ? l10n.transactionsFrom
+                    : l10n.commonAccount,
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -368,11 +475,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 validator: (id) => id != null
                     ? null
                     : destinations.isEmpty
-                    ? 'Necesitas otra cuenta para transferir'
-                    : 'Elige la cuenta de destino',
-                decoration: const InputDecoration(
-                  labelText: 'Hacia',
-                  border: OutlineInputBorder(),
+                    ? l10n.transactionsNeedAnotherAccount
+                    : l10n.transactionsChooseDestination,
+                decoration: InputDecoration(
+                  labelText: l10n.transactionsTo,
+                  border: const OutlineInputBorder(),
                 ),
               )
             else
@@ -381,16 +488,16 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 initialValue: _categoryId,
                 isExpanded: true,
                 items: [
-                  const DropdownMenuItem<String?>(
+                  DropdownMenuItem<String?>(
                     value: null,
-                    child: Text('Sin categoría'),
+                    child: Text(l10n.commonNoCategory),
                   ),
                   for (final category in categories)
                     DropdownMenuItem<String?>(
                       value: category.id,
                       child: Text(
                         category.isArchived
-                            ? '${category.name} (archivada)'
+                            ? l10n.accountsArchivedName(category.name)
                             : category.name,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -399,22 +506,49 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 onChanged: _saving
                     ? null
                     : (id) => setState(() => _categoryId = id),
-                decoration: const InputDecoration(
-                  labelText: 'Categoría',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.commonCategory,
+                  border: const OutlineInputBorder(),
                 ),
               ),
+            if (crossCurrency && destination != null) ...[
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _destinationAmount,
+                enabled: !_saving,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                textInputAction: TextInputAction.next,
+                validator: (value) => TransactionValidators.amount(l10n, value),
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.transactionsAmountIn(destination.currency),
+                  hintText: l10n.transactionsAmountHint,
+                  prefixText: '${currencySymbol(destination.currency)} ',
+                  // Lo que equivale a 1 de la moneda de origen, a la vista.
+                  helperText: impliedRate == null
+                      ? null
+                      : l10n.transactionsImpliedRate(
+                          currency,
+                          formats.rate(impliedRate),
+                          destination.currency,
+                        ),
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             InkWell(
               onTap: _saving ? null : _pickDate,
               borderRadius: BorderRadius.circular(4),
               child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Fecha',
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.calendar_today_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.commonDate,
+                  border: const OutlineInputBorder(),
+                  suffixIcon: const Icon(Icons.calendar_today_outlined),
                 ),
-                child: Text(formatFullDate(_date)),
+                child: Text(context.formats.fullDate(_date)),
               ),
             ),
             const SizedBox(height: 16),
@@ -422,11 +556,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               controller: _description,
               enabled: !_saving,
               textCapitalization: TextCapitalization.sentences,
-              validator: TransactionValidators.description,
-              decoration: const InputDecoration(
-                labelText: 'Descripción (opcional)',
-                hintText: 'Ej: Mercado de la semana',
-                border: OutlineInputBorder(),
+              validator: (value) => TransactionValidators.description(l10n, value),
+              decoration: InputDecoration(
+                labelText: l10n.transactionsDescriptionLabel,
+                hintText: l10n.transactionsDescriptionHint,
+                border: const OutlineInputBorder(),
               ),
             ),
             if (_error != null) ...[
@@ -442,7 +576,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(_isEditing ? 'Guardar cambios' : 'Registrar'),
+                  : Text(
+                      _isEditing
+                          ? l10n.commonSaveChanges
+                          : l10n.transactionsRecord,
+                    ),
             ),
           ],
         ),

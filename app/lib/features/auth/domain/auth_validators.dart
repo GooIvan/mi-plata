@@ -1,3 +1,5 @@
+import '../../../l10n/l10n.dart';
+
 /// Reglas de los formularios de acceso. Los mensajes llegan al usuario.
 class AuthValidators {
   const AuthValidators._();
@@ -7,30 +9,34 @@ class AuthValidators {
 
   static final _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
-  static String? email(String? value) {
+  static String? email(AppLocalizations l10n, String? value) {
     final email = value?.trim() ?? '';
-    if (email.isEmpty) return 'Ingresa tu correo';
-    if (!_emailPattern.hasMatch(email)) return 'El correo no es válido';
+    if (email.isEmpty) return l10n.authEmailRequired;
+    if (!_emailPattern.hasMatch(email)) return l10n.authEmailInvalid;
     return null;
   }
 
   /// Al iniciar sesión solo se exige que no esté vacía.
-  static String? requiredPassword(String? value) {
-    if (value == null || value.isEmpty) return 'Ingresa tu contraseña';
+  static String? requiredPassword(AppLocalizations l10n, String? value) {
+    if (value == null || value.isEmpty) return l10n.authPasswordRequired;
     return null;
   }
 
-  static String? newPassword(String? value) {
-    if (value == null || value.isEmpty) return 'Crea una contraseña';
+  static String? newPassword(AppLocalizations l10n, String? value) {
+    if (value == null || value.isEmpty) return l10n.authNewPasswordRequired;
     if (value.length < minPasswordLength) {
-      return 'Usa al menos $minPasswordLength caracteres';
+      return l10n.authPasswordTooShort(minPasswordLength);
     }
     return null;
   }
 
-  static String? passwordConfirmation(String? value, String password) {
-    if (value == null || value.isEmpty) return 'Repite tu contraseña';
-    if (value != password) return 'Las contraseñas no coinciden';
+  static String? passwordConfirmation(
+    AppLocalizations l10n,
+    String? value,
+    String password,
+  ) {
+    if (value == null || value.isEmpty) return l10n.authPasswordRepeatRequired;
+    if (value != password) return l10n.authPasswordMismatch;
     return null;
   }
 }

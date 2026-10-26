@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mi_plata/features/summary/domain/month_summary.dart';
 import 'package:mi_plata/features/summary/domain/monthly_total.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
+import '../../support/test_app.dart';
 
 MonthlyTotal row(
   DateTime month,
@@ -64,7 +65,7 @@ void main() {
         row(oct, income, 500000, category: 'extra'),
         row(oct, expense, 1200000.5, category: 'mercado'),
         row(oct, expense, 300000, category: 'transporte'),
-      ], oct);
+      ], oct, copConverter);
 
       expect(summary.incomeCents, 350000000);
       expect(summary.expenseCents, 150000050);
@@ -78,13 +79,13 @@ void main() {
         row(oct, expense, 100),
         row(sep, expense, 999),
         row(oct, expense, 777, currency: 'USD'),
-      ], oct);
+      ], oct, copConverter);
 
       expect(summary.expenseCents, 10000);
     });
 
     test('un mes sin movimientos queda en cero y vacío', () {
-      final summary = SummaryCalculator.forMonth([row(sep, expense, 100)], oct);
+      final summary = SummaryCalculator.forMonth([row(sep, expense, 100)], oct, copConverter);
 
       expect(summary.incomeCents, 0);
       expect(summary.expenseCents, 0);
@@ -97,7 +98,7 @@ void main() {
       final summary = SummaryCalculator.forMonth([
         row(oct, income, 100),
         row(oct, expense, 350),
-      ], oct);
+      ], oct, copConverter);
 
       expect(summary.balanceCents, -25000);
     });
@@ -106,7 +107,7 @@ void main() {
       final summary = SummaryCalculator.forMonth([
         row(oct, expense, 0.1, category: 'a'),
         row(oct, expense, 0.2, category: 'b'),
-      ], oct);
+      ], oct, copConverter);
 
       expect(summary.expenseCents, 30);
     });
@@ -118,7 +119,7 @@ void main() {
         row(oct, expense, 100, category: 'a'),
         row(oct, expense, 300, category: 'b'),
         row(oct, expense, 600, category: 'c'),
-      ], oct);
+      ], oct, copConverter);
 
       final shares = summary.expenseByCategory;
       expect(shares.map((s) => s.categoryId), ['c', 'b', 'a']);
@@ -130,7 +131,7 @@ void main() {
       final summary = SummaryCalculator.forMonth([
         row(oct, expense, 100, category: 'a'),
         row(oct, expense, 50, category: 'a'),
-      ], oct);
+      ], oct, copConverter);
 
       expect(summary.expenseByCategory.single.cents, 15000);
       expect(summary.expenseByCategory.single.share, 1);
@@ -140,7 +141,7 @@ void main() {
       final summary = SummaryCalculator.forMonth([
         row(oct, expense, 700, category: 'a'),
         row(oct, expense, 300),
-      ], oct);
+      ], oct, copConverter);
 
       final uncategorized = summary.expenseByCategory.last;
       expect(uncategorized.kind, ShareKind.uncategorized);
@@ -152,7 +153,7 @@ void main() {
       final summary = SummaryCalculator.forMonth([
         row(oct, income, 1000, category: 'salario'),
         row(oct, expense, 400, category: 'mercado'),
-      ], oct);
+      ], oct, copConverter);
 
       expect(summary.incomeByCategory.single.categoryId, 'salario');
       expect(summary.expenseByCategory.single.categoryId, 'mercado');
@@ -164,9 +165,9 @@ void main() {
         row(oct, expense, 100, category: 'a'),
       ];
 
-      final first = SummaryCalculator.forMonth(rows, oct).expenseByCategory;
+      final first = SummaryCalculator.forMonth(rows, oct, copConverter).expenseByCategory;
       final second =
-          SummaryCalculator.forMonth(rows.reversed, oct).expenseByCategory;
+          SummaryCalculator.forMonth(rows.reversed, oct, copConverter).expenseByCategory;
 
       expect(first.map((s) => s.categoryId), ['a', 'b']);
       expect(second.map((s) => s.categoryId), ['a', 'b']);
@@ -180,7 +181,7 @@ void main() {
 
       test('hasta ocho categorías se muestran todas', () {
         final shares =
-            SummaryCalculator.forMonth(categories(8), oct).expenseByCategory;
+            SummaryCalculator.forMonth(categories(8), oct, copConverter).expenseByCategory;
 
         expect(shares, hasLength(8));
         expect(shares.any((s) => s.kind == ShareKind.other), isFalse);
@@ -188,7 +189,7 @@ void main() {
 
       test('con nueve se muestran siete y el resto va en "Otras"', () {
         final shares =
-            SummaryCalculator.forMonth(categories(9), oct).expenseByCategory;
+            SummaryCalculator.forMonth(categories(9), oct, copConverter).expenseByCategory;
 
         expect(shares, hasLength(8));
         expect(shares.last.kind, ShareKind.other);
@@ -202,7 +203,7 @@ void main() {
 
   group('trend', () {
     test('devuelve seis meses, del más viejo al más reciente', () {
-      final points = SummaryCalculator.trend([], oct);
+      final points = SummaryCalculator.trend([], oct, copConverter);
 
       expect(points, hasLength(6));
       expect(points.first.month, DateTime(2026, 5));
@@ -213,21 +214,21 @@ void main() {
       final points = SummaryCalculator.trend([
         row(oct, expense, 500),
         row(DateTime(2026, 7), income, 900),
-      ], oct);
+      ], oct, copConverter);
 
       expect(points.map((p) => p.incomeCents), [0, 0, 90000, 0, 0, 0]);
       expect(points.map((p) => p.expenseCents), [0, 0, 0, 0, 0, 50000]);
     });
 
     test('cruza el cambio de año', () {
-      final points = SummaryCalculator.trend([], DateTime(2026, 2));
+      final points = SummaryCalculator.trend([], DateTime(2026, 2), copConverter);
 
       expect(points.first.month, DateTime(2025, 9));
       expect(points.last.month, DateTime(2026, 2));
     });
 
     test('la cantidad de meses es configurable', () {
-      expect(SummaryCalculator.trend([], oct, months: 3), hasLength(3));
+      expect(SummaryCalculator.trend([], oct, copConverter, months: 3), hasLength(3));
     });
   });
 
@@ -266,7 +267,7 @@ void main() {
         for (var i = 0; i < 10; i++)
           row(oct, expense, 1000.0 - i, category: 'c$i'),
         row(oct, expense, 50),
-      ], oct);
+      ], oct, copConverter);
 
       // En el reparto las más pequeñas van en "Otras", pero aquí no.
       expect(summary.expenseByCategory.any((s) => s.kind == ShareKind.other), isTrue);
@@ -276,7 +277,7 @@ void main() {
     });
 
     test('el mes sin gastos tiene el mapa vacío', () {
-      final summary = SummaryCalculator.forMonth([], oct);
+      final summary = SummaryCalculator.forMonth([], oct, copConverter);
 
       expect(summary.expenseCentsByCategory, isEmpty);
       expect(summary.incomeCentsByCategory, isEmpty);
@@ -295,7 +296,7 @@ void main() {
 
   group('ritmo de gasto', () {
     // 100.000 gastados en octubre (31 días).
-    final summary = SummaryCalculator.forMonth([row(oct, expense, 100000)], oct);
+    final summary = SummaryCalculator.forMonth([row(oct, expense, 100000)], oct, copConverter);
 
     test('en el mes en curso promedia sobre los días transcurridos', () {
       final pace = SummaryCalculator.pace(summary, DateTime(2026, 10, 10));
@@ -331,7 +332,7 @@ void main() {
     });
 
     test('sin gastos el ritmo es cero', () {
-      final empty = SummaryCalculator.forMonth([], oct);
+      final empty = SummaryCalculator.forMonth([], oct, copConverter);
       final pace = SummaryCalculator.pace(empty, DateTime(2026, 10, 15));
 
       expect(pace.dailyAverageCents, 0);
@@ -340,7 +341,7 @@ void main() {
 
     test('febrero usa sus 28 días', () {
       final feb = DateTime(2026, 2);
-      final february = SummaryCalculator.forMonth([row(feb, expense, 280)], feb);
+      final february = SummaryCalculator.forMonth([row(feb, expense, 280)], feb, copConverter);
       final pace = SummaryCalculator.pace(february, DateTime(2026, 2, 14));
 
       expect(pace.daysInMonth, 28);

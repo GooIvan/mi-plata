@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/l10n.dart';
+import '../../accounts/presentation/accounts_providers.dart';
+import '../../currency/presentation/currency_providers.dart';
 import '../../summary/domain/month_summary.dart';
 import '../../summary/presentation/summary_providers.dart';
 import '../../transactions/domain/transaction.dart';
@@ -18,8 +21,12 @@ import 'budgets_providers.dart';
 ///
 /// Al editar un gasto de la misma categoría y mes, solo cuenta la diferencia
 /// con lo que ya estaba guardado.
+///
+/// El presupuesto está en la moneda base: un gasto de una cuenta en otra
+/// moneda se pasa con la tasa de hoy, y si no hay tasa no se avisa.
 Future<String?> budgetAlertBeforeSaving(
-  WidgetRef ref, {
+  WidgetRef ref,
+  AppLocalizations l10n, {
   required TransactionDraft draft,
   Transaction? previous,
 }) async {
@@ -33,19 +40,39 @@ Future<String?> budgetAlertBeforeSaving(
     if (limit == null) return null;
 
     final totals = await ref.read(monthlyTotalsProvider(month).future);
+    final converter = await ref.read(currencyConverterProvider.future);
+    final accounts = await ref.read(accountsProvider.future);
+    String? currencyOf(String accountId) => accounts
+        .where((account) => account.id == accountId)
+        .map((account) => account.currency)
+        .firstOrNull;
+
     final spent =
         SummaryCalculator.forMonth(
           totals,
           month,
+          converter,
         ).expenseCentsByCategory[categoryId] ??
         0;
 
-    var added = _cents(double.parse(draft.amount));
+    final draftCurrency = currencyOf(draft.accountId);
+    if (draftCurrency == null) return null;
+    var added = converter.toBaseCents(
+      _cents(double.parse(draft.amount)),
+      draftCurrency,
+    );
+    if (added == null) return null;
+
     if (previous != null &&
         previous.type == TransactionType.expense &&
         previous.categoryId == categoryId &&
         SummaryCalculator.monthStart(previous.date) == month) {
-      added -= _cents(previous.amount);
+      final previousCurrency = currencyOf(previous.accountId);
+      final before = previousCurrency == null
+          ? null
+          : converter.toBaseCents(_cents(previous.amount), previousCurrency);
+      if (before == null) return null;
+      added -= before;
     }
 
     final alert = BudgetCalculator.alertForExpense(
@@ -56,8 +83,8 @@ Future<String?> budgetAlertBeforeSaving(
     if (alert == null) return null;
 
     final name =
-        ref.read(categoryNamesProvider)[categoryId] ?? 'esta categoría';
-    return budgetAlertMessage(alert, name);
+        ref.read(categoryNamesProvider)[categoryId] ?? l10n.budgetsThisCategory;
+    return budgetAlertMessage(l10n, alert, name, currency: converter.base);
   } catch (_) {
     return null;
   }

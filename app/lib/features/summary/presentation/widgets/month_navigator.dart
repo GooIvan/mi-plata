@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/format/date_format.dart';
+import '../../../../core/format/formats.dart';
+import '../../../../l10n/l10n.dart';
 
 /// "‹ Octubre 2026 ›": para moverse de un mes al otro.
 class MonthNavigator extends StatelessWidget {
@@ -25,16 +26,16 @@ class MonthNavigator extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          tooltip: 'Mes anterior',
+          tooltip: context.l10n.summaryPreviousMonth,
           icon: const Icon(Icons.chevron_left),
           onPressed: onPrevious,
         ),
         Text(
-          formatMonth(month),
+          context.formats.month(month),
           style: Theme.of(context).textTheme.titleLarge,
         ),
         IconButton(
-          tooltip: 'Mes siguiente',
+          tooltip: context.l10n.summaryNextMonth,
           icon: const Icon(Icons.chevron_right),
           onPressed: canGoNext ? onNext : null,
         ),

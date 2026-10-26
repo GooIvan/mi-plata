@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
 import '../domain/negative_balance_check.dart';
 import 'negative_balance_message.dart';
 
@@ -16,13 +17,13 @@ Future<bool> confirmNegativeBalance(
     builder: (context) => AlertDialog(
       title: Text(title),
       content: Text(
-        '${negativeBalanceMessage(warnings)}\n\n'
-        'Si el monto es correcto, puedes continuar.',
+        '${negativeBalanceMessage(context.l10n, warnings)}\n\n'
+        '${context.l10n.negativeBalanceAdvice}',
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Corregir'),
+          child: Text(context.l10n.negativeBalanceFix),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(true),

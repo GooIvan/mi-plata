@@ -32,6 +32,9 @@ class FakeAuthRepository implements AuthRepository {
 
   final calls = <String>[];
 
+  /// El idioma con que se registró el último usuario.
+  String? signedUpWithLanguage;
+
   @override
   Session? get currentSession => _session;
 
@@ -49,8 +52,13 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<bool> signUp({required String email, required String password}) async {
+  Future<bool> signUp({
+    required String email,
+    required String password,
+    required String language,
+  }) async {
     calls.add('signUp:$email');
+    signedUpWithLanguage = language;
     if (error != null) throw error!;
     if (confirmationRequired) return true;
     _open(email);

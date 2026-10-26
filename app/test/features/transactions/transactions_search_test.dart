@@ -467,20 +467,21 @@ void main() {
       );
     });
 
-    testWidgets('al salir de la pantalla y volver, empieza sin filtros', (tester) async {
+    testWidgets('al cambiar de pestaña y volver, conserva los filtros', (tester) async {
       await openList(tester, backendWith(data));
       await openFilterSheet(tester);
       await tester.tap(find.widgetWithText(ChoiceChip, 'Ingresos'));
       await tester.pumpAndSettle();
       await apply(tester);
 
-      await tester.tap(find.byType(BackButton));
-      await tester.pumpAndSettle();
+      // Cada pestaña conserva su estado al cambiar.
+      await goTo(tester, AppRoutes.dashboard);
       await goTo(tester, AppRoutes.transactions);
 
-      expect(find.byType(InputChip), findsNothing);
-      expect(find.text('Cena'), findsOneWidget);
+      expect(find.byType(InputChip), findsOneWidget);
+      expect(find.text('Cena'), findsNothing);
     });
+
   });
 
   group('estados', () {

@@ -2,20 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'core/config/env.dart';
-import 'core/format/date_format.dart';
+import 'core/format/formats.dart';
 import 'core/riverpod/no_retry.dart';
+import 'core/storage/preferences_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting(dateLocale);
+  for (final locale in dateLocales) {
+    await initializeDateFormatting(locale);
+  }
+  final preferences = await SharedPreferences.getInstance();
   await dotenv.load();
   await Supabase.initialize(
     url: Env.supabaseUrl,
     publishableKey: Env.supabasePublishableKey,
   );
-  runApp(const ProviderScope(retry: noRetry, child: MiPlataApp()));
+  runApp(
+    ProviderScope(
+      retry: noRetry,
+      overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
+      child: const MiPlataApp(),
+    ),
+  );
 }

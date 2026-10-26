@@ -13,12 +13,13 @@ List<BalancePoint> months(List<int> pesos) => [
 ];
 
 Future<void> pump(WidgetTester tester, List<int> pesos) => tester.pumpWidget(
-  MaterialApp(
+  localizedApp(
     home: Scaffold(
       body: SingleChildScrollView(
         child: BalanceHistoryCard(
           points: months(pesos),
           selectedMonth: DateTime(2026, 10),
+          currency: 'COP',
         ),
       ),
     ),

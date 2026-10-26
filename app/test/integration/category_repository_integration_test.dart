@@ -12,11 +12,21 @@ import 'package:mi_plata/features/categories/presentation/category_error_message
 import 'package:mi_plata/features/transactions/data/transaction_repository.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_draft.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
+import 'package:mi_plata/l10n/l10n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../support/test_app.dart';
 
 import '../support/integration_harness.dart';
 
+late AppLocalizations l10n;
+
 void main() {
+  setUpAll(() async {
+    l10n = await loadL10n();
+    await initDates();
+  });
+
   group(
     'CategoryRepository contra Supabase local',
     skip: integrationEnabled ? false : integrationSkipReason,
@@ -53,6 +63,55 @@ void main() {
         expect(all.every((c) => !c.isArchived), isTrue);
       });
 
+      group('las categorías por defecto salen en el idioma del registro', () {
+        Future<List<String>> namesFor({String? language}) async {
+          final client = await harness.signedUpClient('idioma', language: language);
+          final all = await CategoryRepository(client).fetchAll();
+          expect(all, hasLength(13));
+          return [for (final category in all) category.name]..sort();
+        }
+
+        test('sin idioma, en español', () async {
+          final names = await namesFor();
+          expect(names, containsAll(['Mercado', 'Salario', 'Otros gastos']));
+        });
+
+        test('en español', () async {
+          final names = await namesFor(language: 'es');
+          expect(names, containsAll(['Alimentación', 'Transporte', 'Ingresos extra']));
+        });
+
+        test('en inglés', () async {
+          final names = await namesFor(language: 'en');
+          expect(
+            names,
+            unorderedEquals([
+              'Clothing', 'Education', 'Entertainment', 'Extra income', 'Food',
+              'Groceries', 'Health', 'Housing', 'Other expenses', 'Other income',
+              'Salary', 'Transport', 'Utilities',
+            ]),
+          );
+        });
+
+        test('un idioma que no tenemos cae en español', () async {
+          final names = await namesFor(language: 'fr');
+          expect(names, contains('Mercado'));
+          expect(names, isNot(contains('Groceries')));
+        });
+
+        test('el tipo de cada una es el correcto en inglés', () async {
+          final client = await harness.signedUpClient('tipos', language: 'en');
+          final all = await CategoryRepository(client).fetchAll();
+          final byName = {for (final c in all) c.name: c.type};
+          expect(byName['Groceries'], CategoryType.expense);
+          expect(byName['Salary'], CategoryType.income);
+          expect(
+            all.where((c) => c.type == CategoryType.income).map((c) => c.name),
+            unorderedEquals(['Salary', 'Extra income', 'Other income']),
+          );
+        });
+      });
+
       test('crear, renombrar y archivar', () async {
         await categories.create(name: 'Mascotas', type: CategoryType.expense);
         var mascotas = await named('Mascotas');
@@ -77,7 +136,7 @@ void main() {
             isA<PostgrestException>()
                 .having((e) => e.code, 'code', '23505')
                 .having(
-                  (e) => categoryErrorMessage(e),
+                  (e) => categoryErrorMessage(l10n, e),
                   'mensaje',
                   'Ya tienes una categoría activa con ese nombre.',
                 ),
@@ -124,7 +183,7 @@ void main() {
         await accounts.create(
           name: 'Bancolombia',
           type: AccountType.bank,
-          initialBalance: '100000',
+          initialBalance: '100000', currency: 'COP',
         );
         final account = (await accounts.fetchAll()).single;
         final transporte = await named('Transporte');

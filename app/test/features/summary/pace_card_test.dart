@@ -24,6 +24,7 @@ MonthSummary expenses(DateTime month, double total) => SummaryCalculator.forMont
           ),
         ],
   month,
+ copConverter,
 );
 
 Future<void> pump(
@@ -32,7 +33,7 @@ Future<void> pump(
   required MonthSummary previous,
   required DateTime today,
 }) => tester.pumpWidget(
-  MaterialApp(
+  localizedApp(
     home: Scaffold(
       body: PaceCard(summary: summary, previous: previous, today: today),
     ),
@@ -88,7 +89,7 @@ void main() {
     await pump(
       tester,
       summary: expenses(oct, 100000),
-      previous: SummaryCalculator.forMonth([], sep),
+      previous: SummaryCalculator.forMonth([], sep, copConverter),
       today: DateTime(2026, 10, 10),
     );
 
@@ -118,7 +119,7 @@ void main() {
     await pump(
       tester,
       summary: expenses(sep, 300000),
-      previous: SummaryCalculator.forMonth([], DateTime(2026, 8)),
+      previous: SummaryCalculator.forMonth([], DateTime(2026, 8), copConverter),
       today: DateTime(2026, 10, 22),
     );
 
@@ -132,7 +133,7 @@ void main() {
     await pump(
       tester,
       summary: expenses(oct, 100000),
-      previous: SummaryCalculator.forMonth([], sep),
+      previous: SummaryCalculator.forMonth([], sep, copConverter),
       today: DateTime(2026, 10, 3),
     );
 
@@ -160,7 +161,7 @@ void main() {
           total: 500000,
           movements: 1,
         ),
-      ], sep),
+      ], sep, copConverter),
       today: DateTime(2026, 10, 10),
     );
 
@@ -170,7 +171,7 @@ void main() {
   testWidgets('sin gastos el promedio es cero', (tester) async {
     await pump(
       tester,
-      summary: SummaryCalculator.forMonth([], oct),
+      summary: SummaryCalculator.forMonth([], oct, copConverter),
       previous: expenses(sep, 100000),
       today: DateTime(2026, 10, 15),
     );

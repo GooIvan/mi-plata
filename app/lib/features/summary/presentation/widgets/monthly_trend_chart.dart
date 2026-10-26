@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/format/date_format.dart';
-import '../../../../core/format/money_format.dart';
+import '../../../../core/format/formats.dart';
+import '../../../../l10n/l10n.dart';
 import '../../domain/month_summary.dart';
 import '../summary_colors.dart';
 
@@ -18,9 +18,13 @@ class MonthlyTrendChart extends StatefulWidget {
     super.key,
     required this.points,
     required this.selectedMonth,
+    required this.currency,
   });
 
   final List<MonthPoint> points;
+
+  /// La moneda de los montos (la base del usuario).
+  final String currency;
 
   /// El mes que se está mirando: su etiqueta va en negrita.
   final DateTime selectedMonth;
@@ -53,6 +57,8 @@ class _MonthlyTrendChartState extends State<MonthlyTrendChart> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
     final colors = SummaryColors.of(context);
     final points = widget.points;
 
@@ -71,10 +77,10 @@ class _MonthlyTrendChartState extends State<MonthlyTrendChart> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Ingresos vs. gastos', style: theme.textTheme.titleMedium),
+            Text(l10n.summaryTrendTitle, style: theme.textTheme.titleMedium),
             const SizedBox(height: 2),
             Text(
-              'Últimos ${points.length} meses',
+              l10n.summaryLastMonths(points.length),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -82,17 +88,14 @@ class _MonthlyTrendChartState extends State<MonthlyTrendChart> {
             const SizedBox(height: 12),
             Row(
               children: [
-                _LegendItem(color: colors.income, label: 'Ingresos'),
+                _LegendItem(color: colors.income, label: l10n.commonIncomes),
                 const SizedBox(width: 16),
-                _LegendItem(color: colors.expense, label: 'Gastos'),
+                _LegendItem(color: colors.expense, label: l10n.commonExpenses),
               ],
             ),
             const SizedBox(height: 16),
             Semantics(
-              label:
-                  'Gráfico de barras con los ingresos y los gastos de los '
-                  'últimos ${points.length} meses. La misma información está '
-                  'disponible como tabla.',
+              label: l10n.summaryTrendSemantics(points.length),
               excludeSemantics: true,
               child: SizedBox(
                 height: 220,
@@ -121,7 +124,7 @@ class _MonthlyTrendChartState extends State<MonthlyTrendChart> {
                           getTitlesWidget: (value, meta) => SideTitleWidget(
                             meta: meta,
                             child: Text(
-                              formatCompactMoney(value),
+                              formats.compactMoney(value, currency: widget.currency),
                               style: labelStyle,
                             ),
                           ),
@@ -138,7 +141,7 @@ class _MonthlyTrendChartState extends State<MonthlyTrendChart> {
                               meta: meta,
                               space: 8,
                               child: Text(
-                                formatMonthShort(month),
+                                formats.monthShort(month),
                                 style: labelStyle?.copyWith(
                                   fontWeight: selected ? FontWeight.bold : null,
                                   color: selected
@@ -156,9 +159,13 @@ class _MonthlyTrendChartState extends State<MonthlyTrendChart> {
                         getTooltipColor: (_) => theme.colorScheme.inverseSurface,
                         getTooltipItem: (group, groupIndex, rod, rodIndex) =>
                             BarTooltipItem(
-                              '${formatMonth(points[groupIndex].month)}\n'
-                              '${rodIndex == 0 ? 'Ingresos' : 'Gastos'}: '
-                              '${formatMoney(rod.toY)}',
+                              l10n.summaryTrendTooltip(
+                                formats.month(points[groupIndex].month),
+                                rodIndex == 0
+                                    ? l10n.commonIncomes
+                                    : l10n.commonExpenses,
+                                formats.money(rod.toY, currency: widget.currency),
+                              ),
                               TextStyle(
                                 color: theme.colorScheme.onInverseSurface,
                                 fontSize: 12,
@@ -186,10 +193,13 @@ class _MonthlyTrendChartState extends State<MonthlyTrendChart> {
               child: TextButton.icon(
                 onPressed: () => setState(() => _showTable = !_showTable),
                 icon: Icon(_showTable ? Icons.expand_less : Icons.table_rows),
-                label: Text(_showTable ? 'Ocultar tabla' : 'Ver como tabla'),
+                label: Text(
+                  _showTable ? l10n.summaryHideTable : l10n.summaryShowTable,
+                ),
               ),
             ),
-            if (_showTable) _TrendTable(points: points),
+            if (_showTable)
+              _TrendTable(points: points, currency: widget.currency),
           ],
         ),
       ),
@@ -231,13 +241,16 @@ class _LegendItem extends StatelessWidget {
 }
 
 class _TrendTable extends StatelessWidget {
-  const _TrendTable({required this.points});
+  const _TrendTable({required this.points, required this.currency});
 
   final List<MonthPoint> points;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
     final header = theme.textTheme.labelMedium?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
@@ -250,7 +263,7 @@ class _TrendTable extends StatelessWidget {
     );
 
     Widget amount(int cents) => Text(
-      formatMoney(cents / 100),
+      formats.money(cents / 100, currency: currency),
       textAlign: TextAlign.end,
       style: theme.textTheme.bodySmall?.copyWith(
         fontFeatures: const [FontFeature.tabularFigures()],
@@ -263,13 +276,16 @@ class _TrendTable extends StatelessWidget {
         columnWidths: const {0: FlexColumnWidth(1.1)},
         children: [
           row([
-            Text('Mes', style: header),
-            Text('Ingresos', textAlign: TextAlign.end, style: header),
-            Text('Gastos', textAlign: TextAlign.end, style: header),
+            Text(l10n.summaryTableMonth, style: header),
+            Text(l10n.commonIncomes, textAlign: TextAlign.end, style: header),
+            Text(l10n.commonExpenses, textAlign: TextAlign.end, style: header),
           ]),
           for (final point in points)
             row([
-              Text(formatMonth(point.month), style: theme.textTheme.bodySmall),
+              Text(
+                formats.month(point.month),
+                style: theme.textTheme.bodySmall,
+              ),
               amount(point.incomeCents),
               amount(point.expenseCents),
             ]),

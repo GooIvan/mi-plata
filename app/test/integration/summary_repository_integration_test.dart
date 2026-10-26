@@ -16,6 +16,7 @@ import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../support/integration_harness.dart';
+import '../support/test_app.dart';
 
 void main() {
   group(
@@ -40,12 +41,12 @@ void main() {
         await accounts.create(
           name: 'Bancolombia',
           type: AccountType.bank,
-          initialBalance: '0',
+          initialBalance: '0', currency: 'COP',
         );
         await accounts.create(
           name: 'Efectivo',
           type: AccountType.cash,
-          initialBalance: '0',
+          initialBalance: '0', currency: 'COP',
         );
         final all = await accounts.fetchAll();
         final Account bank = all.firstWhere((a) => a.name == 'Bancolombia');
@@ -136,7 +137,7 @@ void main() {
 
       test('con la calculadora da el resumen esperado del mes', () async {
         final rows = await summary.fetchMonthlyTotals(from: march, to: april);
-        final result = SummaryCalculator.forMonth(rows, march);
+        final result = SummaryCalculator.forMonth(rows, march, copConverter);
 
         expect(result.incomeCents, 300000000);
         expect(result.expenseCents, 83000075); // 750.000,75 + 80.000

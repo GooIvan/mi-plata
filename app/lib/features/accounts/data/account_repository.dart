@@ -16,15 +16,18 @@ class AccountRepository {
   }
 
   /// [initialBalance] es un decimal en texto, como lo devuelve `AmountParser`.
+  /// La moneda de una cuenta se elige al crearla y no se cambia después.
   Future<void> create({
     required String name,
     required AccountType type,
     required String initialBalance,
+    required String currency,
   }) async {
     await _client.from('accounts').insert({
       'name': name,
       'type': type.dbValue,
       'initial_balance': initialBalance,
+      'currency': currency,
     });
   }
 
