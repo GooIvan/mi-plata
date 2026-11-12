@@ -184,7 +184,7 @@ flutter test                                                  # rápidas, sin re
 flutter test test/integration --dart-define=INTEGRATION=true  # contra Supabase local
 ```
 
-Las de integración necesitan `supabase start` y crean usuarios de prueba que se borran con `supabase db reset`.
+Las de integración necesitan `supabase start` y **solo corren contra Supabase local**: si el `.env` apunta a otro servidor, fallan antes de crear nada. Cada archivo borra al terminar los usuarios de prueba que creó (con todo lo suyo). Si una corrida se interrumpe quedan algunos; `scripts/limpiar-usuarios-de-prueba.sh` borra los de la base local (los que tienen correo `@example.com`) sin tocar tus datos, y conviene correrlo antes de abrir un pull request.
 
 ---
 
