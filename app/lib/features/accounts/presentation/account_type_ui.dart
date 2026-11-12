@@ -17,4 +17,15 @@ extension AccountTypeUi on AccountType {
     AccountType.wallet => Icons.account_balance_wallet_outlined,
     AccountType.card => Icons.credit_card_outlined,
   };
+
+  /// Un color para cada tipo, para reconocerlas de un vistazo.
+  Color color(Brightness brightness) {
+    final dark = brightness == Brightness.dark;
+    return switch (this) {
+      AccountType.cash => dark ? const Color(0xFF3DD6A0) : const Color(0xFF0E9F6E),
+      AccountType.bank => dark ? const Color(0xFF7DA5FF) : const Color(0xFF3E7BFA),
+      AccountType.wallet => dark ? const Color(0xFFB79CFF) : const Color(0xFF7C4DFF),
+      AccountType.card => dark ? const Color(0xFFFFB066) : const Color(0xFFE8730C),
+    };
+  }
 }

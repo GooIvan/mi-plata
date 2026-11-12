@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/format/formats.dart';
+import '../../../../core/theme/finance_colors.dart';
+import '../../../../core/widgets/icon_badge.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../debts/domain/debt.dart';
 import '../../../debts/domain/debt_direction.dart';
@@ -43,9 +45,10 @@ class DebtsSummaryCard extends StatelessWidget {
     if (all.every((debt) => debt.isArchived)) {
       return Row(
         children: [
-          Icon(
-            Icons.handshake_outlined,
-            color: theme.colorScheme.onSurfaceVariant,
+          IconBadge(
+            icon: Icons.handshake_outlined,
+            color: theme.colorScheme.primary,
+            size: 40,
           ),
           const SizedBox(width: 12),
           Expanded(child: Text(context.l10n.dashboardDebtsEmpty)),
@@ -72,6 +75,7 @@ class DebtsSummaryCard extends StatelessWidget {
                 label: context.l10n.dashboardYouOwe,
                 total: payable,
                 currency: rates.base,
+                color: context.finance.expense,
               ),
             ),
             Expanded(
@@ -79,6 +83,7 @@ class DebtsSummaryCard extends StatelessWidget {
                 label: context.l10n.dashboardOwedToYou,
                 total: receivable,
                 currency: rates.base,
+                color: context.finance.income,
               ),
             ),
             const Icon(Icons.chevron_right),
@@ -115,11 +120,13 @@ class _Amount extends StatelessWidget {
     required this.label,
     required this.total,
     required this.currency,
+    required this.color,
   });
 
   final String label;
   final ConvertedTotal total;
   final String currency;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +143,8 @@ class _Amount extends StatelessWidget {
           child: Text(
             context.formats.money(total.cents / 100, currency: currency),
             style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w700,
+              color: color,
             ),
           ),
         ),

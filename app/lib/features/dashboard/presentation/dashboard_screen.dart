@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/format/formats.dart';
 import '../../../core/router/app_routes.dart';
+import '../../../core/theme/finance_colors.dart';
 import '../../../l10n/l10n.dart';
 import '../../accounts/domain/account.dart';
-import '../../accounts/presentation/account_type_ui.dart';
 import '../../accounts/presentation/accounts_providers.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../budgets/presentation/budget_providers_overview.dart';
@@ -14,11 +13,13 @@ import '../../currency/presentation/currency_providers.dart';
 import '../../recurring/presentation/recurring_providers.dart';
 import '../../savings/presentation/goals_providers.dart';
 import '../../summary/domain/month_summary.dart';
+import '../../summary/presentation/summary_providers.dart';
 import '../../transactions/presentation/transaction_error_message.dart';
 import '../../transactions/presentation/transaction_form_screen.dart';
 import '../../transactions/presentation/transactions_providers.dart';
 import '../../transactions/presentation/widgets/transaction_tile.dart';
 import '../../debts/presentation/debts_providers.dart';
+import 'widgets/accounts_strip.dart';
 import 'widgets/budget_summary_card.dart';
 import 'widgets/debts_summary_card.dart';
 import 'widgets/goals_summary_card.dart';
@@ -46,12 +47,16 @@ class DashboardScreen extends ConsumerWidget {
           budgetOverviewProvider(SummaryCalculator.monthStart(DateTime.now())),
         )
         .value;
+    final thisMonth = SummaryCalculator.monthStart(DateTime.now());
+    final monthTotals = ref.watch(monthlyTotalsProvider(thisMonth)).value;
+    final rates = converter.value;
+    final month = monthTotals == null || rates == null
+        ? null
+        : SummaryCalculator.forMonth(monthTotals, thisMonth, rates);
     final accountNames = ref.watch(accountNamesProvider);
     final accountCurrencies = ref.watch(accountCurrenciesProvider);
     final categoryNames = ref.watch(categoryNamesProvider);
-    final theme = Theme.of(context);
     final l10n = context.l10n;
-    final formats = context.formats;
 
     final activeAccounts =
         accounts.value?.where((account) => !account.isArchived).toList() ??
@@ -59,14 +64,23 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        titleSpacing: 16,
+        title: Row(
           children: [
+            const _Logo(),
+            const SizedBox(width: 10),
             const Text('mi-plata'),
-            if (auth.currentUser?.email case final email?)
-              Text(email, style: theme.textTheme.labelSmall),
           ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: _ProfileButton(
+              email: auth.currentUser?.email,
+              onTap: () => context.push(AppRoutes.settings),
+            ),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
@@ -79,6 +93,7 @@ class DashboardScreen extends ConsumerWidget {
               ref.invalidate(currencyConverterProvider);
             },
             onCreateAccount: () => context.go(AppRoutes.accounts),
+            month: month,
           ),
           if (activeAccounts.isNotEmpty) ...[
             _SectionHeader(
@@ -86,33 +101,9 @@ class DashboardScreen extends ConsumerWidget {
               actionLabel: l10n.commonSeeAll,
               onAction: () => context.go(AppRoutes.accounts),
             ),
-            Card(
-              margin: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  for (final account in activeAccounts)
-                    ListTile(
-                      leading: CircleAvatar(child: Icon(account.type.icon)),
-                      title: Text(
-                        account.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: Text(
-                        formats.money(
-                          account.currentBalance,
-                          currency: account.currency,
-                        ),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: account.currentBalance < 0
-                              ? theme.colorScheme.error
-                              : null,
-                        ),
-                      ),
-                      onTap: () => context.go(AppRoutes.accounts),
-                    ),
-                ],
-              ),
+            AccountsStrip(
+              accounts: activeAccounts,
+              onTap: () => context.go(AppRoutes.accounts),
             ),
           ],
           _SectionHeader(
@@ -226,13 +217,87 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 24, bottom: 4),
+      padding: const EdgeInsets.only(top: 24, bottom: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          TextButton(onPressed: onAction, child: Text(actionLabel)),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            onPressed: onAction,
+            child: Text(actionLabel),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// La marca: un cuadrado con el degradado de la tarjeta principal.
+class _Logo extends StatelessWidget {
+  const _Logo();
+
+  @override
+  Widget build(BuildContext context) {
+    final finance = context.finance;
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: finance.heroGradient,
+        ),
+      ),
+      child: Icon(
+        Icons.account_balance_wallet_rounded,
+        size: 18,
+        color: finance.onHero,
+      ),
+    );
+  }
+}
+
+/// La inicial del correo, que lleva a los ajustes.
+class _ProfileButton extends StatelessWidget {
+  const _ProfileButton({required this.email, required this.onTap});
+
+  final String? email;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final initial = (email?.trim().isNotEmpty ?? false)
+        ? email!.trim()[0].toUpperCase()
+        : null;
+
+    // El correo queda en el tooltip: así se sabe con qué cuenta se entró.
+    return Tooltip(
+      message: email ?? '',
+      child: InkResponse(
+        onTap: onTap,
+        radius: 24,
+        child: CircleAvatar(
+          radius: 18,
+          backgroundColor: colors.primaryContainer,
+          foregroundColor: colors.onPrimaryContainer,
+          child: initial == null
+              ? const Icon(Icons.person_outline, size: 20)
+              : Text(
+                  initial,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+        ),
       ),
     );
   }

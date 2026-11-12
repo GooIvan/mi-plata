@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/format/formats.dart';
+import '../../../../core/theme/finance_colors.dart';
+import '../../../../core/widgets/icon_badge.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../currency/domain/currency.dart';
 import '../../domain/transaction.dart';
@@ -58,20 +60,24 @@ class TransactionTile extends StatelessWidget {
           ].join(' · ')
         : [if (hasDescription && category != null) category, account].join(' · ');
 
+    final finance = context.finance;
     final (sign, color) = switch (type) {
-      TransactionType.income => ('+', theme.colorScheme.primary),
-      TransactionType.expense => ('-', theme.colorScheme.error),
-      TransactionType.transfer => ('', theme.colorScheme.onSurfaceVariant),
+      TransactionType.income => ('+', finance.income),
+      TransactionType.expense => ('-', finance.expense),
+      TransactionType.transfer => ('', finance.transfer),
     };
 
     return ListTile(
-      leading: CircleAvatar(child: Icon(type.icon)),
+      leading: IconBadge(icon: type.icon, color: color),
       title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
       // Dos líneas: una transferencia entre monedas también dice lo que llegó.
       subtitle: Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
       trailing: Text(
         '$sign${formats.money(transaction.amount, currency: currency)}',
-        style: theme.textTheme.titleMedium?.copyWith(color: color),
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w700,
+        ),
       ),
       onTap: onTap,
     );

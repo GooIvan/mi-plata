@@ -141,16 +141,18 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.only(bottom: 88),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
       itemCount: visible.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final category = visible[index];
-        return CategoryTile(
-          category: category,
-          onEdit: () => showCategoryForm(context, category: category),
-          onToggleArchived: () =>
-              _setArchived(category, archived: !category.isArchived),
+        return Card(
+          child: CategoryTile(
+            category: category,
+            onEdit: () => showCategoryForm(context, category: category),
+            onToggleArchived: () =>
+                _setArchived(category, archived: !category.isArchived),
+          ),
         );
       },
     );

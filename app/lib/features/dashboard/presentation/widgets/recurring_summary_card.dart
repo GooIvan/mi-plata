@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/format/formats.dart';
+import '../../../../core/widgets/icon_badge.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../recurring/domain/recurring_payment.dart';
 import '../../../recurring/presentation/recurring_detail_screen.dart';
@@ -39,7 +40,11 @@ class RecurringSummaryCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(Icons.autorenew, color: theme.colorScheme.onSurfaceVariant),
+            IconBadge(
+              icon: Icons.autorenew,
+              color: theme.colorScheme.primary,
+              size: 40,
+            ),
             const SizedBox(width: 12),
             Expanded(child: Text(message)),
             const Icon(Icons.chevron_right),

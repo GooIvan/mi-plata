@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/format/formats.dart';
+import '../../../../core/widgets/icon_badge.dart';
 import '../../../../l10n/l10n.dart';
 import '../../domain/goal_progress.dart';
 import '../goal_ui.dart';
@@ -39,6 +40,14 @@ class GoalTile extends StatelessWidget {
           children: [
             Row(
               children: [
+                IconBadge(
+                  icon: archived
+                      ? Icons.inventory_2_outlined
+                      : Icons.flag_rounded,
+                  color: color,
+                  size: 40,
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     progress.goal.name,
@@ -51,17 +60,18 @@ class GoalTile extends StatelessWidget {
                 Text(
                   l10n.commonPercent(progress.percent),
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
+                    color: color,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             ClipRRect(
-              borderRadius: BorderRadius.circular(3),
+              borderRadius: BorderRadius.circular(6),
               child: LinearProgressIndicator(
                 value: progress.fraction,
-                minHeight: 8,
+                minHeight: 10,
                 color: color,
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
               ),

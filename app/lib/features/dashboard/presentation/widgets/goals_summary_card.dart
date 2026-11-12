@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/icon_badge.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../savings/domain/goal_progress.dart';
 import '../../../savings/presentation/goal_detail_screen.dart';
@@ -34,9 +35,10 @@ class GoalsSummaryCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(
-              Icons.flag_outlined,
-              color: theme.colorScheme.onSurfaceVariant,
+            IconBadge(
+              icon: Icons.flag_outlined,
+              color: theme.colorScheme.primary,
+              size: 40,
             ),
             const SizedBox(width: 12),
             Expanded(child: Text(message)),

@@ -168,23 +168,26 @@ class _Content extends ConsumerWidget {
               style: theme.textTheme.titleMedium,
             ),
           ),
-          for (final progress in overview.budgeted) ...[
-            BudgetProgressTile(
-              name: nameOf(progress.categoryId),
-              progress: progress,
-              currency: overview.currency,
-              onTap: canEdit
-                  ? () => showBudgetForm(
-                      context,
-                      month: month,
-                      categoryId: progress.categoryId,
-                      currentCents: progress.limitCents,
-                      budgetedIds: budgetedIds,
-                    )
-                  : null,
+          for (final progress in overview.budgeted)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Card(
+                child: BudgetProgressTile(
+                  name: nameOf(progress.categoryId),
+                  progress: progress,
+                  currency: overview.currency,
+                  onTap: canEdit
+                      ? () => showBudgetForm(
+                          context,
+                          month: month,
+                          categoryId: progress.categoryId,
+                          currentCents: progress.limitCents,
+                          budgetedIds: budgetedIds,
+                        )
+                      : null,
+                ),
+              ),
             ),
-            const Divider(height: 1),
-          ],
         ],
         if (overview.unbudgeted.isNotEmpty) ...[
           Padding(
@@ -195,27 +198,32 @@ class _Content extends ConsumerWidget {
             ),
           ),
           for (final spending in overview.unbudgeted)
-            ListTile(
-              title: Text(nameOf(spending.categoryId)),
-              subtitle: canEdit && spending.categoryId != null
-                  ? Text(l10n.budgetsTapToDefine)
-                  : null,
-              trailing: Text(
-                context.formats.money(
-                  spending.spentCents / 100,
-                  currency: overview.currency,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Card(
+                child: ListTile(
+                  title: Text(nameOf(spending.categoryId)),
+                  subtitle: canEdit && spending.categoryId != null
+                      ? Text(l10n.budgetsTapToDefine)
+                      : null,
+                  trailing: Text(
+                    context.formats.money(
+                      spending.spentCents / 100,
+                      currency: overview.currency,
+                    ),
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  // "Sin categoría" no tiene a quién ponerle un presupuesto.
+                  onTap: canEdit && spending.categoryId != null
+                      ? () => showBudgetForm(
+                          context,
+                          month: month,
+                          categoryId: spending.categoryId,
+                          budgetedIds: budgetedIds,
+                        )
+                      : null,
                 ),
-                style: theme.textTheme.titleMedium,
               ),
-              // "Sin categoría" no tiene a quién ponerle un presupuesto.
-              onTap: canEdit && spending.categoryId != null
-                  ? () => showBudgetForm(
-                      context,
-                      month: month,
-                      categoryId: spending.categoryId,
-                      budgetedIds: budgetedIds,
-                    )
-                  : null,
             ),
         ],
       ],
