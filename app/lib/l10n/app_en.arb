@@ -1418,5 +1418,108 @@
         "type": "String"
       }
     }
-  }
+  },
+  "cardInstallmentsSwitch": "Split into installments",
+  "cardInstallmentsPurchaseLabel": "Purchase price",
+  "cardInstallmentsCountLabel": "Number of installments",
+  "cardInstallmentsCountInvalid": "Enter 2 to 60 installments",
+  "cardInstallmentsAmountLabel": "Amount of each installment (optional)",
+  "cardInstallmentsAmountHelper": "With interest, as the bank charges it. Empty if there's no interest.",
+  "cardInstallmentsAmountInvalid": "The installments don't add up to the purchase price",
+  "cardInstallmentsQuote": "{count} installments of {amount}. Total to pay: {total}.",
+  "@cardInstallmentsQuote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsQuoteInterest": "{count} installments of {amount}. Total to pay: {total}, with {interest} of interest.",
+  "@cardInstallmentsQuoteInterest": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsLocked": "Purchase split into {count} installments. To change the amount or the card, delete it and enter it again.",
+  "@cardInstallmentsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsTag": "{count} installments",
+  "@cardInstallmentsTag": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsButton": "Installment purchases ({count})",
+  "@cardInstallmentsButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsTitle": "Installment purchases",
+  "cardInstallmentsUnnamed": "Split purchase",
+  "cardInstallmentsProgress": "{paid} of {total} installments charged",
+  "@cardInstallmentsProgress": {
+    "placeholders": {
+      "paid": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsEach": "{amount} each",
+  "@cardInstallmentsEach": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsRemaining": "{amount} still to be charged",
+  "@cardInstallmentsRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsNext": "Next installment on the {date} statement",
+  "@cardInstallmentsNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsEmpty": "No installment purchases left to charge.",
+  "dbErrorInstallmentPurchaseNotCard": "Only a purchase made with a card can be split into installments",
+  "dbErrorInstallmentPurchaseAmounts": "The installments don't add up to the purchase price",
+  "dbErrorInstallmentPurchaseLocked": "This purchase is split into installments: to change the amount or the card, delete it and enter it again"
 }

@@ -3352,8 +3352,145 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardCardOverdue.
   ///
   /// In es, this message translates to:
-  /// **'Vencido desde el {date}'**
+  /// **'Vencido el {date}'**
   String dashboardCardOverdue(String date);
+
+  /// No description provided for @cardInstallmentsSwitch.
+  ///
+  /// In es, this message translates to:
+  /// **'Diferir en cuotas'**
+  String get cardInstallmentsSwitch;
+
+  /// No description provided for @cardInstallmentsPurchaseLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Valor de la compra'**
+  String get cardInstallmentsPurchaseLabel;
+
+  /// No description provided for @cardInstallmentsCountLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Número de cuotas'**
+  String get cardInstallmentsCountLabel;
+
+  /// No description provided for @cardInstallmentsCountInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe de 2 a 60 cuotas'**
+  String get cardInstallmentsCountInvalid;
+
+  /// No description provided for @cardInstallmentsAmountLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Valor de cada cuota (opcional)'**
+  String get cardInstallmentsAmountLabel;
+
+  /// No description provided for @cardInstallmentsAmountHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Con intereses, como la cobra el banco. Vacío si no hay intereses.'**
+  String get cardInstallmentsAmountHelper;
+
+  /// No description provided for @cardInstallmentsAmountInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Las cuotas no cuadran con el valor de la compra'**
+  String get cardInstallmentsAmountInvalid;
+
+  /// No description provided for @cardInstallmentsQuote.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} cuotas de {amount}. Total a pagar: {total}.'**
+  String cardInstallmentsQuote(int count, String amount, String total);
+
+  /// No description provided for @cardInstallmentsQuoteInterest.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} cuotas de {amount}. Total a pagar: {total}, con {interest} de intereses.'**
+  String cardInstallmentsQuoteInterest(
+    int count,
+    String amount,
+    String total,
+    String interest,
+  );
+
+  /// No description provided for @cardInstallmentsLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'Compra diferida en {count} cuotas. Para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo.'**
+  String cardInstallmentsLocked(int count);
+
+  /// No description provided for @cardInstallmentsTag.
+  ///
+  /// In es, this message translates to:
+  /// **'{count} cuotas'**
+  String cardInstallmentsTag(int count);
+
+  /// No description provided for @cardInstallmentsButton.
+  ///
+  /// In es, this message translates to:
+  /// **'Compras en cuotas ({count})'**
+  String cardInstallmentsButton(int count);
+
+  /// No description provided for @cardInstallmentsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Compras en cuotas'**
+  String get cardInstallmentsTitle;
+
+  /// No description provided for @cardInstallmentsUnnamed.
+  ///
+  /// In es, this message translates to:
+  /// **'Compra diferida'**
+  String get cardInstallmentsUnnamed;
+
+  /// No description provided for @cardInstallmentsProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'{paid} de {total} cuotas cobradas'**
+  String cardInstallmentsProgress(int paid, int total);
+
+  /// No description provided for @cardInstallmentsEach.
+  ///
+  /// In es, this message translates to:
+  /// **'{amount} cada una'**
+  String cardInstallmentsEach(String amount);
+
+  /// No description provided for @cardInstallmentsRemaining.
+  ///
+  /// In es, this message translates to:
+  /// **'Faltan {amount} por cobrar'**
+  String cardInstallmentsRemaining(String amount);
+
+  /// No description provided for @cardInstallmentsNext.
+  ///
+  /// In es, this message translates to:
+  /// **'Próxima cuota en el corte del {date}'**
+  String cardInstallmentsNext(String date);
+
+  /// No description provided for @cardInstallmentsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay compras en cuotas por cobrar.'**
+  String get cardInstallmentsEmpty;
+
+  /// No description provided for @dbErrorInstallmentPurchaseNotCard.
+  ///
+  /// In es, this message translates to:
+  /// **'Solo una compra hecha con una tarjeta se puede diferir en cuotas'**
+  String get dbErrorInstallmentPurchaseNotCard;
+
+  /// No description provided for @dbErrorInstallmentPurchaseAmounts.
+  ///
+  /// In es, this message translates to:
+  /// **'Las cuotas no cuadran con el valor de la compra'**
+  String get dbErrorInstallmentPurchaseAmounts;
+
+  /// No description provided for @dbErrorInstallmentPurchaseLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta compra está diferida en cuotas: para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo'**
+  String get dbErrorInstallmentPurchaseLocked;
 }
 
 class _AppLocalizationsDelegate

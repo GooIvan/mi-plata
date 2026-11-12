@@ -11,6 +11,7 @@ import '../../domain/card_usage.dart';
 import '../account_type_ui.dart';
 import '../card_actions.dart';
 import '../card_providers.dart';
+import 'card_installments_sheet.dart';
 
 enum AccountMenuAction { edit, toggleArchived }
 
@@ -240,6 +241,26 @@ class CardSummary extends ConsumerWidget {
                   case final statement?)
                 _StatementRow(account: account, statement: statement, today: now),
           ],
+          if (!account.isArchived)
+            if (activeInstallments(
+              ref.watch(cardInstallmentPlansProvider).value ?? const [],
+              account,
+              today: now,
+            ) case final plans when plans.isNotEmpty)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(0, 32),
+                    visualDensity: VisualDensity.compact,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () => showCardInstallmentsSheet(context, account),
+                  icon: const Icon(Icons.splitscreen_outlined, size: 16),
+                  label: Text(l10n.cardInstallmentsButton(plans.length)),
+                ),
+              ),
         ],
       ),
     );

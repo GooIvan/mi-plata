@@ -2017,6 +2017,100 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String dashboardCardOverdue(String date) {
-    return 'Vencido desde el $date';
+    return 'Vencido el $date';
   }
+
+  @override
+  String get cardInstallmentsSwitch => 'Diferir en cuotas';
+
+  @override
+  String get cardInstallmentsPurchaseLabel => 'Valor de la compra';
+
+  @override
+  String get cardInstallmentsCountLabel => 'Número de cuotas';
+
+  @override
+  String get cardInstallmentsCountInvalid => 'Escribe de 2 a 60 cuotas';
+
+  @override
+  String get cardInstallmentsAmountLabel => 'Valor de cada cuota (opcional)';
+
+  @override
+  String get cardInstallmentsAmountHelper =>
+      'Con intereses, como la cobra el banco. Vacío si no hay intereses.';
+
+  @override
+  String get cardInstallmentsAmountInvalid =>
+      'Las cuotas no cuadran con el valor de la compra';
+
+  @override
+  String cardInstallmentsQuote(int count, String amount, String total) {
+    return '$count cuotas de $amount. Total a pagar: $total.';
+  }
+
+  @override
+  String cardInstallmentsQuoteInterest(
+    int count,
+    String amount,
+    String total,
+    String interest,
+  ) {
+    return '$count cuotas de $amount. Total a pagar: $total, con $interest de intereses.';
+  }
+
+  @override
+  String cardInstallmentsLocked(int count) {
+    return 'Compra diferida en $count cuotas. Para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo.';
+  }
+
+  @override
+  String cardInstallmentsTag(int count) {
+    return '$count cuotas';
+  }
+
+  @override
+  String cardInstallmentsButton(int count) {
+    return 'Compras en cuotas ($count)';
+  }
+
+  @override
+  String get cardInstallmentsTitle => 'Compras en cuotas';
+
+  @override
+  String get cardInstallmentsUnnamed => 'Compra diferida';
+
+  @override
+  String cardInstallmentsProgress(int paid, int total) {
+    return '$paid de $total cuotas cobradas';
+  }
+
+  @override
+  String cardInstallmentsEach(String amount) {
+    return '$amount cada una';
+  }
+
+  @override
+  String cardInstallmentsRemaining(String amount) {
+    return 'Faltan $amount por cobrar';
+  }
+
+  @override
+  String cardInstallmentsNext(String date) {
+    return 'Próxima cuota en el corte del $date';
+  }
+
+  @override
+  String get cardInstallmentsEmpty => 'No hay compras en cuotas por cobrar.';
+
+  @override
+  String get dbErrorInstallmentPurchaseNotCard =>
+      'Solo una compra hecha con una tarjeta se puede diferir en cuotas';
+
+  @override
+  String get dbErrorInstallmentPurchaseAmounts =>
+      'Las cuotas no cuadran con el valor de la compra';
+
+  @override
+  String get dbErrorInstallmentPurchaseLocked =>
+      'Esta compra está diferida en cuotas: para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo';
 }

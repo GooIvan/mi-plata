@@ -6,7 +6,10 @@ import 'package:mi_plata/features/categories/data/category_repository.dart';
 import 'package:mi_plata/features/categories/domain/category.dart';
 import 'package:mi_plata/features/categories/domain/category_type.dart';
 import 'package:mi_plata/features/accounts/domain/account.dart';
+import 'package:mi_plata/features/accounts/data/card_installment_repository.dart';
 import 'package:mi_plata/features/accounts/domain/account_type.dart';
+import 'package:mi_plata/features/accounts/domain/card_installment_draft.dart';
+import 'package:mi_plata/features/accounts/domain/card_installment_plan.dart';
 import 'package:mi_plata/features/currency/data/currency_repository.dart';
 import 'package:mi_plata/features/currency/domain/exchange_rate.dart';
 import 'package:mi_plata/features/debts/data/debt_repository.dart';
@@ -1236,6 +1239,80 @@ class FakeSavingsGoalRepository implements SavingsGoalRepository {
   }
 }
 
+/// Imita las compras diferidas en cuotas: al registrar una crea el gasto de la
+/// tarjeta (en la lista compartida, así cambia su saldo) y su plan, con las
+/// mismas cuentas que hace la base de datos.
+class FakeCardInstallmentRepository implements CardInstallmentRepository {
+  FakeCardInstallmentRepository(
+    this.transactions, [
+    List<CardInstallmentPlan> plans = const [],
+  ]) : plans = [...plans];
+
+  final List<Transaction> transactions;
+  final List<CardInstallmentPlan> plans;
+
+  /// Lo que se ha registrado, para comprobarlo.
+  final created = <CardInstallmentDraft>[];
+
+  /// Error que lanzarán las operaciones mientras no sea null.
+  Object? error;
+
+  var _nextId = 1;
+
+  @override
+  Future<List<CardInstallmentPlan>> fetchAll() async {
+    if (error != null) throw error!;
+    return [...plans]..sort((a, b) => b.date.compareTo(a.date));
+  }
+
+  @override
+  Future<void> createPurchase(CardInstallmentDraft draft) async {
+    if (error != null) throw error!;
+    created.add(draft);
+    final purchase = (double.parse(draft.purchaseAmount) * 100).round();
+    final quote = CardInstallmentQuote.of(
+      purchaseCents: purchase,
+      installments: draft.installments,
+      installmentCents: draft.installmentAmount == null
+          ? null
+          : (double.parse(draft.installmentAmount!) * 100).round(),
+    );
+    if (!quote.valid) {
+      throw const PostgrestException(
+        message: 'Las cuotas no cuadran con el valor de la compra',
+        code: '23514',
+        details: 'installment_purchase_amounts',
+      );
+    }
+    final id = 'installment-${_nextId++}';
+    transactions.add(
+      Transaction(
+        id: id,
+        type: TransactionType.expense,
+        accountId: draft.accountId,
+        categoryId: draft.categoryId,
+        amount: quote.totalCents / 100,
+        date: draft.date,
+        description: draft.description,
+      ),
+    );
+    plans.add(
+      CardInstallmentPlan(
+        id: 'plan-$id',
+        transactionId: id,
+        accountId: draft.accountId,
+        categoryId: draft.categoryId,
+        description: draft.description,
+        date: draft.date,
+        totalCents: quote.totalCents,
+        purchaseCents: purchase,
+        installments: draft.installments,
+        installmentCents: quote.installmentCents,
+      ),
+    );
+  }
+}
+
 /// Cuentas, categorías y movimientos enlazados, como la base de datos real.
 class FakeBackend {
   factory FakeBackend({
@@ -1244,6 +1321,7 @@ class FakeBackend {
     List<Transaction> transactions = const [],
     List<BudgetRule> budgets = const [],
     List<SavingsGoal> goals = const [],
+    List<CardInstallmentPlan> installmentPlans = const [],
     String baseCurrency = 'COP',
     List<ExchangeRate> rates = const [],
   }) {
@@ -1277,6 +1355,7 @@ class FakeBackend {
         hasBudgets: () => budgetsRepository.rules.isNotEmpty,
         rescaleBudgets: budgetsRepository.rescale,
       ),
+      FakeCardInstallmentRepository(shared, installmentPlans),
     );
   }
 
@@ -1290,6 +1369,7 @@ class FakeBackend {
     this.recurring,
     this.goals,
     this.currency,
+    this.installments,
   );
 
   final FakeAccountRepository accounts;
@@ -1301,4 +1381,5 @@ class FakeBackend {
   final FakeRecurringRepository recurring;
   final FakeSavingsGoalRepository goals;
   final FakeCurrencyRepository currency;
+  final FakeCardInstallmentRepository installments;
 }

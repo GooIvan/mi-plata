@@ -13,6 +13,7 @@ import 'package:mi_plata/core/riverpod/no_retry.dart';
 import 'package:mi_plata/core/storage/preferences_provider.dart';
 import 'package:mi_plata/features/currency/domain/currency_converter.dart';
 import 'package:mi_plata/features/accounts/presentation/accounts_providers.dart';
+import 'package:mi_plata/features/accounts/presentation/card_providers.dart';
 import 'package:mi_plata/features/auth/presentation/auth_providers.dart';
 import 'package:mi_plata/features/budgets/presentation/budgets_providers.dart';
 import 'package:mi_plata/features/categories/presentation/categories_providers.dart';
@@ -153,6 +154,7 @@ Future<FakeBackend> pumpMiPlata(
         currencyRepositoryProvider.overrideWithValue(fakes.currency),
         recurringRepositoryProvider.overrideWithValue(fakes.recurring),
         savingsGoalRepositoryProvider.overrideWithValue(fakes.goals),
+        cardInstallmentRepositoryProvider.overrideWithValue(fakes.installments),
       ],
       child: const MiPlataApp(),
     ),

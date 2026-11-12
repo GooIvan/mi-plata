@@ -1,10 +1,37 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers/ledger_revision.dart';
+import '../../../core/supabase/supabase_provider.dart';
 import '../../transactions/domain/transaction_filter.dart';
 import '../../transactions/presentation/transactions_providers.dart';
+import '../data/card_installment_repository.dart';
 import '../domain/account.dart';
+import '../domain/card_installment_draft.dart';
+import '../domain/card_installment_plan.dart';
 import '../domain/card_statement.dart';
 import 'accounts_providers.dart';
+
+final cardInstallmentRepositoryProvider = Provider<CardInstallmentRepository>(
+  (ref) => CardInstallmentRepository(ref.watch(supabaseClientProvider)),
+);
+
+/// Las compras diferidas en cuotas con tarjeta. Se recargan solas cuando cambia
+/// algo del dinero (ver [ledgerRevisionProvider]).
+final cardInstallmentPlansProvider =
+    FutureProvider.autoDispose<List<CardInstallmentPlan>>((ref) {
+      ref.watch(ledgerRevisionProvider);
+      return ref.watch(cardInstallmentRepositoryProvider).fetchAll();
+    });
+
+/// Registra una compra diferida en cuotas y avisa de que el dinero cambió: el
+/// saldo de la tarjeta, el resumen y los extractos se recalculan.
+Future<void> createCardInstallmentPurchase(
+  WidgetRef ref,
+  CardInstallmentDraft draft,
+) async {
+  await ref.read(cardInstallmentRepositoryProvider).createPurchase(draft);
+  ref.read(ledgerRevisionProvider.notifier).bump();
+}
 
 /// Cuántos movimientos de una tarjeta se piden desde el último corte. Un mes de
 /// uso de una tarjeta cabe de sobra.
@@ -20,6 +47,7 @@ final cardStatementProvider = FutureProvider.autoDispose
       final calendar = account?.cardCalendar;
       if (account == null || calendar == null) return null;
 
+      final plans = await ref.watch(cardInstallmentPlansProvider.future);
       final today = DateTime.now();
       final statement = calendar.lastStatement(today);
       final moves = await ref
@@ -40,6 +68,7 @@ final cardStatementProvider = FutureProvider.autoDispose
         account: account,
         sinceStatement: moves,
         today: today,
+        plans: plans,
       );
     });
 

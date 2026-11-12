@@ -131,19 +131,25 @@ class _WhenLine extends StatelessWidget {
     final color = overdue ? scheme.error : scheme.onSurfaceVariant;
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          overdue ? Icons.error_outline : Icons.event_outlined,
-          size: 14,
-          color: color,
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(
+            overdue ? Icons.error_outline : Icons.event_outlined,
+            size: 14,
+            color: color,
+          ),
         ),
         const SizedBox(width: 4),
+        // Dos líneas: "Vencido desde el 11 nov" no cabe junto al monto y el botón
+        // en un teléfono angosto.
         Expanded(
           child: Text(
             overdue
                 ? l10n.dashboardCardOverdue(date)
                 : l10n.dashboardCardDueOn(when, date),
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(color: color),
           ),

@@ -1426,12 +1426,115 @@
       }
     }
   },
-  "dashboardCardOverdue": "Vencido desde el {date}",
+  "dashboardCardOverdue": "Vencido el {date}",
   "@dashboardCardOverdue": {
     "placeholders": {
       "date": {
         "type": "String"
       }
     }
-  }
+  },
+  "cardInstallmentsSwitch": "Diferir en cuotas",
+  "cardInstallmentsPurchaseLabel": "Valor de la compra",
+  "cardInstallmentsCountLabel": "Número de cuotas",
+  "cardInstallmentsCountInvalid": "Escribe de 2 a 60 cuotas",
+  "cardInstallmentsAmountLabel": "Valor de cada cuota (opcional)",
+  "cardInstallmentsAmountHelper": "Con intereses, como la cobra el banco. Vacío si no hay intereses.",
+  "cardInstallmentsAmountInvalid": "Las cuotas no cuadran con el valor de la compra",
+  "cardInstallmentsQuote": "{count} cuotas de {amount}. Total a pagar: {total}.",
+  "@cardInstallmentsQuote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsQuoteInterest": "{count} cuotas de {amount}. Total a pagar: {total}, con {interest} de intereses.",
+  "@cardInstallmentsQuoteInterest": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsLocked": "Compra diferida en {count} cuotas. Para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo.",
+  "@cardInstallmentsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsTag": "{count} cuotas",
+  "@cardInstallmentsTag": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsButton": "Compras en cuotas ({count})",
+  "@cardInstallmentsButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsTitle": "Compras en cuotas",
+  "cardInstallmentsUnnamed": "Compra diferida",
+  "cardInstallmentsProgress": "{paid} de {total} cuotas cobradas",
+  "@cardInstallmentsProgress": {
+    "placeholders": {
+      "paid": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsEach": "{amount} cada una",
+  "@cardInstallmentsEach": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsRemaining": "Faltan {amount} por cobrar",
+  "@cardInstallmentsRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsNext": "Próxima cuota en el corte del {date}",
+  "@cardInstallmentsNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsEmpty": "No hay compras en cuotas por cobrar.",
+  "dbErrorInstallmentPurchaseNotCard": "Solo una compra hecha con una tarjeta se puede diferir en cuotas",
+  "dbErrorInstallmentPurchaseAmounts": "Las cuotas no cuadran con el valor de la compra",
+  "dbErrorInstallmentPurchaseLocked": "Esta compra está diferida en cuotas: para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo"
 }

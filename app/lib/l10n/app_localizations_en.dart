@@ -2021,4 +2021,100 @@ class AppLocalizationsEn extends AppLocalizations {
   String dashboardCardOverdue(String date) {
     return 'Overdue since $date';
   }
+
+  @override
+  String get cardInstallmentsSwitch => 'Split into installments';
+
+  @override
+  String get cardInstallmentsPurchaseLabel => 'Purchase price';
+
+  @override
+  String get cardInstallmentsCountLabel => 'Number of installments';
+
+  @override
+  String get cardInstallmentsCountInvalid => 'Enter 2 to 60 installments';
+
+  @override
+  String get cardInstallmentsAmountLabel =>
+      'Amount of each installment (optional)';
+
+  @override
+  String get cardInstallmentsAmountHelper =>
+      'With interest, as the bank charges it. Empty if there\'s no interest.';
+
+  @override
+  String get cardInstallmentsAmountInvalid =>
+      'The installments don\'t add up to the purchase price';
+
+  @override
+  String cardInstallmentsQuote(int count, String amount, String total) {
+    return '$count installments of $amount. Total to pay: $total.';
+  }
+
+  @override
+  String cardInstallmentsQuoteInterest(
+    int count,
+    String amount,
+    String total,
+    String interest,
+  ) {
+    return '$count installments of $amount. Total to pay: $total, with $interest of interest.';
+  }
+
+  @override
+  String cardInstallmentsLocked(int count) {
+    return 'Purchase split into $count installments. To change the amount or the card, delete it and enter it again.';
+  }
+
+  @override
+  String cardInstallmentsTag(int count) {
+    return '$count installments';
+  }
+
+  @override
+  String cardInstallmentsButton(int count) {
+    return 'Installment purchases ($count)';
+  }
+
+  @override
+  String get cardInstallmentsTitle => 'Installment purchases';
+
+  @override
+  String get cardInstallmentsUnnamed => 'Split purchase';
+
+  @override
+  String cardInstallmentsProgress(int paid, int total) {
+    return '$paid of $total installments charged';
+  }
+
+  @override
+  String cardInstallmentsEach(String amount) {
+    return '$amount each';
+  }
+
+  @override
+  String cardInstallmentsRemaining(String amount) {
+    return '$amount still to be charged';
+  }
+
+  @override
+  String cardInstallmentsNext(String date) {
+    return 'Next installment on the $date statement';
+  }
+
+  @override
+  String get cardInstallmentsEmpty =>
+      'No installment purchases left to charge.';
+
+  @override
+  String get dbErrorInstallmentPurchaseNotCard =>
+      'Only a purchase made with a card can be split into installments';
+
+  @override
+  String get dbErrorInstallmentPurchaseAmounts =>
+      'The installments don\'t add up to the purchase price';
+
+  @override
+  String get dbErrorInstallmentPurchaseLocked =>
+      'This purchase is split into installments: to change the amount or the card, delete it and enter it again';
 }

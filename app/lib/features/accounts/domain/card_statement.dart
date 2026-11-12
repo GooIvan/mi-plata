@@ -1,6 +1,7 @@
 import '../../transactions/domain/transaction.dart';
 import '../../transactions/domain/transaction_type.dart';
 import 'account.dart';
+import 'card_installment_plan.dart';
 
 /// Lo que se debe de una tarjeta respecto a su último corte.
 ///
@@ -12,6 +13,10 @@ import 'account.dart';
 /// Los pagos y los reembolsos que llegan después del corte bajan lo que se debe
 /// del extracto, como en el banco. Si se paga de más, lo que sobra queda a
 /// favor para el siguiente.
+///
+/// Una compra diferida en cuotas baja el saldo de una vez, pero al extracto solo
+/// entra una cuota por corte: lo que falta de cobrar de esas compras tampoco es
+/// lo que se debe del extracto.
 class CardStatement {
   const CardStatement({
     required this.statementDate,
@@ -56,11 +61,13 @@ class CardStatement {
   /// El extracto de [account] hoy, o null si no es una tarjeta con sus fechas.
   ///
   /// [sinceStatement] son los movimientos de la tarjeta hechos después del
-  /// último corte; si trae de más (de antes del corte) se ignoran.
+  /// último corte; si trae de más (de antes del corte) se ignoran. [plans] son
+  /// las compras en cuotas (de cualquier tarjeta: solo cuentan las de esta).
   static CardStatement? compute({
     required Account account,
     required Iterable<Transaction> sinceStatement,
     required DateTime today,
+    Iterable<CardInstallmentPlan> plans = const [],
   }) {
     final calendar = account.cardCalendar;
     if (calendar == null) return null;
@@ -77,6 +84,15 @@ class CardStatement {
       if (transaction.accountId != account.id) continue;
       if (transaction.type == TransactionType.income) continue;
       unbilled += _cents(transaction.amount);
+    }
+
+    // Las compras en cuotas hechas antes del corte ya empezaron a cobrarse: lo
+    // que les falta por cobrar es de extractos que vienen. (Las hechas después
+    // del corte ya están arriba, completas, como cualquier gasto.)
+    for (final plan in plans) {
+      if (plan.accountId != account.id) continue;
+      if (_dateOnly(plan.date).isAfter(statement)) continue;
+      unbilled += plan.unbilledCents(calendar, statement);
     }
 
     return CardStatement(

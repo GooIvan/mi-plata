@@ -456,6 +456,7 @@ void main() {
     testWidgets('un gasto con la tarjeta que pasa el cupo avisa, y se puede registrar igual', (
       tester,
     ) async {
+      tallView(tester);
       final backend = FakeBackend(
         accounts: [
           testAccount('Nequi', type: AccountType.wallet, balance: 100000),
@@ -488,6 +489,7 @@ void main() {
     });
 
     testWidgets('un gasto con la tarjeta dentro del cupo no avisa', (tester) async {
+      tallView(tester);
       final backend = FakeBackend(
         accounts: [
           testAccount('Nequi', type: AccountType.wallet, balance: 100000),
@@ -541,6 +543,7 @@ void main() {
     });
 
     testWidgets('en una tarjeta de crédito no avisa', (tester) async {
+      tallView(tester);
       final backend = nequiConCuatroMil();
       await pumpMiPlata(tester, backend: backend);
       await fillExpense(tester, amount: '20.000', account: 'Visa');
