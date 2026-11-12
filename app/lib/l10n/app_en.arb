@@ -1300,5 +1300,226 @@
   "navHome": "Home",
   "navGoals": "Goals",
   "navMore": "More",
-  "navTransactions": "Activity"
+  "navTransactions": "Activity",
+  "accountsCardLimitLabel": "Credit limit (optional)",
+  "accountsCardLimitHelper": "The most the bank lets you spend with the card",
+  "accountsCardLimitInvalid": "The limit has to be an amount above zero",
+  "accountsCardStatementDayLabel": "Statement day (optional)",
+  "accountsCardStatementDayHelper": "The day of the month your statement closes",
+  "accountsCardPaymentDayLabel": "Payment due day (optional)",
+  "accountsCardPaymentDayHelper": "The day of the month you must pay by",
+  "accountsCardDayInvalid": "Enter a day from 1 to 31",
+  "accountsCardDaysTogether": "Give both days, or leave both empty",
+  "accountsCardInitialBalanceHelper": "What you already owe, with a minus sign (e.g. -200,000). Empty if it starts at zero",
+  "accountsCardUsedOf": "Used {used} of {limit}",
+  "@accountsCardUsedOf": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardAvailable": "{amount} available",
+  "@accountsCardAvailable": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardOverLimit": "Over the limit by {amount}",
+  "@accountsCardOverLimit": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardDates": "Statement {statement} · Pay by {payment}",
+  "@accountsCardDates": {
+    "placeholders": {
+      "statement": {
+        "type": "String"
+      },
+      "payment": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardCardDebt": "Owed on cards {amount}",
+  "@dashboardCardDebt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "creditLimitMessage": "{account} would end up {amount} over its limit.",
+  "@creditLimitMessage": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardDue": "Due from the last statement: {amount}",
+  "@accountsCardDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardOverdue": "Overdue since {date}: {amount}",
+  "@accountsCardOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardPaidUp": "Paid up for the last statement",
+  "accountsCardPay": "Pay",
+  "dashboardCardPaymentsTitle": "Card payments",
+  "dashboardCardDueToday": "Due today",
+  "dashboardCardDueTomorrow": "Due tomorrow",
+  "dashboardCardDueIn": "Due in {days} days",
+  "@dashboardCardDueIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardCardDueOn": "{when} · {date}",
+  "@dashboardCardDueOn": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardCardOverdue": "Overdue since {date}",
+  "@dashboardCardOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsSwitch": "Split into installments",
+  "cardInstallmentsPurchaseLabel": "Purchase price",
+  "cardInstallmentsCountLabel": "Number of installments",
+  "cardInstallmentsCountInvalid": "Enter 2 to 60 installments",
+  "cardInstallmentsAmountLabel": "Amount of each installment (optional)",
+  "cardInstallmentsAmountHelper": "With interest, as the bank charges it. Empty if there's no interest.",
+  "cardInstallmentsAmountInvalid": "The installments don't add up to the purchase price",
+  "cardInstallmentsQuote": "{count} installments of {amount}. Total to pay: {total}.",
+  "@cardInstallmentsQuote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsQuoteInterest": "{count} installments of {amount}. Total to pay: {total}, with {interest} of interest.",
+  "@cardInstallmentsQuoteInterest": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsLocked": "Purchase split into {count} installments. To change the amount or the card, delete it and enter it again.",
+  "@cardInstallmentsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsTag": "{count} installments",
+  "@cardInstallmentsTag": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsButton": "Installment purchases ({count})",
+  "@cardInstallmentsButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsTitle": "Installment purchases",
+  "cardInstallmentsUnnamed": "Split purchase",
+  "cardInstallmentsProgress": "{paid} of {total} installments charged",
+  "@cardInstallmentsProgress": {
+    "placeholders": {
+      "paid": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsEach": "{amount} each",
+  "@cardInstallmentsEach": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsRemaining": "{amount} still to be charged",
+  "@cardInstallmentsRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsNext": "Next installment on the {date} statement",
+  "@cardInstallmentsNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsEmpty": "No installment purchases left to charge.",
+  "dbErrorInstallmentPurchaseNotCard": "Only a purchase made with a card can be split into installments",
+  "dbErrorInstallmentPurchaseAmounts": "The installments don't add up to the purchase price",
+  "dbErrorInstallmentPurchaseLocked": "This purchase is split into installments: to change the amount or the card, delete it and enter it again"
 }

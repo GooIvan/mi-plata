@@ -228,13 +228,62 @@ void main() {
       expect(total.isComplete, isFalse);
     });
 
-    test('las deudas (saldos negativos) restan', () {
+    test('un saldo negativo (sobregiro) resta', () {
       final accounts = [
         testAccount('Banco', balance: 1000000),
-        testAccount('Tarjeta en dólares', balance: -50, currency: 'USD', type: AccountType.card),
+        testAccount('Banco en dólares', balance: -50, currency: 'USD'),
       ];
 
       expect(AccountTotals.inBase(accounts, converter).cents, 80000000);
+    });
+
+    test('las tarjetas no cuentan: ese dinero sigue en las cuentas', () {
+      final accounts = [
+        testAccount('Banco', balance: 1000000),
+        testAccount('Visa', balance: -300000, type: AccountType.card),
+        testAccount('Tarjeta en dólares', balance: -50, currency: 'USD', type: AccountType.card),
+      ];
+
+      expect(AccountTotals.inBase(accounts, converter).cents, 100000000);
+      expect(AccountTotals.centsByCurrency(accounts), {'COP': 100000000});
+    });
+
+    test('lo que se debe en las tarjetas se suma aparte, por moneda y por tarjeta', () {
+      final accounts = [
+        testAccount('Banco', balance: -999),
+        testAccount('Visa', balance: -300000, type: AccountType.card),
+        testAccount('Mastercard', balance: -100000.5, type: AccountType.card),
+        // El saldo a favor de una tarjeta no paga la deuda de otra.
+        testAccount('Amex', balance: 80000, type: AccountType.card),
+        testAccount('Dólares', balance: -50, currency: 'USD', type: AccountType.card),
+        testAccount('Sin deuda', type: AccountType.card),
+      ];
+
+      expect(
+        AccountTotals.cardDebtCentsByCurrency(accounts),
+        {'COP': 40000050, 'USD': 5000},
+      );
+      // 400.000,50 + 50 * 4.000 = 600.000,50
+      expect(AccountTotals.cardDebtInBase(accounts, converter).cents, 60000050);
+    });
+
+    test('la deuda de una tarjeta en una moneda sin tasa se avisa', () {
+      final accounts = [
+        testAccount('Visa', balance: -100000, type: AccountType.card),
+        testAccount('Pesos mexicanos', balance: -500, currency: 'MXN', type: AccountType.card),
+      ];
+
+      final debt = AccountTotals.cardDebtInBase(accounts, converter);
+      expect(debt.cents, 10000000);
+      expect(debt.missing, {'MXN'});
+    });
+
+    test('sin tarjetas no hay deuda', () {
+      expect(
+        AccountTotals.cardDebtCentsByCurrency([testAccount('Banco', balance: -5)]),
+        isEmpty,
+      );
+      expect(AccountTotals.cardDebtInBase(const [], converter).cents, 0);
     });
 
     test('sin cuentas es cero', () {

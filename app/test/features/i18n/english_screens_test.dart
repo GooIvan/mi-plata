@@ -263,8 +263,10 @@ void main() {
       await _open(tester);
 
       expect(find.text('Total money'), findsOneWidget);
-      // 3.630.000 + 100.000 - 200.000, con el movimiento, la transferencia y el abono.
-      expect(textLike(r'$3,530,000'), findsOneWidget);
+      // 3.630.000 + 100.000, con el movimiento, la transferencia y el abono.
+      // La tarjeta (-200.000) no resta: se ve aparte.
+      expect(textLike(r'$3,730,000'), findsOneWidget);
+      expect(textLike(r'Owed on cards $200,000'), findsOneWidget);
       expect(find.text('In 3 accounts'), findsOneWidget);
       expect(find.text('Recent transactions'), findsOneWidget);
       expect(find.text('You owe'), findsOneWidget);

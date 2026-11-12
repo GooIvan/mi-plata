@@ -7,6 +7,7 @@ import '../../../core/theme/finance_colors.dart';
 import '../../../l10n/l10n.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/accounts_providers.dart';
+import '../../accounts/presentation/card_providers.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../budgets/presentation/budget_providers_overview.dart';
 import '../../currency/presentation/currency_providers.dart';
@@ -21,6 +22,7 @@ import '../../transactions/presentation/widgets/transaction_tile.dart';
 import '../../debts/presentation/debts_providers.dart';
 import 'widgets/accounts_strip.dart';
 import 'widgets/budget_summary_card.dart';
+import 'widgets/card_payments_card.dart';
 import 'widgets/debts_summary_card.dart';
 import 'widgets/goals_summary_card.dart';
 import 'widgets/recurring_summary_card.dart';
@@ -53,6 +55,8 @@ class DashboardScreen extends ConsumerWidget {
     final month = monthTotals == null || rates == null
         ? null
         : SummaryCalculator.forMonth(monthTotals, thisMonth, rates);
+    // Es un extra: mientras carga o si falla, simplemente no aparece.
+    final cardDues = ref.watch(cardDuesProvider).value;
     final accountNames = ref.watch(accountNamesProvider);
     final accountCurrencies = ref.watch(accountCurrenciesProvider);
     final categoryNames = ref.watch(categoryNamesProvider);
@@ -105,6 +109,14 @@ class DashboardScreen extends ConsumerWidget {
               accounts: activeAccounts,
               onTap: () => context.go(AppRoutes.accounts),
             ),
+          ],
+          if (cardDues != null && cardDues.isNotEmpty) ...[
+            _SectionHeader(
+              title: l10n.dashboardCardPaymentsTitle,
+              actionLabel: l10n.commonSeeAll,
+              onAction: () => context.go(AppRoutes.accounts),
+            ),
+            CardPaymentsCard(dues: cardDues),
           ],
           _SectionHeader(
             title: l10n.recurringTitle,

@@ -1916,4 +1916,205 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navTransactions => 'Activity';
+
+  @override
+  String get accountsCardLimitLabel => 'Credit limit (optional)';
+
+  @override
+  String get accountsCardLimitHelper =>
+      'The most the bank lets you spend with the card';
+
+  @override
+  String get accountsCardLimitInvalid =>
+      'The limit has to be an amount above zero';
+
+  @override
+  String get accountsCardStatementDayLabel => 'Statement day (optional)';
+
+  @override
+  String get accountsCardStatementDayHelper =>
+      'The day of the month your statement closes';
+
+  @override
+  String get accountsCardPaymentDayLabel => 'Payment due day (optional)';
+
+  @override
+  String get accountsCardPaymentDayHelper =>
+      'The day of the month you must pay by';
+
+  @override
+  String get accountsCardDayInvalid => 'Enter a day from 1 to 31';
+
+  @override
+  String get accountsCardDaysTogether => 'Give both days, or leave both empty';
+
+  @override
+  String get accountsCardInitialBalanceHelper =>
+      'What you already owe, with a minus sign (e.g. -200,000). Empty if it starts at zero';
+
+  @override
+  String accountsCardUsedOf(String used, String limit) {
+    return 'Used $used of $limit';
+  }
+
+  @override
+  String accountsCardAvailable(String amount) {
+    return '$amount available';
+  }
+
+  @override
+  String accountsCardOverLimit(String amount) {
+    return 'Over the limit by $amount';
+  }
+
+  @override
+  String accountsCardDates(String statement, String payment) {
+    return 'Statement $statement · Pay by $payment';
+  }
+
+  @override
+  String dashboardCardDebt(String amount) {
+    return 'Owed on cards $amount';
+  }
+
+  @override
+  String creditLimitMessage(String account, String amount) {
+    return '$account would end up $amount over its limit.';
+  }
+
+  @override
+  String accountsCardDue(String amount) {
+    return 'Due from the last statement: $amount';
+  }
+
+  @override
+  String accountsCardOverdue(String date, String amount) {
+    return 'Overdue since $date: $amount';
+  }
+
+  @override
+  String get accountsCardPaidUp => 'Paid up for the last statement';
+
+  @override
+  String get accountsCardPay => 'Pay';
+
+  @override
+  String get dashboardCardPaymentsTitle => 'Card payments';
+
+  @override
+  String get dashboardCardDueToday => 'Due today';
+
+  @override
+  String get dashboardCardDueTomorrow => 'Due tomorrow';
+
+  @override
+  String dashboardCardDueIn(int days) {
+    return 'Due in $days days';
+  }
+
+  @override
+  String dashboardCardDueOn(String when, String date) {
+    return '$when · $date';
+  }
+
+  @override
+  String dashboardCardOverdue(String date) {
+    return 'Overdue since $date';
+  }
+
+  @override
+  String get cardInstallmentsSwitch => 'Split into installments';
+
+  @override
+  String get cardInstallmentsPurchaseLabel => 'Purchase price';
+
+  @override
+  String get cardInstallmentsCountLabel => 'Number of installments';
+
+  @override
+  String get cardInstallmentsCountInvalid => 'Enter 2 to 60 installments';
+
+  @override
+  String get cardInstallmentsAmountLabel =>
+      'Amount of each installment (optional)';
+
+  @override
+  String get cardInstallmentsAmountHelper =>
+      'With interest, as the bank charges it. Empty if there\'s no interest.';
+
+  @override
+  String get cardInstallmentsAmountInvalid =>
+      'The installments don\'t add up to the purchase price';
+
+  @override
+  String cardInstallmentsQuote(int count, String amount, String total) {
+    return '$count installments of $amount. Total to pay: $total.';
+  }
+
+  @override
+  String cardInstallmentsQuoteInterest(
+    int count,
+    String amount,
+    String total,
+    String interest,
+  ) {
+    return '$count installments of $amount. Total to pay: $total, with $interest of interest.';
+  }
+
+  @override
+  String cardInstallmentsLocked(int count) {
+    return 'Purchase split into $count installments. To change the amount or the card, delete it and enter it again.';
+  }
+
+  @override
+  String cardInstallmentsTag(int count) {
+    return '$count installments';
+  }
+
+  @override
+  String cardInstallmentsButton(int count) {
+    return 'Installment purchases ($count)';
+  }
+
+  @override
+  String get cardInstallmentsTitle => 'Installment purchases';
+
+  @override
+  String get cardInstallmentsUnnamed => 'Split purchase';
+
+  @override
+  String cardInstallmentsProgress(int paid, int total) {
+    return '$paid of $total installments charged';
+  }
+
+  @override
+  String cardInstallmentsEach(String amount) {
+    return '$amount each';
+  }
+
+  @override
+  String cardInstallmentsRemaining(String amount) {
+    return '$amount still to be charged';
+  }
+
+  @override
+  String cardInstallmentsNext(String date) {
+    return 'Next installment on the $date statement';
+  }
+
+  @override
+  String get cardInstallmentsEmpty =>
+      'No installment purchases left to charge.';
+
+  @override
+  String get dbErrorInstallmentPurchaseNotCard =>
+      'Only a purchase made with a card can be split into installments';
+
+  @override
+  String get dbErrorInstallmentPurchaseAmounts =>
+      'The installments don\'t add up to the purchase price';
+
+  @override
+  String get dbErrorInstallmentPurchaseLocked =>
+      'This purchase is split into installments: to change the amount or the card, delete it and enter it again';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,8 +10,12 @@ import '../../../core/widgets/state_message.dart';
 import '../../../l10n/l10n.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/domain/amount_parser.dart';
+import '../../accounts/domain/card_installment_draft.dart';
+import '../../accounts/domain/card_installment_plan.dart';
+import '../../accounts/domain/card_installment_validators.dart';
 import '../../accounts/presentation/account_label.dart';
 import '../../accounts/presentation/accounts_providers.dart';
+import '../../accounts/presentation/card_providers.dart';
 import '../../budgets/presentation/budget_expense_alert.dart';
 import '../../currency/domain/currency.dart';
 import '../../currency/domain/currency_converter.dart';
@@ -18,6 +23,7 @@ import '../../currency/presentation/currency_providers.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/domain/category_type.dart';
 import '../../categories/presentation/categories_providers.dart';
+import '../domain/credit_limit_check.dart';
 import '../domain/negative_balance_check.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_draft.dart';
@@ -31,14 +37,16 @@ import 'transactions_providers.dart';
 
 /// Abre el formulario para registrar un movimiento, o para editar [transaction].
 ///
-/// Para uno nuevo se puede empezar con el tipo y las cuentas ya elegidos (por
-/// ejemplo, "ahorrar" es una transferencia hacia la cuenta de una meta).
+/// Para uno nuevo se puede empezar con el tipo, las cuentas y el monto ya
+/// puestos (por ejemplo, "ahorrar" es una transferencia hacia la cuenta de una
+/// meta, y "pagar la tarjeta" una hacia la tarjeta con lo que se debe).
 Future<void> showTransactionForm(
   BuildContext context, {
   Transaction? transaction,
   TransactionType? initialType,
   String? initialAccountId,
   String? initialDestinationId,
+  double? initialAmount,
 }) {
   // En el navegador raíz: el formulario cubre la barra de navegación.
   return Navigator.of(context, rootNavigator: true).push(
@@ -49,6 +57,7 @@ Future<void> showTransactionForm(
         initialType: initialType,
         initialAccountId: initialAccountId,
         initialDestinationId: initialDestinationId,
+        initialAmount: initialAmount,
       ),
     ),
   );
@@ -61,6 +70,7 @@ class TransactionFormScreen extends ConsumerStatefulWidget {
     this.initialType,
     this.initialAccountId,
     this.initialDestinationId,
+    this.initialAmount,
   });
 
   final Transaction? transaction;
@@ -69,6 +79,7 @@ class TransactionFormScreen extends ConsumerStatefulWidget {
   final TransactionType? initialType;
   final String? initialAccountId;
   final String? initialDestinationId;
+  final double? initialAmount;
 
   @override
   ConsumerState<TransactionFormScreen> createState() =>
@@ -79,6 +90,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amount = TextEditingController();
   final _destinationAmount = TextEditingController();
+  final _installments = TextEditingController();
+  final _installmentAmount = TextEditingController();
   late final _description = TextEditingController(
     text: widget.transaction?.description,
   );
@@ -90,12 +103,20 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       widget.transaction?.destinationAccountId ?? widget.initialDestinationId;
   late String? _categoryId = widget.transaction?.categoryId;
   late DateTime _date = widget.transaction?.date ?? DateTime.now();
+  /// Si la compra con la tarjeta se difiere en cuotas.
+  bool _defer = false;
   bool _saving = false;
   bool _amountReady = false;
   String? _error;
 
   bool get _isEditing => widget.transaction != null;
   bool get _isTransfer => _type == TransactionType.transfer;
+
+  /// Solo un gasto nuevo con una tarjeta se puede diferir en cuotas.
+  bool _canDefer(Account? source) =>
+      !_isEditing && _type == TransactionType.expense && (source?.isCard ?? false);
+
+  static int _cents(String decimal) => (double.parse(decimal) * 100).round();
 
   /// Si es una transferencia entre cuentas de monedas distintas: entonces hay
   /// un monto que sale y otro que llega.
@@ -130,6 +151,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             context.formats,
           );
         }
+      } else if (widget.initialAmount != null) {
+        _amount.text = AmountParser.toInput(
+          widget.initialAmount!,
+          context.formats,
+        );
       }
     }
   }
@@ -138,6 +164,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   void dispose() {
     _amount.dispose();
     _destinationAmount.dispose();
+    _installments.dispose();
+    _installmentAmount.dispose();
     _description.dispose();
     super.dispose();
   }
@@ -159,12 +187,40 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final description = _description.text.trim();
     final accounts = ref.read(accountsProvider).value ?? const <Account>[];
     final formats = context.formats;
+    final l10n = context.l10n;
+
+    // Una compra diferida se registra por lo que se paga en total (con
+    // intereses): los avisos de cupo y de presupuesto cuentan eso.
+    final deferring =
+        _defer &&
+        _canDefer(accounts.where((a) => a.id == _accountId).firstOrNull);
+    final purchase = AmountParser.parse(_amount.text, formats)!;
+    final count = deferring ? int.parse(_installments.text.trim()) : null;
+    final installmentAmount = deferring && _installmentAmount.text.trim().isNotEmpty
+        ? AmountParser.parse(_installmentAmount.text, formats)
+        : null;
+    final quote = count == null
+        ? null
+        : CardInstallmentQuote.of(
+            purchaseCents: _cents(purchase),
+            installments: count,
+            installmentCents: installmentAmount == null
+                ? null
+                : _cents(installmentAmount),
+          );
+    if (quote != null && !quote.valid) {
+      setState(() => _error = l10n.cardInstallmentsAmountInvalid);
+      return;
+    }
+
     final draft = TransactionDraft(
       type: _type,
       accountId: _accountId!,
       destinationAccountId: _isTransfer ? _destinationId : null,
       categoryId: _isTransfer ? null : _categoryId,
-      amount: AmountParser.parse(_amount.text, formats)!,
+      amount: quote == null
+          ? purchase
+          : (quote.totalCents / 100).toStringAsFixed(2),
       // Solo una transferencia entre monedas distintas dice cuánto llega.
       destinationAmount: _isCrossCurrency(accounts)
           ? AmountParser.parse(_destinationAmount.text, formats)
@@ -178,7 +234,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       draft: draft,
       previous: widget.transaction,
     );
-    if (warnings.isNotEmpty && !await _confirmNegativeBalance(warnings)) return;
+    final overLimit = CreditLimitCheck.after(
+      accounts: accounts,
+      draft: draft,
+      previous: widget.transaction,
+    );
+    if ((warnings.isNotEmpty || overLimit.isNotEmpty) &&
+        !await _confirmNegativeBalance(warnings, overLimit)) {
+      return;
+    }
     if (!mounted) return;
 
     setState(() {
@@ -188,7 +252,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
     final transactions = ref.read(transactionsProvider.notifier);
     final messenger = ScaffoldMessenger.of(context);
-    final l10n = context.l10n;
     try {
       // Antes de guardar: después, el gasto ya estaría sumado en el mes.
       final budgetAlert = await budgetAlertBeforeSaving(
@@ -199,6 +262,19 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       );
       if (_isEditing) {
         await transactions.edit(widget.transaction!.id, draft);
+      } else if (quote != null) {
+        await createCardInstallmentPurchase(
+          ref,
+          CardInstallmentDraft(
+            accountId: draft.accountId,
+            purchaseAmount: purchase,
+            installments: count!,
+            installmentAmount: installmentAmount,
+            categoryId: draft.categoryId,
+            date: draft.date,
+            description: draft.description,
+          ),
+        );
       } else {
         await transactions.create(draft);
       }
@@ -220,12 +296,16 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
-  /// Avisa que el cambio deja cuentas en negativo; devuelve si el usuario
-  /// quiere guardar de todos modos.
-  Future<bool> _confirmNegativeBalance(List<NegativeBalance> warnings) =>
+  /// Avisa que el cambio deja cuentas en negativo o tarjetas por encima de su
+  /// cupo; devuelve si el usuario quiere guardar de todos modos.
+  Future<bool> _confirmNegativeBalance(
+    List<NegativeBalance> warnings,
+    List<CreditLimitExceeded> overLimit,
+  ) =>
       confirmNegativeBalance(
         context,
         warnings,
+        overLimit: overLimit,
         title: _isEditing
             ? context.l10n.negativeBalanceSaveTitle
             : context.l10n.negativeBalanceRecordTitle,
@@ -327,6 +407,79 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     );
   }
 
+  /// Cuántas cuotas y de cuánto, con lo que quedaría a la vista.
+  List<Widget> _installmentFields(String currency) {
+    final l10n = context.l10n;
+    final formats = context.formats;
+    final purchase = AmountParser.parse(_amount.text, formats);
+    final count = int.tryParse(_installments.text.trim());
+    final each = _installmentAmount.text.trim().isEmpty
+        ? null
+        : AmountParser.parse(_installmentAmount.text, formats);
+
+    String? quoteText;
+    if (purchase != null && count != null && count >= 2 && count <= 60) {
+      final quote = CardInstallmentQuote.of(
+        purchaseCents: _cents(purchase),
+        installments: count,
+        installmentCents: each == null ? null : _cents(each),
+      );
+      if (quote.valid) {
+        final interest = quote.totalCents - _cents(purchase);
+        String money(int cents) => formats.money(cents / 100, currency: currency);
+        quoteText = interest > 0
+            ? l10n.cardInstallmentsQuoteInterest(
+                count,
+                money(quote.installmentCents),
+                money(quote.totalCents),
+                money(interest),
+              )
+            : l10n.cardInstallmentsQuote(
+                count,
+                money(quote.installmentCents),
+                money(quote.totalCents),
+              );
+      }
+    }
+
+    return [
+      const SizedBox(height: 8),
+      TextFormField(
+        controller: _installments,
+        enabled: !_saving,
+        keyboardType: TextInputType.number,
+        textInputAction: TextInputAction.next,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        onChanged: (_) => setState(() {}),
+        validator: (value) => CardInstallmentValidators.count(l10n, value),
+        decoration: InputDecoration(
+          labelText: l10n.cardInstallmentsCountLabel,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+      const SizedBox(height: 16),
+      TextFormField(
+        controller: _installmentAmount,
+        enabled: !_saving,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        textInputAction: TextInputAction.next,
+        onChanged: (_) => setState(() {}),
+        validator: (value) => CardInstallmentValidators.amount(l10n, value),
+        decoration: InputDecoration(
+          labelText: l10n.cardInstallmentsAmountLabel,
+          helperText: l10n.cardInstallmentsAmountHelper,
+          helperMaxLines: 2,
+          prefixText: '${currencySymbol(currency)} ',
+          border: const OutlineInputBorder(),
+        ),
+      ),
+      if (quoteText != null) ...[
+        const SizedBox(height: 12),
+        Text(quoteText, style: Theme.of(context).textTheme.bodyMedium),
+      ],
+    ];
+  }
+
   Widget _buildForm(List<Account> allAccounts, List<Category> allCategories) {
     final l10n = context.l10n;
     // Una cuenta archivada solo se ofrece si el movimiento que se edita ya la usa.
@@ -377,6 +530,20 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         .where((a) => a.id == _destinationId)
         .firstOrNull;
     final crossCurrency = _isCrossCurrency(accounts);
+    final canDefer = _canDefer(source);
+    final deferring = canDefer && _defer;
+    // Una compra ya diferida en cuotas no cambia de monto, de tarjeta ni de
+    // tipo: dejaría de cuadrar con sus cuotas.
+    final plan = !_isEditing
+        ? null
+        : ref.watch(
+            cardInstallmentPlansProvider.select(
+              (plans) => plans.value
+                  ?.where((p) => p.transactionId == widget.transaction!.id)
+                  .firstOrNull,
+            ),
+          );
+    final locked = plan != null;
     final baseCurrency = ref.watch(currencyConverterProvider).value?.base;
     // El monto va en la moneda de la cuenta; mientras no hay cuenta, en la base.
     final currency = source?.currency ?? baseCurrency ?? defaultCurrency;
@@ -405,6 +572,10 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (plan != null) ...[
+              _InstallmentNotice(message: l10n.cardInstallmentsLocked(plan.installments)),
+              const SizedBox(height: 16),
+            ],
             SegmentedButton<TransactionType>(
               showSelectedIcon: false,
               segments: [
@@ -416,7 +587,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   ButtonSegment(value: type, label: Text(type.label(l10n))),
               ],
               selected: {_type},
-              onSelectionChanged: _saving
+              onSelectionChanged: _saving || locked
                   ? null
                   : (selection) => setState(() {
                       _type = selection.first;
@@ -427,16 +598,20 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             const SizedBox(height: 20),
             TextFormField(
               controller: _amount,
-              enabled: !_saving,
+              enabled: !_saving && !locked,
               autofocus: !_isEditing,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               textInputAction: TextInputAction.next,
               validator: (value) => TransactionValidators.amount(l10n, value),
               style: theme.textTheme.headlineSmall,
-              onChanged: crossCurrency ? (_) => setState(() {}) : null,
+              onChanged: crossCurrency || deferring
+                  ? (_) => setState(() {})
+                  : null,
               decoration: InputDecoration(
                 labelText: crossCurrency
                     ? l10n.transactionsAmountOut(currency)
+                    : deferring
+                    ? l10n.cardInstallmentsPurchaseLabel
                     : l10n.commonAmount,
                 hintText: l10n.transactionsAmountHint,
                 prefixText: '${currencySymbol(currency)} ',
@@ -448,7 +623,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               initialValue: _accountId,
               isExpanded: true,
               items: [for (final account in accounts) accountItem(account)],
-              onChanged: _saving
+              onChanged: _saving || locked
                   ? null
                   : (id) => setState(() {
                       _accountId = id;
@@ -538,6 +713,16 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 ),
               ),
             ],
+            if (canDefer) ...[
+              const SizedBox(height: 8),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.cardInstallmentsSwitch),
+                value: _defer,
+                onChanged: _saving ? null : (value) => setState(() => _defer = value),
+              ),
+            ],
+            if (deferring) ..._installmentFields(currency),
             const SizedBox(height: 16),
             InkWell(
               onTap: _saving ? null : _pickDate,
@@ -584,6 +769,38 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Avisa que la compra está diferida en cuotas y por eso no se cambia el monto.
+class _InstallmentNotice extends StatelessWidget {
+  const _InstallmentNotice({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline, size: 20, color: scheme.onSecondaryContainer),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(color: scheme.onSecondaryContainer),
+            ),
+          ),
+        ],
       ),
     );
   }

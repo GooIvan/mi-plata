@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mi_plata/features/accounts/domain/account.dart';
 import 'package:mi_plata/features/accounts/domain/account_totals.dart';
+import 'package:mi_plata/features/accounts/domain/account_type.dart';
 import 'package:mi_plata/features/summary/domain/balance_history.dart';
 import 'package:mi_plata/features/transactions/domain/transaction_type.dart';
 
@@ -141,6 +142,27 @@ void main() {
 
       // Igual que el panel: las archivadas no cuentan, ni su saldo inicial.
       expect(centsOf(points), [105000000, 85000000]);
+    });
+
+    test('las tarjetas no cuentan: gastar con ellas no baja el total, pagarlas sí', () {
+      final visa = testAccount('Visa', balance: -100000, type: AccountType.card);
+      final points = BalanceHistory.compute(
+        accounts: [bank, cash, visa],
+        flows: [
+          // Enero: una compra de 30.000 con la tarjeta.
+          flow(m(2026, 1), visa.id, -3000000),
+          // Febrero: se paga la tarjeta con 130.000 del banco.
+          flow(m(2026, 2), bank.id, -13000000),
+          flow(m(2026, 2), visa.id, 13000000),
+        ],
+        end: m(2026, 2),
+        months: 2,
+        converter: copConverter,
+      );
+
+      // Igual que el panel: el saldo de la tarjeta no entra, ni el inicial.
+      // Enero no cambia; en febrero salen del banco los 130.000.
+      expect(centsOf(points), [105000000, 92000000]);
     });
 
     test('ignora otras monedas y cuentas que no conoce', () {

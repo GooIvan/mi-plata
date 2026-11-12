@@ -110,11 +110,7 @@ void main() {
     ) async {
       await pumpMiPlata(
         tester,
-        backend: FakeBackend(
-          accounts: [
-            testAccount('Visa', type: AccountType.card, balance: -350000),
-          ],
-        ),
+        backend: FakeBackend(accounts: [testAccount('Banco', balance: -350000)]),
       );
 
       final finance = Theme.of(tester.element(find.byType(TotalBalanceCard)))

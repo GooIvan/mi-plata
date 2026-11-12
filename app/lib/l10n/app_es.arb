@@ -1315,5 +1315,226 @@
   "navHome": "Inicio",
   "navGoals": "Metas",
   "navMore": "Más",
-  "navTransactions": "Actividad"
+  "navTransactions": "Actividad",
+  "accountsCardLimitLabel": "Cupo (opcional)",
+  "accountsCardLimitHelper": "Lo máximo que te deja gastar el banco con la tarjeta",
+  "accountsCardLimitInvalid": "El cupo tiene que ser un monto mayor que cero",
+  "accountsCardStatementDayLabel": "Día de corte (opcional)",
+  "accountsCardStatementDayHelper": "El día del mes en que cierra tu extracto",
+  "accountsCardPaymentDayLabel": "Día límite de pago (opcional)",
+  "accountsCardPaymentDayHelper": "El día del mes hasta el que debes pagar",
+  "accountsCardDayInvalid": "Escribe un día del 1 al 31",
+  "accountsCardDaysTogether": "Indica los dos días, o deja los dos vacíos",
+  "accountsCardInitialBalanceHelper": "Lo que ya debes, con signo menos (ej: -200.000). Vacío si empieza en cero",
+  "accountsCardUsedOf": "Usado {used} de {limit}",
+  "@accountsCardUsedOf": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardAvailable": "Disponible {amount}",
+  "@accountsCardAvailable": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardOverLimit": "Te pasaste del cupo por {amount}",
+  "@accountsCardOverLimit": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardDates": "Corte {statement} · Pagar antes del {payment}",
+  "@accountsCardDates": {
+    "placeholders": {
+      "statement": {
+        "type": "String"
+      },
+      "payment": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardCardDebt": "Debes en tarjetas {amount}",
+  "@dashboardCardDebt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "creditLimitMessage": "{account} quedaría {amount} por encima de su cupo.",
+  "@creditLimitMessage": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardDue": "Por pagar del último corte: {amount}",
+  "@accountsCardDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardOverdue": "Vencido desde el {date}: {amount}",
+  "@accountsCardOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardPaidUp": "Al día con el último corte",
+  "accountsCardPay": "Pagar",
+  "dashboardCardPaymentsTitle": "Pagos de tarjetas",
+  "dashboardCardDueToday": "Vence hoy",
+  "dashboardCardDueTomorrow": "Vence mañana",
+  "dashboardCardDueIn": "Vence en {days} días",
+  "@dashboardCardDueIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardCardDueOn": "{when} · {date}",
+  "@dashboardCardDueOn": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardCardOverdue": "Vencido el {date}",
+  "@dashboardCardOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsSwitch": "Diferir en cuotas",
+  "cardInstallmentsPurchaseLabel": "Valor de la compra",
+  "cardInstallmentsCountLabel": "Número de cuotas",
+  "cardInstallmentsCountInvalid": "Escribe de 2 a 60 cuotas",
+  "cardInstallmentsAmountLabel": "Valor de cada cuota (opcional)",
+  "cardInstallmentsAmountHelper": "Con intereses, como la cobra el banco. Vacío si no hay intereses.",
+  "cardInstallmentsAmountInvalid": "Las cuotas no cuadran con el valor de la compra",
+  "cardInstallmentsQuote": "{count} cuotas de {amount}. Total a pagar: {total}.",
+  "@cardInstallmentsQuote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsQuoteInterest": "{count} cuotas de {amount}. Total a pagar: {total}, con {interest} de intereses.",
+  "@cardInstallmentsQuoteInterest": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsLocked": "Compra diferida en {count} cuotas. Para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo.",
+  "@cardInstallmentsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsTag": "{count} cuotas",
+  "@cardInstallmentsTag": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsButton": "Compras en cuotas ({count})",
+  "@cardInstallmentsButton": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsTitle": "Compras en cuotas",
+  "cardInstallmentsUnnamed": "Compra diferida",
+  "cardInstallmentsProgress": "{paid} de {total} cuotas cobradas",
+  "@cardInstallmentsProgress": {
+    "placeholders": {
+      "paid": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "cardInstallmentsEach": "{amount} cada una",
+  "@cardInstallmentsEach": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsRemaining": "Faltan {amount} por cobrar",
+  "@cardInstallmentsRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsNext": "Próxima cuota en el corte del {date}",
+  "@cardInstallmentsNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "cardInstallmentsEmpty": "No hay compras en cuotas por cobrar.",
+  "dbErrorInstallmentPurchaseNotCard": "Solo una compra hecha con una tarjeta se puede diferir en cuotas",
+  "dbErrorInstallmentPurchaseAmounts": "Las cuotas no cuadran con el valor de la compra",
+  "dbErrorInstallmentPurchaseLocked": "Esta compra está diferida en cuotas: para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo"
 }

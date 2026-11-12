@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/format/formats.dart';
@@ -42,6 +43,13 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
   late final _name = TextEditingController(text: widget.account?.name);
   late final _balance = TextEditingController();
   final _rate = TextEditingController();
+  final _limit = TextEditingController();
+  late final _statementDay = TextEditingController(
+    text: widget.account?.statementDay?.toString(),
+  );
+  late final _paymentDay = TextEditingController(
+    text: widget.account?.paymentDay?.toString(),
+  );
 
   /// La moneda elegida al crear; null es la moneda base.
   String? _currency;
@@ -65,6 +73,12 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
           account.initialBalance,
           context.formats,
         );
+        if (account.creditLimit != null) {
+          _limit.text = AmountParser.toInput(
+            account.creditLimit!,
+            context.formats,
+          );
+        }
       }
     }
   }
@@ -74,6 +88,9 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
     _name.dispose();
     _balance.dispose();
     _rate.dispose();
+    _limit.dispose();
+    _statementDay.dispose();
+    _paymentDay.dispose();
     super.dispose();
   }
 
@@ -92,6 +109,18 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
     final initialBalance = AmountParser.parse(_balance.text, context.formats)!;
     final currency = _currency ?? converter?.base ?? defaultCurrency;
     final rate = RateParser.parse(_rate.text, context.formats);
+    // Los datos de la tarjeta solo valen en una tarjeta; en otro tipo de cuenta
+    // se envían vacíos para borrar lo que hubiera.
+    final isCard = _type == AccountType.card;
+    final creditLimit = isCard && _limit.text.trim().isNotEmpty
+        ? AmountParser.parse(_limit.text, context.formats)
+        : null;
+    final statementDay = isCard
+        ? AccountValidators.parseDay(_statementDay.text)
+        : null;
+    final paymentDay = isCard
+        ? AccountValidators.parseDay(_paymentDay.text)
+        : null;
 
     try {
       if (_isEditing) {
@@ -100,6 +129,9 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
           name: name,
           type: _type,
           initialBalance: initialBalance,
+          creditLimit: creditLimit,
+          statementDay: statementDay,
+          paymentDay: paymentDay,
         );
       } else {
         // La tasa de la moneda nueva, si se dio, va primero: si falla, no se
@@ -112,6 +144,9 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
           type: _type,
           initialBalance: initialBalance,
           currency: currency,
+          creditLimit: creditLimit,
+          statementDay: statementDay,
+          paymentDay: paymentDay,
         );
       }
       if (mounted) Navigator.of(context).pop();
@@ -122,6 +157,73 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
         _error = accountErrorMessage(context.l10n, error);
       });
     }
+  }
+
+  /// El cupo y los dos días de una tarjeta. Todos son opcionales.
+  List<Widget> _cardFields(String currency) {
+    final l10n = context.l10n;
+    return [
+      const SizedBox(height: 16),
+      TextFormField(
+        controller: _limit,
+        enabled: !_saving,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        textInputAction: TextInputAction.next,
+        validator: (value) => AccountValidators.creditLimit(l10n, value),
+        decoration: InputDecoration(
+          labelText: l10n.accountsCardLimitLabel,
+          helperText: l10n.accountsCardLimitHelper,
+          helperMaxLines: 2,
+          prefixText: '${currencySymbol(currency)} ',
+          border: const OutlineInputBorder(),
+        ),
+      ),
+      const SizedBox(height: 16),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: _statementDay,
+              enabled: !_saving,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (value) => AccountValidators.cardDay(l10n, value),
+              decoration: InputDecoration(
+                labelText: l10n.accountsCardStatementDayLabel,
+                helperText: l10n.accountsCardStatementDayHelper,
+                helperMaxLines: 3,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextFormField(
+              controller: _paymentDay,
+              enabled: !_saving,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (value) =>
+                  AccountValidators.cardDay(l10n, value) ??
+                  AccountValidators.cardDaysTogether(
+                    l10n,
+                    _statementDay.text,
+                    value,
+                  ),
+              decoration: InputDecoration(
+                labelText: l10n.accountsCardPaymentDayLabel,
+                helperText: l10n.accountsCardPaymentDayHelper,
+                helperMaxLines: 3,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ];
   }
 
   @override
@@ -234,10 +336,14 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 labelText: l10n.accountsInitialBalanceLabel,
                 hintText: l10n.accountsInitialBalanceHint,
                 prefixText: '${currencySymbol(currency)} ',
-                helperText: l10n.accountsInitialBalanceHelper,
+                helperText: _type == AccountType.card
+                    ? l10n.accountsCardInitialBalanceHelper
+                    : l10n.accountsInitialBalanceHelper,
+                helperMaxLines: 2,
                 border: const OutlineInputBorder(),
               ),
             ),
+            if (_type == AccountType.card) ..._cardFields(currency),
             if (askRate) ...[
               const SizedBox(height: 16),
               TextFormField(

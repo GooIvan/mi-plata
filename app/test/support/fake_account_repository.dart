@@ -11,6 +11,9 @@ Account testAccount(
   double balance = 0,
   bool archived = false,
   String currency = 'COP',
+  double? creditLimit,
+  int? statementDay,
+  int? paymentDay,
 }) => Account(
   id: 'id-$name',
   name: name,
@@ -19,7 +22,19 @@ Account testAccount(
   initialBalance: balance,
   currentBalance: balance,
   isArchived: archived,
+  creditLimit: creditLimit,
+  statementDay: statementDay,
+  paymentDay: paymentDay,
 );
+
+/// Lo que se anota en [FakeAccountRepository.calls] sobre los datos de una
+/// tarjeta: nada si no hay, para que las pruebas de siempre no cambien.
+String _termsNote({String? creditLimit, int? statementDay, int? paymentDay}) =>
+    [
+      if (creditLimit != null) ':limit=$creditLimit',
+      if (statementDay != null) ':statement=$statementDay',
+      if (paymentDay != null) ':payment=$paymentDay',
+    ].join();
 
 /// Sustituye a [AccountRepository] en las pruebas, con las cuentas en memoria.
 ///
@@ -76,12 +91,16 @@ class FakeAccountRepository implements AccountRepository {
     required AccountType type,
     required String initialBalance,
     required String currency,
+    String? creditLimit,
+    int? statementDay,
+    int? paymentDay,
   }) async {
     // La moneda solo se anota cuando no es el peso: así las pruebas de siempre
     // siguen comparando 'create:Nombre:tipo:saldo'.
     calls.add(
       'create:$name:${type.name}:$initialBalance'
-      '${currency == 'COP' ? '' : ':$currency'}',
+      '${currency == 'COP' ? '' : ':$currency'}'
+      '${_termsNote(creditLimit: creditLimit, statementDay: statementDay, paymentDay: paymentDay)}',
     );
     if (error != null) throw error!;
     _failIfNameTaken(name);
@@ -91,6 +110,9 @@ class FakeAccountRepository implements AccountRepository {
         type: type,
         balance: double.parse(initialBalance),
         currency: currency,
+        creditLimit: creditLimit == null ? null : double.parse(creditLimit),
+        statementDay: statementDay,
+        paymentDay: paymentDay,
       ),
     );
   }
@@ -101,8 +123,14 @@ class FakeAccountRepository implements AccountRepository {
     required String name,
     required AccountType type,
     required String initialBalance,
+    String? creditLimit,
+    int? statementDay,
+    int? paymentDay,
   }) async {
-    calls.add('update:$id:$name:${type.name}:$initialBalance');
+    calls.add(
+      'update:$id:$name:${type.name}:$initialBalance'
+      '${_termsNote(creditLimit: creditLimit, statementDay: statementDay, paymentDay: paymentDay)}',
+    );
     if (error != null) throw error!;
     _failIfNameTaken(name, exceptId: id);
     final index = _accounts.indexWhere((account) => account.id == id);
@@ -115,6 +143,9 @@ class FakeAccountRepository implements AccountRepository {
       initialBalance: balance,
       currentBalance: balance,
       isArchived: _accounts[index].isArchived,
+      creditLimit: creditLimit == null ? null : double.parse(creditLimit),
+      statementDay: statementDay,
+      paymentDay: paymentDay,
     );
   }
 
@@ -135,6 +166,9 @@ class FakeAccountRepository implements AccountRepository {
         initialBalance: account.initialBalance,
         currentBalance: currentBalance ?? account.currentBalance,
         isArchived: isArchived ?? account.isArchived,
+        creditLimit: account.creditLimit,
+        statementDay: account.statementDay,
+        paymentDay: account.paymentDay,
       );
 
   /// Imita el índice único de nombres entre cuentas activas.

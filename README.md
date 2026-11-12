@@ -30,6 +30,12 @@ Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsAp
 ### Diseño
 - [x] **Diseño renovado**: tema propio con la tipografía Plus Jakarta Sans (empaquetada en `app/assets/fonts`, licencia OFL), paleta esmeralda en claro y oscuro, tarjetas redondeadas y colores con significado (verde ingresos, rojo gastos, azul transferencias). El Inicio abre con una tarjeta del dinero total con lo que entró y salió este mes (se pone roja si el total es negativo) y las cuentas como tarjetas con el color de su tipo. Los colores del dinero viven en `FinanceColors` (`app/lib/core/theme/`) y una prueba verifica su contraste.
 
+### Fase 4 — Tarjetas de crédito
+- [x] **Datos de la tarjeta**: cupo, día de corte y día límite de pago (todo opcional). En Cuentas, la tarjeta muestra cuánto del cupo usaste y lo que te queda, con aviso al llegar al 80 % o pasarte (ícono y texto, no solo color).
+- [x] **El dinero de la tarjeta no sale hasta que la pagas**: el dinero total no resta lo que gastas con tarjeta; ese dinero sigue en tus cuentas y lo que debes aparece aparte ("Debes en tarjetas").
+- [x] **Extracto y pago**: la app calcula cuánto falta pagar de tu último corte, avisa en Inicio cuando se acerca o se pasó la fecha, y *Pagar* abre una transferencia hacia la tarjeta con ese monto.
+- [x] **Compras diferidas a cuotas** con la tarjeta, con o sin intereses. Ver [Tarjetas de crédito](#-tarjetas-de-crédito).
+
 ### Futuro
 - [ ] Modo sin conexión (primero consulta, luego registrar movimientos con cola de sincronización)
 - [ ] Importación de extractos bancarios (CSV)
@@ -87,10 +93,10 @@ Cada módulo dentro de `features/` se organiza en capas:
 
 | Tabla | Descripción |
 |---|---|
-| `accounts` | Dónde está el dinero: nombre, tipo, saldo inicial, moneda (`COP` por defecto) |
+| `accounts` | Dónde está el dinero: nombre, tipo, saldo inicial, moneda (`COP` por defecto); en una tarjeta, también el cupo (`credit_limit`) y el día de corte y de pago (`statement_day`, `payment_day`) |
 | `categories` | Clasificación de movimientos, de tipo ingreso (`income`) o gasto (`expense`) |
 | `transactions` | Ingresos, gastos y transferencias (`income`, `expense`, `transfer`) asociados a una cuenta; en una transferencia entre monedas, `destination_amount` es lo que llega; `recurring_payment_id` dice de qué pago recurrente viene |
-| `v_account_balances` | Vista que calcula el saldo actual de cada cuenta |
+| `v_account_balances` | Vista que calcula el saldo actual de cada cuenta (y trae el cupo y los días de una tarjeta) |
 | `debts` | Lo que debo (`payable`) o me deben (`receivable`): persona, monto, fechas y notas |
 | `debt_payments` | Enlaza cada deuda con los movimientos que son sus abonos |
 | `v_debt_balances` | Vista con lo pagado y lo pendiente de cada deuda |
@@ -101,14 +107,16 @@ Cada módulo dentro de `features/` se organiza en capas:
 | `recurring_payments` | Una regla de pago recurrente: nombre, monto, cuenta, categoría, cada cuánto (`every` + `unit`), próxima fecha, fecha final y pausa. No genera movimientos sola. Con `debt_id` es el plan de cuotas de una deuda |
 | `v_recurring_payments` | Vista con los pagos recurrentes más lo que falta de la deuda de un plan de cuotas y cuántas cuotas lleva pagadas |
 | `budgets` | Presupuesto mensual de una categoría de gasto, vigente desde un mes (monto 0 = sin presupuesto); solo se aceptan categorías de gasto |
+| `card_installment_plans` | Una compra con tarjeta diferida en cuotas: el gasto al que pertenece, lo que costaba sin intereses, cuántas cuotas y de cuánto cada una |
+| `v_card_installment_plans` | Vista con cada plan y los datos de su gasto (tarjeta, fecha, descripción, total) |
 
-Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa. Lo mismo vale para `set_exchange_rate` y `set_base_currency`, que reexpresa las tasas y los presupuestos al cambiar la moneda base, y para `confirm_recurring_payment`, `skip_recurring_payment` y `create_installment_debt`.
+Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa. Lo mismo vale para `set_exchange_rate` y `set_base_currency`, que reexpresa las tasas y los presupuestos al cambiar la moneda base, y para `confirm_recurring_payment`, `skip_recurring_payment`, `create_installment_debt` y `create_card_installment_purchase`.
 
 **Principios de diseño:**
 
 - Los montos se guardan como `numeric(14,2)`, nunca como `float`.
 - Los saldos **se calculan** a partir de los movimientos; no se almacenan.
-- Un saldo puede ser negativo (sobregiro, tarjetas), así que la base de datos no lo impide; en cambio la app **avisa antes de guardar** un movimiento que deje una cuenta en negativo. Las tarjetas quedan exentas.
+- Un saldo puede ser negativo (sobregiro, tarjetas), así que la base de datos no lo impide; en cambio la app **avisa antes de guardar** un movimiento que deje una cuenta en negativo. Las tarjetas quedan exentas de ese aviso (para ellas el negativo es lo normal), pero se avisa si un gasto las deja por encima de su cupo. Las tarjetas no cuentan en el dinero total.
 - Las transferencias entre cuentas son una sola fila (`account_id` → `destination_account_id`) y no cuentan como gasto ni ingreso.
 - Las cuentas y categorías se archivan en lugar de eliminarse, para conservar el historial.
 - Todas las tablas incluyen `user_id` y están protegidas con Row Level Security (RLS).
@@ -200,6 +208,29 @@ Una compra que se paga de a poco (un televisor en 12 cuotas, un crédito de una 
 - Omitir una cuota no cambia lo que debes: el plan sigue hasta que se pague todo, aunque pase de las cuotas pactadas.
 - La deuda es en la moneda de la cuenta con que se pagan las cuotas. Crear la compra no mueve dinero; cada abono es un gasto del mes en que lo pagas.
 - Todavía solo sirve para deudas que *debes*, y no para préstamos en los que recibes el dinero (para esos, registra el préstamo como una deuda normal).
+
+---
+
+## 💳 Tarjetas de crédito
+
+Una tarjeta es una cuenta de tipo *Tarjeta*. Su saldo es negativo cuando debes: lo **usado** es ese valor sin el signo, y lo **disponible**, el cupo menos lo usado. Nada de eso se guarda: se calcula, como el resto de los saldos.
+
+- **Datos** (al crear o editar la tarjeta, todos opcionales): el **cupo**, el **día de corte** (cuando cierra el extracto) y el **día límite de pago**. Los dos días van juntos. Un día que el mes no tiene (un corte "31" en abril) cae en el último día del mes. Si el día de pago es menor o igual al de corte, se paga el mes siguiente.
+- **No resta del dinero total.** Gastar con la tarjeta no baja el dinero total ni su evolución mensual: ese dinero sigue en tus cuentas hasta que pagas la tarjeta, y entonces sí sale. Lo que debes en tarjetas se ve aparte en la tarjeta principal del Inicio ("Debes en tarjetas"), sumado por tarjeta (el saldo a favor de una no paga la deuda de otra). Una tarjeta con saldo a favor no suma al total.
+- **Cupo**: la barra pasa a ámbar desde el 80 % y a rojo al pasarte, siempre con ícono y texto. Al registrar un gasto que deja la tarjeta por encima de su cupo la app **avisa, sin bloquear** (el banco puede dejar pasar un poco).
+- **Extracto**: con el día de corte, la app calcula lo que **falta pagar de tu último corte**: lo que debes hoy menos lo que se movió después del corte (compras y adelantos, que son del próximo extracto). Los pagos y reembolsos posteriores al corte lo bajan, como en el banco; si pagas de más, lo que sobra queda a favor para el siguiente. No hay extractos guardados ni historial, y es una guía: el extracto del banco manda.
+- **Pagar la tarjeta** es una transferencia (no cuenta como gasto). *Pagar*, en la tarjeta y en el aviso de Inicio, abre el formulario con la tarjeta de destino, el monto que falta y como origen la cuenta con más dinero de la misma moneda (puedes cambiarla). **Pagos de tarjetas**, en Inicio, lista las que tienen algo por pagar, la más urgente primero; una fecha pasada se marca como vencida.
+
+### Compras diferidas a cuotas
+
+En el formulario de un gasto nuevo con tarjeta, **Diferir en cuotas** pide el número de cuotas (de 2 a 60) y, si el banco cobra intereses, el **valor de cada cuota**. Antes de guardar se ve el total y los intereses; sin valor de cuota no hay intereses y la compra se parte en partes iguales (la última absorbe los centavos).
+
+- Se registra **un solo gasto por lo que se paga en total** (la compra más los intereses): la deuda y el cupo usado son los reales desde el primer día, y en el resumen del mes el gasto cae en el mes de la compra. Es un plan aparte (`card_installment_plans`), pero no se guarda nada por cuota.
+- Al **extracto** solo entra una cuota por corte: la primera, en el primer corte desde la fecha de la compra (el mismo día del corte entra en ese corte). Lo que falta por cobrar no se debe todavía, así que no suma a lo que falta pagar del extracto.
+- **Cuentas → Compras en cuotas (N)** lista las que siguen cobrándose: cuántas cuotas ya se cobraron, lo que falta y el corte de la próxima. Las ya cobradas completas dejan de aparecer; en la actividad, el movimiento dice "N cuotas".
+- **Editar** una compra diferida no cambia su monto, su tarjeta ni su tipo (dejaría de cuadrar con las cuotas; la base de datos lo impide): descripción, categoría y fecha sí. Para cambiar el monto, se borra y se registra de nuevo. Borrarla borra también su plan.
+- Las cuotas que escribes no pueden sumar menos que la compra (salvo los centavos del redondeo).
+- **Límites conocidos**: la app no calcula intereses (los pones tú, como los cobra el banco); el cupo usado cuenta el total con intereses desde el principio, un poco más de lo que cuenta el banco; las fechas de cobro salen de los días de corte de hoy (si cambias el día de corte, se recalculan); una compra ya registrada no se puede convertir a cuotas; todavía no hay notificaciones fuera de la app.
 
 ---
 

@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/format/formats.dart';
 import '../../../../core/theme/finance_colors.dart';
 import '../../../../core/widgets/icon_badge.dart';
 import '../../../../l10n/l10n.dart';
+import '../../../accounts/presentation/card_providers.dart';
 import '../../../currency/domain/currency.dart';
 import '../../domain/transaction.dart';
 import '../../domain/transaction_type.dart';
 import '../transaction_type_ui.dart';
 
-class TransactionTile extends StatelessWidget {
+class TransactionTile extends ConsumerWidget {
   const TransactionTile({
     super.key,
     required this.transaction,
@@ -28,10 +30,19 @@ class TransactionTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final type = transaction.type;
+    // Si la compra se difirió en cuotas, se dice cuántas.
+    final installments = ref.watch(
+      cardInstallmentPlansProvider.select(
+        (plans) => plans.value
+            ?.where((plan) => plan.transactionId == transaction.id)
+            .firstOrNull
+            ?.installments,
+      ),
+    );
 
     final account = accountNames[transaction.accountId] ?? l10n.commonAccount;
     final destination =
@@ -58,7 +69,11 @@ class TransactionTile extends StatelessWidget {
                 ),
               ),
           ].join(' · ')
-        : [if (hasDescription && category != null) category, account].join(' · ');
+        : [
+            if (installments != null) l10n.cardInstallmentsTag(installments),
+            if (hasDescription && category != null) category,
+            account,
+          ].join(' · ');
 
     final finance = context.finance;
     final (sign, color) = switch (type) {

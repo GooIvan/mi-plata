@@ -10,7 +10,8 @@ import '../../../currency/domain/currency_converter.dart';
 import '../../../currency/presentation/widgets/missing_rates_note.dart';
 import '../../../summary/domain/month_summary.dart';
 
-/// El dinero total: la suma de los saldos de las cuentas activas.
+/// El dinero total: la suma de los saldos de las cuentas activas, sin las
+/// tarjetas (lo que se debe en ellas se muestra aparte).
 class TotalBalanceCard extends StatelessWidget {
   const TotalBalanceCard({
     super.key,
@@ -182,6 +183,8 @@ class _Totals extends StatelessWidget {
     // Arriba, todo sumado en la moneda base; debajo, lo que hay en cada una de
     // las otras monedas, tal como está.
     final total = AccountTotals.inBase(accounts, converter);
+    final cardDebt = AccountTotals.cardDebtInBase(accounts, converter);
+    final missing = {...total.missing, ...cardDebt.missing};
     final others = AccountTotals.centsByCurrency(accounts).entries
         .where((entry) => entry.key != converter.base)
         .toList()
@@ -234,9 +237,26 @@ class _Totals extends StatelessWidget {
               style: theme.textTheme.titleMedium?.copyWith(color: soft),
             ),
           ),
-        if (!total.isComplete) ...[
+        if (cardDebt.cents > 0) ...[
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(Icons.credit_card_outlined, size: 16, color: soft),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  context.l10n.dashboardCardDebt(
+                    formats.money(cardDebt.cents / 100, currency: converter.base),
+                  ),
+                  style: theme.textTheme.labelLarge?.copyWith(color: soft),
+                ),
+              ),
+            ],
+          ),
+        ],
+        if (missing.isNotEmpty) ...[
           const SizedBox(height: 8),
-          MissingRatesNote(currencies: total.missing, onColor: onHero),
+          MissingRatesNote(currencies: missing, onColor: onHero),
         ],
         if (month case final month?) ...[
           const SizedBox(height: 18),
