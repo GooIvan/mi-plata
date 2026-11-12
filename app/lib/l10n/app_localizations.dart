@@ -3288,6 +3288,72 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Debes en tarjetas {amount}'**
   String dashboardCardDebt(String amount);
+
+  /// No description provided for @creditLimitMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'{account} quedaría {amount} por encima de su cupo.'**
+  String creditLimitMessage(String account, String amount);
+
+  /// No description provided for @accountsCardDue.
+  ///
+  /// In es, this message translates to:
+  /// **'Por pagar del último corte: {amount}'**
+  String accountsCardDue(String amount);
+
+  /// No description provided for @accountsCardOverdue.
+  ///
+  /// In es, this message translates to:
+  /// **'Vencido desde el {date}: {amount}'**
+  String accountsCardOverdue(String date, String amount);
+
+  /// No description provided for @accountsCardPaidUp.
+  ///
+  /// In es, this message translates to:
+  /// **'Al día con el último corte'**
+  String get accountsCardPaidUp;
+
+  /// No description provided for @accountsCardPay.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagar'**
+  String get accountsCardPay;
+
+  /// No description provided for @dashboardCardPaymentsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagos de tarjetas'**
+  String get dashboardCardPaymentsTitle;
+
+  /// No description provided for @dashboardCardDueToday.
+  ///
+  /// In es, this message translates to:
+  /// **'Vence hoy'**
+  String get dashboardCardDueToday;
+
+  /// No description provided for @dashboardCardDueTomorrow.
+  ///
+  /// In es, this message translates to:
+  /// **'Vence mañana'**
+  String get dashboardCardDueTomorrow;
+
+  /// No description provided for @dashboardCardDueIn.
+  ///
+  /// In es, this message translates to:
+  /// **'Vence en {days} días'**
+  String dashboardCardDueIn(int days);
+
+  /// No description provided for @dashboardCardDueOn.
+  ///
+  /// In es, this message translates to:
+  /// **'{when} · {date}'**
+  String dashboardCardDueOn(String when, String date);
+
+  /// No description provided for @dashboardCardOverdue.
+  ///
+  /// In es, this message translates to:
+  /// **'Vencido desde el {date}'**
+  String dashboardCardOverdue(String date);
 }
 
 class _AppLocalizationsDelegate

@@ -1356,5 +1356,67 @@
         "type": "String"
       }
     }
+  },
+  "creditLimitMessage": "{account} would end up {amount} over its limit.",
+  "@creditLimitMessage": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardDue": "Due from the last statement: {amount}",
+  "@accountsCardDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardOverdue": "Overdue since {date}: {amount}",
+  "@accountsCardOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardPaidUp": "Paid up for the last statement",
+  "accountsCardPay": "Pay",
+  "dashboardCardPaymentsTitle": "Card payments",
+  "dashboardCardDueToday": "Due today",
+  "dashboardCardDueTomorrow": "Due tomorrow",
+  "dashboardCardDueIn": "Due in {days} days",
+  "@dashboardCardDueIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardCardDueOn": "{when} · {date}",
+  "@dashboardCardDueOn": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardCardOverdue": "Overdue since {date}",
+  "@dashboardCardOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   }
 }

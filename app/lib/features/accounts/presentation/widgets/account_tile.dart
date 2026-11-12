@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/format/formats.dart';
 import '../../../../core/theme/finance_colors.dart';
 import '../../../../core/widgets/icon_badge.dart';
 import '../../../../l10n/l10n.dart';
 import '../../domain/account.dart';
+import '../../domain/card_statement.dart';
 import '../../domain/card_usage.dart';
 import '../account_type_ui.dart';
+import '../card_actions.dart';
+import '../card_providers.dart';
 
 enum AccountMenuAction { edit, toggleArchived }
 
@@ -105,16 +109,17 @@ class AccountTile extends StatelessWidget {
 }
 
 /// Lo que se ve de una tarjeta además de su saldo: cuánto del cupo se usó, lo
-/// que queda y las fechas de corte y de pago. No muestra nada si la tarjeta no
-/// tiene ni cupo ni fechas.
-class CardSummary extends StatelessWidget {
+/// que queda, las fechas de corte y de pago y lo que falta pagar del último
+/// corte (con un botón para pagarlo). No muestra nada si la tarjeta no tiene
+/// ni cupo ni fechas.
+class CardSummary extends ConsumerWidget {
   const CardSummary({super.key, required this.account, this.today});
 
   final Account account;
   final DateTime? today;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final usage = CardUsage.of(account);
     final calendar = account.cardCalendar;
     if (!usage.hasLimit && calendar == null) return const SizedBox.shrink();
@@ -229,7 +234,104 @@ class CardSummary extends StatelessWidget {
                 ),
               ],
             ),
+            // Es un extra: mientras carga o si falla, simplemente no aparece.
+            if (!account.isArchived)
+              if (ref.watch(cardStatementProvider(account.id)).value
+                  case final statement?)
+                _StatementRow(account: account, statement: statement, today: now),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Lo que falta pagar del último corte y el botón para pagarlo; o el aviso de
+/// que no se debe nada de él.
+class _StatementRow extends ConsumerWidget {
+  const _StatementRow({
+    required this.account,
+    required this.statement,
+    required this.today,
+  });
+
+  final Account account;
+  final CardStatement statement;
+  final DateTime today;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final l10n = context.l10n;
+    final formats = context.formats;
+
+    if (statement.isPaidUp) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Row(
+          children: [
+            Icon(Icons.check_circle_outline, size: 16, color: context.finance.income),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                l10n.accountsCardPaidUp,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final overdue = statement.isOverdue(today);
+    final amount = formats.money(
+      statement.dueCents / 100,
+      currency: account.currency,
+    );
+    final color = overdue ? scheme.error : scheme.onSurface;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        children: [
+          Icon(
+            overdue ? Icons.error_outline : Icons.payments_outlined,
+            size: 16,
+            color: overdue ? scheme.error : scheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              overdue
+                  ? l10n.accountsCardOverdue(
+                      formats.dayMonth(statement.dueDate),
+                      amount,
+                    )
+                  : l10n.accountsCardDue(amount),
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          FilledButton.tonal(
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              visualDensity: VisualDensity.compact,
+            ),
+            onPressed: () => showPayCard(
+              context,
+              ref,
+              account,
+              amount: statement.dueCents / 100,
+            ),
+            child: Text(l10n.accountsCardPay),
+          ),
         ],
       ),
     );

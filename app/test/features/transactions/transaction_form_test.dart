@@ -453,6 +453,62 @@ void main() {
       expect(textLike(r'-$2.000'), findsNWidgets(2));
     });
 
+    testWidgets('un gasto con la tarjeta que pasa el cupo avisa, y se puede registrar igual', (
+      tester,
+    ) async {
+      final backend = FakeBackend(
+        accounts: [
+          testAccount('Nequi', type: AccountType.wallet, balance: 100000),
+          testAccount(
+            'Visa',
+            type: AccountType.card,
+            balance: -800000,
+            creditLimit: 1000000,
+          ),
+        ],
+      );
+      await pumpMiPlata(tester, backend: backend);
+      await fillExpense(tester, amount: '300.000', account: 'Visa');
+
+      await tester.tap(submit('Registrar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('¿Registrar de todos modos?'), findsOneWidget);
+      expect(
+        find.textContaining(r'Visa quedaría $100.000 por encima de su cupo.'),
+        findsOneWidget,
+      );
+      // La tarjeta puede quedar en negativo: eso no se avisa, solo el cupo.
+      expect(find.textContaining('quedará en'), findsNothing);
+      expect(backend.transactions.created, isEmpty);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Registrar igual'));
+      await tester.pumpAndSettle();
+      expect(backend.transactions.created, hasLength(1));
+    });
+
+    testWidgets('un gasto con la tarjeta dentro del cupo no avisa', (tester) async {
+      final backend = FakeBackend(
+        accounts: [
+          testAccount('Nequi', type: AccountType.wallet, balance: 100000),
+          testAccount(
+            'Visa',
+            type: AccountType.card,
+            balance: -800000,
+            creditLimit: 1000000,
+          ),
+        ],
+      );
+      await pumpMiPlata(tester, backend: backend);
+      await fillExpense(tester, amount: '150.000', account: 'Visa');
+
+      await tester.tap(submit('Registrar'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(backend.transactions.created, hasLength(1));
+    });
+
     testWidgets('dejar la cuenta justo en cero no avisa', (tester) async {
       final backend = nequiConCuatroMil();
       await pumpMiPlata(tester, backend: backend);

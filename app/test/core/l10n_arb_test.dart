@@ -68,6 +68,7 @@ void main() {
       'settingsBaseCurrencyValue',
       'ratesOneEquals',
       'transactionsImpliedRate',
+      'dashboardCardDueOn',
     };
     final untranslated = [
       for (final key in es.keys)

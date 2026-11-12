@@ -37,8 +37,8 @@ class NegativeBalanceCheck {
       if (account.isArchived || account.type == AccountType.card) continue;
 
       final delta =
-          _effect(account.id, draft: draft) -
-          _effect(account.id, previous: previous);
+          effectOn(account.id, draft: draft) -
+          effectOn(account.id, previous: previous);
       if (delta >= 0) continue;
 
       final newCents = _cents(account.currentBalance) + delta;
@@ -50,7 +50,9 @@ class NegativeBalanceCheck {
   }
 
   /// Cuánto suma (o resta) un movimiento al saldo de [accountId], en centavos.
-  static int _effect(
+  /// Es el [draft] que se va a guardar o el [previous] que ya estaba; con
+  /// ninguno de los dos, cero.
+  static int effectOn(
     String accountId, {
     TransactionDraft? draft,
     Transaction? previous,

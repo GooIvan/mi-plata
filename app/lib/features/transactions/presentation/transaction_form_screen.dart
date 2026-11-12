@@ -18,6 +18,7 @@ import '../../currency/presentation/currency_providers.dart';
 import '../../categories/domain/category.dart';
 import '../../categories/domain/category_type.dart';
 import '../../categories/presentation/categories_providers.dart';
+import '../domain/credit_limit_check.dart';
 import '../domain/negative_balance_check.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_draft.dart';
@@ -31,14 +32,16 @@ import 'transactions_providers.dart';
 
 /// Abre el formulario para registrar un movimiento, o para editar [transaction].
 ///
-/// Para uno nuevo se puede empezar con el tipo y las cuentas ya elegidos (por
-/// ejemplo, "ahorrar" es una transferencia hacia la cuenta de una meta).
+/// Para uno nuevo se puede empezar con el tipo, las cuentas y el monto ya
+/// puestos (por ejemplo, "ahorrar" es una transferencia hacia la cuenta de una
+/// meta, y "pagar la tarjeta" una hacia la tarjeta con lo que se debe).
 Future<void> showTransactionForm(
   BuildContext context, {
   Transaction? transaction,
   TransactionType? initialType,
   String? initialAccountId,
   String? initialDestinationId,
+  double? initialAmount,
 }) {
   // En el navegador raíz: el formulario cubre la barra de navegación.
   return Navigator.of(context, rootNavigator: true).push(
@@ -49,6 +52,7 @@ Future<void> showTransactionForm(
         initialType: initialType,
         initialAccountId: initialAccountId,
         initialDestinationId: initialDestinationId,
+        initialAmount: initialAmount,
       ),
     ),
   );
@@ -61,6 +65,7 @@ class TransactionFormScreen extends ConsumerStatefulWidget {
     this.initialType,
     this.initialAccountId,
     this.initialDestinationId,
+    this.initialAmount,
   });
 
   final Transaction? transaction;
@@ -69,6 +74,7 @@ class TransactionFormScreen extends ConsumerStatefulWidget {
   final TransactionType? initialType;
   final String? initialAccountId;
   final String? initialDestinationId;
+  final double? initialAmount;
 
   @override
   ConsumerState<TransactionFormScreen> createState() =>
@@ -130,6 +136,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             context.formats,
           );
         }
+      } else if (widget.initialAmount != null) {
+        _amount.text = AmountParser.toInput(
+          widget.initialAmount!,
+          context.formats,
+        );
       }
     }
   }
@@ -178,7 +189,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       draft: draft,
       previous: widget.transaction,
     );
-    if (warnings.isNotEmpty && !await _confirmNegativeBalance(warnings)) return;
+    final overLimit = CreditLimitCheck.after(
+      accounts: accounts,
+      draft: draft,
+      previous: widget.transaction,
+    );
+    if ((warnings.isNotEmpty || overLimit.isNotEmpty) &&
+        !await _confirmNegativeBalance(warnings, overLimit)) {
+      return;
+    }
     if (!mounted) return;
 
     setState(() {
@@ -220,12 +239,16 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
-  /// Avisa que el cambio deja cuentas en negativo; devuelve si el usuario
-  /// quiere guardar de todos modos.
-  Future<bool> _confirmNegativeBalance(List<NegativeBalance> warnings) =>
+  /// Avisa que el cambio deja cuentas en negativo o tarjetas por encima de su
+  /// cupo; devuelve si el usuario quiere guardar de todos modos.
+  Future<bool> _confirmNegativeBalance(
+    List<NegativeBalance> warnings,
+    List<CreditLimitExceeded> overLimit,
+  ) =>
       confirmNegativeBalance(
         context,
         warnings,
+        overLimit: overLimit,
         title: _isEditing
             ? context.l10n.negativeBalanceSaveTitle
             : context.l10n.negativeBalanceRecordTitle,

@@ -1371,5 +1371,67 @@
         "type": "String"
       }
     }
+  },
+  "creditLimitMessage": "{account} quedaría {amount} por encima de su cupo.",
+  "@creditLimitMessage": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardDue": "Por pagar del último corte: {amount}",
+  "@accountsCardDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardOverdue": "Vencido desde el {date}: {amount}",
+  "@accountsCardOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardPaidUp": "Al día con el último corte",
+  "accountsCardPay": "Pagar",
+  "dashboardCardPaymentsTitle": "Pagos de tarjetas",
+  "dashboardCardDueToday": "Vence hoy",
+  "dashboardCardDueTomorrow": "Vence mañana",
+  "dashboardCardDueIn": "Vence en {days} días",
+  "@dashboardCardDueIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "dashboardCardDueOn": "{when} · {date}",
+  "@dashboardCardDueOn": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dashboardCardOverdue": "Vencido desde el {date}",
+  "@dashboardCardOverdue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   }
 }

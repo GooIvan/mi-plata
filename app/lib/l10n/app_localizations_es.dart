@@ -1974,4 +1974,49 @@ class AppLocalizationsEs extends AppLocalizations {
   String dashboardCardDebt(String amount) {
     return 'Debes en tarjetas $amount';
   }
+
+  @override
+  String creditLimitMessage(String account, String amount) {
+    return '$account quedaría $amount por encima de su cupo.';
+  }
+
+  @override
+  String accountsCardDue(String amount) {
+    return 'Por pagar del último corte: $amount';
+  }
+
+  @override
+  String accountsCardOverdue(String date, String amount) {
+    return 'Vencido desde el $date: $amount';
+  }
+
+  @override
+  String get accountsCardPaidUp => 'Al día con el último corte';
+
+  @override
+  String get accountsCardPay => 'Pagar';
+
+  @override
+  String get dashboardCardPaymentsTitle => 'Pagos de tarjetas';
+
+  @override
+  String get dashboardCardDueToday => 'Vence hoy';
+
+  @override
+  String get dashboardCardDueTomorrow => 'Vence mañana';
+
+  @override
+  String dashboardCardDueIn(int days) {
+    return 'Vence en $days días';
+  }
+
+  @override
+  String dashboardCardDueOn(String when, String date) {
+    return '$when · $date';
+  }
+
+  @override
+  String dashboardCardOverdue(String date) {
+    return 'Vencido desde el $date';
+  }
 }
