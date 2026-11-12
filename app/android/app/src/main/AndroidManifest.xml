@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- La app habla con Supabase por internet. Los manifiestos de debug y
+         profile ya lo traen; sin esta línea, un APK de release no se conecta. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="mi_plata"
         android:name="${applicationName}"
