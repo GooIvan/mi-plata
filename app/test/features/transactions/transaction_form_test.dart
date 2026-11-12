@@ -449,7 +449,8 @@ void main() {
 
       expect(backend.transactions.created, hasLength(1));
       expect(submit('Registrar'), findsNothing); // volvió al panel
-      expect(textLike(r'-$2.000'), findsOneWidget);
+      // La cuenta y el dinero total (la tarjeta Visa no resta de él).
+      expect(textLike(r'-$2.000'), findsNWidgets(2));
     });
 
     testWidgets('dejar la cuenta justo en cero no avisa', (tester) async {

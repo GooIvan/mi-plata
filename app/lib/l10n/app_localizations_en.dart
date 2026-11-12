@@ -1971,4 +1971,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String accountsCardDates(String statement, String payment) {
     return 'Statement $statement · Pay by $payment';
   }
+
+  @override
+  String dashboardCardDebt(String amount) {
+    return 'Owed on cards $amount';
+  }
 }

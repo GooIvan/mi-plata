@@ -47,7 +47,9 @@ class BalanceHistory {
   /// El dinero total, mes a mes, de los [months] meses que terminan en [end]
   /// (del más viejo al más reciente).
   ///
-  /// Solo cuentan las cuentas activas, igual que el total del panel. El dinero
+  /// Solo cuentan las cuentas activas y no las tarjetas, igual que el total
+  /// del panel (lo que se gasta con una tarjeta no sale de ninguna cuenta hasta
+  /// que se paga). El dinero
   /// de otras monedas se pasa a la moneda base con la tasa de hoy (no hay
   /// tasas históricas) y el de una moneda sin tasa no se suma. Lo que ocurra
   /// después de [end] no entra.
@@ -60,7 +62,9 @@ class BalanceHistory {
   }) {
     final currencies = {
       for (final account in accounts)
-        if (!account.isArchived && converter.canConvert(account.currency))
+        if (!account.isArchived &&
+            !account.isCard &&
+            converter.canConvert(account.currency))
           account.currency,
     };
 
@@ -96,7 +100,7 @@ class BalanceHistory {
     CurrencyConverter converter,
   ) => converter.missing([
     for (final account in accounts)
-      if (!account.isArchived) account.currency,
+      if (!account.isArchived && !account.isCard) account.currency,
   ]);
 
   static List<BalancePoint> _compute({
@@ -110,7 +114,12 @@ class BalanceHistory {
     final first = SummaryCalculator.addMonths(last, -(months - 1));
 
     final active = accounts
-        .where((account) => !account.isArchived && account.currency == currency)
+        .where(
+          (account) =>
+              !account.isArchived &&
+              !account.isCard &&
+              account.currency == currency,
+        )
         .toList();
     final ids = {for (final account in active) account.id};
     final relevant = flows

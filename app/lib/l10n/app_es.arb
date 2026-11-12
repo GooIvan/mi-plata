@@ -1363,5 +1363,13 @@
         "type": "String"
       }
     }
+  },
+  "dashboardCardDebt": "Debes en tarjetas {amount}",
+  "@dashboardCardDebt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   }
 }

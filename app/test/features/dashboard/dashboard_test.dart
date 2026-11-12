@@ -18,7 +18,7 @@ void main() {
   setUpAll(initDates);
 
   group('dinero total', () {
-    testWidgets('suma las cuentas activas, restando las deudas', (tester) async {
+    testWidgets('suma las cuentas activas, sin las tarjetas', (tester) async {
       await pumpMiPlata(
         tester,
         backend: FakeBackend(
@@ -32,9 +32,57 @@ void main() {
       );
 
       expect(find.text('Dinero total'), findsOneWidget);
-      // 1.500.000 + 250.000 - 350.000, sin contar la cuenta archivada.
-      expect(textLike(r'$1.400.000'), findsOneWidget);
+      // 1.500.000 + 250.000: la tarjeta no resta, porque ese dinero sigue en
+      // las cuentas hasta que se paga; la cuenta archivada tampoco cuenta.
+      expect(textLike(r'$1.750.000'), findsOneWidget);
       expect(find.text('En 3 cuentas'), findsOneWidget);
+    });
+
+    testWidgets('lo que se debe en las tarjetas se ve aparte', (tester) async {
+      await pumpMiPlata(
+        tester,
+        backend: FakeBackend(
+          accounts: [
+            testAccount('Bancolombia', balance: 1500000),
+            testAccount('Visa', type: AccountType.card, balance: -350000),
+            testAccount('Mastercard', type: AccountType.card, balance: -150000),
+            // Una tarjeta con saldo a favor no es deuda.
+            testAccount('Amex', type: AccountType.card, balance: 20000),
+          ],
+        ),
+      );
+
+      expect(textLike(r'Debes en tarjetas $500.000'), findsOneWidget);
+      expect(textLike(r'$1.500.000'), findsWidgets);
+    });
+
+    testWidgets('sin deuda en tarjetas no aparece esa línea', (tester) async {
+      await pumpMiPlata(
+        tester,
+        backend: FakeBackend(
+          accounts: [
+            testAccount('Bancolombia', balance: 1500000),
+            testAccount('Visa', type: AccountType.card),
+          ],
+        ),
+      );
+
+      expect(find.textContaining('Debes en tarjetas'), findsNothing);
+    });
+
+    testWidgets('con solo tarjetas el dinero total es cero y se ve lo que se debe', (
+      tester,
+    ) async {
+      await pumpMiPlata(
+        tester,
+        backend: FakeBackend(
+          accounts: [testAccount('Visa', type: AccountType.card, balance: -100000)],
+        ),
+      );
+
+      expect(textLike(r'Debes en tarjetas $100.000'), findsOneWidget);
+      // El total (y el cero de ninguna cuenta con dinero) no es negativo.
+      expect(textLike(r'-$100.000'), findsOneWidget); // solo el saldo de la tarjeta
     });
 
     testWidgets('con una sola cuenta lo dice en singular', (tester) async {
@@ -50,9 +98,8 @@ void main() {
     testWidgets('un total en contra se muestra con signo menos', (tester) async {
       await pumpMiPlata(
         tester,
-        backend: FakeBackend(
-          accounts: [testAccount('Visa', type: AccountType.card, balance: -100000)],
-        ),
+        // Un sobregiro en una cuenta normal sí resta del dinero total.
+        backend: FakeBackend(accounts: [testAccount('Banco', balance: -100000)]),
       );
 
       expect(textLike(r'-$100.000'), findsNWidgets(2));

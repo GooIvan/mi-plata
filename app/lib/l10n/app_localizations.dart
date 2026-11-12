@@ -3282,6 +3282,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Corte {statement} · Pagar antes del {payment}'**
   String accountsCardDates(String statement, String payment);
+
+  /// No description provided for @dashboardCardDebt.
+  ///
+  /// In es, this message translates to:
+  /// **'Debes en tarjetas {amount}'**
+  String dashboardCardDebt(String amount);
 }
 
 class _AppLocalizationsDelegate

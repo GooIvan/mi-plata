@@ -1348,5 +1348,13 @@
         "type": "String"
       }
     }
+  },
+  "dashboardCardDebt": "Owed on cards {amount}",
+  "@dashboardCardDebt": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   }
 }

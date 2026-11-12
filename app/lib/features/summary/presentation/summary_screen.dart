@@ -225,7 +225,10 @@ class _SummaryBody extends ConsumerWidget {
       converter,
     ).difference(view.missing);
     final hasForeign = loaded.any(
-      (account) => !account.isArchived && account.currency != converter.base,
+      (account) =>
+          !account.isArchived &&
+          !account.isCard &&
+          account.currency != converter.base,
     );
     final theme = Theme.of(context);
 
