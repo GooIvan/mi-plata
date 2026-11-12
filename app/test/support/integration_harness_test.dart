@@ -11,7 +11,7 @@ void main() {
 
     test('rechaza la nube y cualquier otro servidor', () {
       for (final url in [
-        'https://fahkzkbpkovccrbsoggg.supabase.co',
+        'https://abcdefghijklmnopqrst.supabase.co',
         'https://127.0.0.1.evil.com',
         'http://192.168.1.10:54321',
         '',

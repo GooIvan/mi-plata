@@ -1,44 +1,69 @@
 # 💰 mi-plata
 
-Aplicación móvil de finanzas personales para llevar el control del dinero en todas mis cuentas, registrar ingresos y gastos, gestionar deudas y avanzar hacia metas de ahorro.
+**mi-plata** es una app de finanzas personales para el celular. Sirve para saber cuánto dinero tienes y dónde está, anotar lo que ganas y lo que gastas, llevar tus deudas y tus tarjetas de crédito, y ahorrar para lo que quieres.
 
-Nace para reemplazar el registro manual de gastos y saldos en un chat de WhatsApp por una herramienta ordenada, con base de datos propia y lista para crecer.
+Nació para reemplazar el registro manual de gastos y saldos en un chat de WhatsApp por una herramienta ordenada. Está en español e inglés y usa tu propia base de datos: tus datos son tuyos.
+
+> **Estado:** versión 0.5.0, de uso personal. Funciona en escritorio Linux y compila para Android; la instalación en un teléfono real se explica más abajo. El código, la base de datos y la documentación son públicos para que cualquiera pueda leerlos, usarlos como ejemplo o montar su propia copia.
 
 ---
 
-## ✨ Funcionalidades
+## ✨ Qué puedes hacer hoy
 
-### Fase 1 — Núcleo
-- [x] **Autenticación**: registro e inicio de sesión con correo y contraseña.
-- [x] **Panel general**: saldo total consolidado y saldo por cuenta.
-- [x] **Cuentas**: bancos, efectivo, billeteras digitales y tarjetas.
-- [x] **Categorías** de ingresos y gastos, personalizables: crear, renombrar y archivar (cada usuario empieza con 13 por defecto).
-- [x] **Movimientos**: ingresos, gastos y transferencias entre cuentas. Se pueden buscar por texto y filtrar por tipo, cuenta, categoría y fechas; la lista carga por páginas.
+**Tu dinero**
+- **Cuentas** de banco, efectivo, billeteras digitales y tarjetas de crédito, cada una con su moneda. El panel de inicio muestra tu **dinero total** (con lo que entró y salió este mes) y el saldo de cada cuenta.
+- **Movimientos**: ingresos, gastos y transferencias entre cuentas. Se pueden buscar por texto y filtrar por tipo, cuenta, categoría y fechas. Las categorías son tuyas: crearlas, renombrarlas y archivarlas.
+- **Varias monedas**: eliges una moneda base y defines tú las tasas de cambio; todo se suma en la base y las transferencias entre monedas dicen cuánto sale y cuánto llega.
+- **Avisos que no estorban**: si un gasto deja una cuenta en negativo, la app avisa antes de guardar, pero te deja seguir.
 
-### Fase 2 — Análisis, deudas y presupuestos
-- [x] **Resumen mensual**: ingresos vs. gastos y distribución por categoría con gráficos. Las transferencias no cuentan como ingreso ni gasto. Compara cada cifra y cada categoría con el mes anterior, muestra el ritmo de gasto con su proyección a fin de mes y la evolución del dinero total mes a mes.
-- [x] **Deudas**: lo que debo y lo que me deben, con registro de abonos. Cada abono es un movimiento real (gasto si debo, ingreso si me deben) y el préstamo inicial se puede registrar opcionalmente en una cuenta.
-- [x] **Presupuestos por categoría**: cuánto quiero gastar al mes en cada categoría de gasto y cómo voy (bien, cerca del límite desde el 80 %, o pasado). Un presupuesto rige desde el mes en que se define hasta que se cambie, así que subirlo no reescribe los meses anteriores, que solo se consultan. Aparece en el panel y avisa, sin bloquear, al registrar un gasto que llega al 80 % o supera el presupuesto.
+**Entender en qué se va la plata**
+- **Resumen mensual** con gráficos de ingresos contra gastos y por categoría, comparado con el mes anterior, el ritmo de gasto con su proyección a fin de mes y la evolución de tu dinero total.
+- **Presupuestos** por categoría: cuánto quieres gastar al mes y cómo vas (bien, cerca del límite o pasado). La app avisa al registrar un gasto que lo acerca o lo supera.
 
-### Fase 3 — Idiomas, monedas, recurrentes y ahorro
-- [x] **Internacionalización**: español e inglés. La app sigue el idioma del teléfono (español si no lo tiene) y se puede cambiar en Ajustes. Montos, fechas, errores de la base de datos y categorías por defecto también se adaptan (ver [Idiomas](#-idiomas)).
-- [x] **Soporte multimoneda**: cada cuenta tiene su moneda; todo se suma en una moneda base con tasas de cambio que defines tú, y las transferencias entre monedas dicen cuánto sale y cuánto llega (ver [Monedas](#-monedas)).
-- [x] **Pagos recurrentes** (suscripciones, arriendo): se registra qué se paga, cuánto y cada cuánto; cuando se acerca la fecha la app avisa con "Pago próximo" y **no descuenta nada hasta que confirmas que pagaste** (o lo omites). Ver [Pagos recurrentes](#-pagos-recurrentes).
-- [x] **Metas de ahorro** con monto objetivo, fecha límite y progreso: cada meta se apoya en una cuenta y lo ahorrado es el saldo de esa cuenta. Ver [Metas de ahorro](#-metas-de-ahorro).
-- [x] **Barra de navegación** con cinco pestañas (Inicio, Actividad, Cuentas, Metas y Más). *Más* reúne el resumen mensual, presupuestos, deudas, pagos recurrentes, categorías y ajustes. Cada pestaña conserva lo que estabas viendo al cambiar, y tocar la pestaña en la que estás vuelve a su pantalla inicial.
+**Lo que debes y lo que te deben**
+- **Deudas** con abonos: cada abono es un movimiento real. También **compras a cuotas** con su plan de pagos.
+- **Pagos recurrentes** (suscripciones, arriendo): la app avisa cuando se acerca la fecha, pero **nunca descuenta nada sola**: tú confirmas que pagaste.
 
-### Diseño
-- [x] **Diseño renovado**: tema propio con la tipografía Plus Jakarta Sans (empaquetada en `app/assets/fonts`, licencia OFL), paleta esmeralda en claro y oscuro, tarjetas redondeadas y colores con significado (verde ingresos, rojo gastos, azul transferencias). El Inicio abre con una tarjeta del dinero total con lo que entró y salió este mes (se pone roja si el total es negativo) y las cuentas como tarjetas con el color de su tipo. Los colores del dinero viven en `FinanceColors` (`app/lib/core/theme/`) y una prueba verifica su contraste.
+**Tarjetas de crédito**
+- Guardas el **cupo**, el **día de corte** y el **día de pago**. Ves cuánto has usado, cuánto te queda y las fechas, con avisos al llegar al 80 % o pasarte.
+- Lo que gastas con la tarjeta **no resta de tu dinero total** hasta que la pagas; lo que debes aparece aparte.
+- La app calcula **cuánto falta pagar de tu último corte**, avisa cuando se acerca o se pasó la fecha, y el botón *Pagar* abre la transferencia ya llenada.
+- **Compras diferidas a cuotas**, con o sin intereses. Ver [Tarjetas de crédito](#-tarjetas-de-crédito).
 
-### Fase 4 — Tarjetas de crédito
-- [x] **Datos de la tarjeta**: cupo, día de corte y día límite de pago (todo opcional). En Cuentas, la tarjeta muestra cuánto del cupo usaste y lo que te queda, con aviso al llegar al 80 % o pasarte (ícono y texto, no solo color).
-- [x] **El dinero de la tarjeta no sale hasta que la pagas**: el dinero total no resta lo que gastas con tarjeta; ese dinero sigue en tus cuentas y lo que debes aparece aparte ("Debes en tarjetas").
-- [x] **Extracto y pago**: la app calcula cuánto falta pagar de tu último corte, avisa en Inicio cuando se acerca o se pasó la fecha, y *Pagar* abre una transferencia hacia la tarjeta con ese monto.
-- [x] **Compras diferidas a cuotas** con la tarjeta, con o sin intereses. Ver [Tarjetas de crédito](#-tarjetas-de-crédito).
+**Ahorrar**
+- **Metas de ahorro** con monto objetivo y fecha límite: cada meta se apoya en una cuenta, y la app sugiere cuánto ahorrar al mes para llegar a tiempo.
+
+**La app en sí**
+- Español e inglés (sigue el idioma del teléfono), modo claro y oscuro, y un diseño pensado para pantallas pequeñas.
+- Tu sesión es privada: cada usuario solo ve sus propios datos.
+
+**Lo que todavía no hace:** funcionar sin internet, mandar notificaciones fuera de la app, importar extractos bancarios ni tener versión web. Son las ideas que siguen en la lista de [Futuro](#futuro).
+
+---
+
+## 🧩 Cómo funciona
+
+```
+   Tu teléfono                         Internet                       Supabase (tu proyecto)
+┌───────────────┐   registra/consulta   ┌────────────────────────┐    ┌──────────────────────┐
+│  App mi-plata │ ───────────────────▶  │  API segura (HTTPS)    │ ─▶ │  Base de datos       │
+│   (Flutter)   │ ◀───────────────────  │  + inicio de sesión    │ ◀─ │  PostgreSQL + reglas │
+└───────────────┘   solo tus datos      └────────────────────────┘    └──────────────────────┘
+```
+
+- **La app** (carpeta `app/`) está hecha con Flutter, así que es una sola base de código para Android y escritorio. Solo muestra datos y los envía; no guarda dinero en el teléfono.
+- **La base de datos** (carpeta `supabase/`) es PostgreSQL, alojada en Supabase (o en tu computador, para desarrollar). Ahí viven tus cuentas y movimientos, y se hacen los cálculos delicados.
+- **Los saldos no se guardan: se calculan** sumando tus movimientos. Por eso nunca se desajustan.
+- **Tu privacidad la garantiza la base de datos**, no la app: cada fila lleva tu usuario y unas reglas (Row Level Security) impiden que alguien lea o cambie filas ajenas, aunque conozca la dirección del servidor.
+- **La llave que lleva la app es pública por diseño** (la *publishable key*) y sin sesión no abre nada. La llave secreta nunca va en la app ni en el repositorio.
+- **Cada cambio de la base de datos es una migración** (`supabase/migrations/`), así cualquiera puede recrear exactamente el mismo esquema.
+
+---
 
 ### Futuro
 - [ ] Modo sin conexión (primero consulta, luego registrar movimientos con cola de sincronización)
 - [ ] Importación de extractos bancarios (CSV)
+- [ ] Notificaciones de pagos próximos
 - [ ] Versión web (Flutter Web)
 
 ---
@@ -89,7 +114,7 @@ Cada módulo dentro de `features/` se organiza en capas:
 
 ---
 
-## 🗄️ Modelo de datos (Fase 1)
+## 🗄️ Modelo de datos
 
 | Tabla | Descripción |
 |---|---|
@@ -135,7 +160,7 @@ Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/<tu-usuario>/mi-plata.git
+git clone https://github.com/GooIvan/mi-plata.git
 cd mi-plata
 ```
 
@@ -175,6 +200,18 @@ Para probar en Android (emulador o celular por USB):
 adb reverse tcp:54321 tcp:54321
 flutter run
 ```
+
+### Instalar en un teléfono Android (sin cable)
+
+Necesitas tu propio proyecto de Supabase (gratis), no el de nadie más:
+
+1. Crea el proyecto en supabase.com (Postgres estándar) y, en *Authentication → Sign In / Providers → Email*, apaga **Confirm email** si es solo para ti.
+2. Sube el esquema: `supabase login`, `supabase link --project-ref <id>` y `supabase db push`.
+3. Pon en `app/.env` la URL del proyecto y su *publishable key* (la que empieza con `sb_publishable_`). **Ese archivo se empaqueta dentro del APK**, por eso solo lleva la llave pública.
+4. Compila: `cd app && flutter build apk --release`. El archivo queda en `app/build/app/outputs/flutter-apk/app-release.apk`.
+5. Pásalo al teléfono (cable, Drive, Telegram…), ábrelo y permite instalar apps de origen desconocido. Se firma con la llave de depuración: sirve para uso personal, no para publicarlo en una tienda.
+
+> ⚠️ No instales en tu teléfono un APK compilado por otra persona con *su* proyecto: tus datos irían a su servidor. Compila el tuyo.
 
 ### 5. Pruebas
 
