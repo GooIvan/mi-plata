@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/format/formats.dart';
+import '../../../../core/theme/finance_colors.dart';
 import '../../../../core/widgets/icon_badge.dart';
 import '../../../../l10n/l10n.dart';
 import '../../domain/account.dart';
+import '../../domain/card_usage.dart';
 import '../account_type_ui.dart';
 
 enum AccountMenuAction { edit, toggleArchived }
@@ -15,6 +17,7 @@ class AccountTile extends StatelessWidget {
     required this.onEdit,
     required this.onToggleArchived,
     this.baseCurrency,
+    this.today,
   });
 
   final Account account;
@@ -24,15 +27,16 @@ class AccountTile extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onToggleArchived;
 
+  /// El día de hoy, para las fechas de una tarjeta; null es el día de verdad.
+  final DateTime? today;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final isNegative = account.currentBalance < 0;
 
-    return Opacity(
-      opacity: account.isArchived ? 0.6 : 1,
-      child: ListTile(
+    final tile = ListTile(
         contentPadding: const EdgeInsets.only(left: 16, right: 6),
         leading: IconBadge(
           icon: account.type.icon,
@@ -86,6 +90,147 @@ class AccountTile extends StatelessWidget {
           ],
         ),
         onTap: onEdit,
+      );
+
+    return Opacity(
+      opacity: account.isArchived ? 0.6 : 1,
+      child: account.isCard
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [tile, CardSummary(account: account, today: today)],
+            )
+          : tile,
+    );
+  }
+}
+
+/// Lo que se ve de una tarjeta además de su saldo: cuánto del cupo se usó, lo
+/// que queda y las fechas de corte y de pago. No muestra nada si la tarjeta no
+/// tiene ni cupo ni fechas.
+class CardSummary extends StatelessWidget {
+  const CardSummary({super.key, required this.account, this.today});
+
+  final Account account;
+  final DateTime? today;
+
+  @override
+  Widget build(BuildContext context) {
+    final usage = CardUsage.of(account);
+    final calendar = account.cardCalendar;
+    if (!usage.hasLimit && calendar == null) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final formats = context.formats;
+    final now = today ?? DateTime.now();
+    final scheme = theme.colorScheme;
+
+    // El color acompaña al texto y al ícono, nunca los reemplaza.
+    final levelColor = switch (usage.level) {
+      CardLevel.ok => account.type.color(theme.brightness),
+      CardLevel.high => context.finance.warning,
+      CardLevel.over => scheme.error,
+    };
+    final small = theme.textTheme.labelMedium?.copyWith(
+      color: scheme.onSurfaceVariant,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (usage.hasLimit) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: usage.ratio!.clamp(0.0, 1.0),
+                minHeight: 8,
+                color: levelColor,
+                backgroundColor: levelColor.withValues(alpha: 0.16),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 12,
+              runSpacing: 2,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  l10n.accountsCardUsedOf(
+                    formats.money(
+                      usage.usedCents / 100,
+                      currency: account.currency,
+                    ),
+                    formats.money(
+                      usage.limitCents! / 100,
+                      currency: account.currency,
+                    ),
+                  ),
+                  style: small,
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (usage.level != CardLevel.ok) ...[
+                      Icon(
+                        usage.level == CardLevel.over
+                            ? Icons.error_outline
+                            : Icons.warning_amber_rounded,
+                        size: 16,
+                        color: levelColor,
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                    Text(
+                      usage.level == CardLevel.over
+                          ? l10n.accountsCardOverLimit(
+                              formats.money(
+                                -usage.availableCents! / 100,
+                                currency: account.currency,
+                              ),
+                            )
+                          : l10n.accountsCardAvailable(
+                              formats.money(
+                                usage.availableCents! / 100,
+                                currency: account.currency,
+                              ),
+                            ),
+                      style: small?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: usage.level == CardLevel.ok
+                            ? scheme.onSurface
+                            : levelColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+          if (calendar != null) ...[
+            SizedBox(height: usage.hasLimit ? 6 : 0),
+            Row(
+              children: [
+                Icon(
+                  Icons.event_outlined,
+                  size: 16,
+                  color: scheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    l10n.accountsCardDates(
+                      formats.dayMonth(calendar.nextStatement(now)),
+                      formats.dayMonth(calendar.nextPayment(now)),
+                    ),
+                    style: small,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
       ),
     );
   }

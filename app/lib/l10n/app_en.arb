@@ -1300,5 +1300,53 @@
   "navHome": "Home",
   "navGoals": "Goals",
   "navMore": "More",
-  "navTransactions": "Activity"
+  "navTransactions": "Activity",
+  "accountsCardLimitLabel": "Credit limit (optional)",
+  "accountsCardLimitHelper": "The most the bank lets you spend with the card",
+  "accountsCardLimitInvalid": "The limit has to be an amount above zero",
+  "accountsCardStatementDayLabel": "Statement day (optional)",
+  "accountsCardStatementDayHelper": "The day of the month your statement closes",
+  "accountsCardPaymentDayLabel": "Payment due day (optional)",
+  "accountsCardPaymentDayHelper": "The day of the month you must pay by",
+  "accountsCardDayInvalid": "Enter a day from 1 to 31",
+  "accountsCardDaysTogether": "Give both days, or leave both empty",
+  "accountsCardInitialBalanceHelper": "What you already owe, with a minus sign (e.g. -200,000). Empty if it starts at zero",
+  "accountsCardUsedOf": "Used {used} of {limit}",
+  "@accountsCardUsedOf": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardAvailable": "{amount} available",
+  "@accountsCardAvailable": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardOverLimit": "Over the limit by {amount}",
+  "@accountsCardOverLimit": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardDates": "Statement {statement} · Pay by {payment}",
+  "@accountsCardDates": {
+    "placeholders": {
+      "statement": {
+        "type": "String"
+      },
+      "payment": {
+        "type": "String"
+      }
+    }
+  }
 }

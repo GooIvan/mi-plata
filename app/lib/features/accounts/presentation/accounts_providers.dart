@@ -32,12 +32,18 @@ class AccountsNotifier extends AsyncNotifier<List<Account>> {
     required AccountType type,
     required String initialBalance,
     required String currency,
+    String? creditLimit,
+    int? statementDay,
+    int? paymentDay,
   }) async {
     await _repository.create(
       name: name,
       type: type,
       initialBalance: initialBalance,
       currency: currency,
+      creditLimit: creditLimit,
+      statementDay: statementDay,
+      paymentDay: paymentDay,
     );
     ref.invalidateSelf();
   }
@@ -47,12 +53,18 @@ class AccountsNotifier extends AsyncNotifier<List<Account>> {
     required String name,
     required AccountType type,
     required String initialBalance,
+    String? creditLimit,
+    int? statementDay,
+    int? paymentDay,
   }) async {
     await _repository.update(
       id: id,
       name: name,
       type: type,
       initialBalance: initialBalance,
+      creditLimit: creditLimit,
+      statementDay: statementDay,
+      paymentDay: paymentDay,
     );
     ref.invalidateSelf();
   }

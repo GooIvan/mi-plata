@@ -1315,5 +1315,53 @@
   "navHome": "Inicio",
   "navGoals": "Metas",
   "navMore": "Más",
-  "navTransactions": "Actividad"
+  "navTransactions": "Actividad",
+  "accountsCardLimitLabel": "Cupo (opcional)",
+  "accountsCardLimitHelper": "Lo máximo que te deja gastar el banco con la tarjeta",
+  "accountsCardLimitInvalid": "El cupo tiene que ser un monto mayor que cero",
+  "accountsCardStatementDayLabel": "Día de corte (opcional)",
+  "accountsCardStatementDayHelper": "El día del mes en que cierra tu extracto",
+  "accountsCardPaymentDayLabel": "Día límite de pago (opcional)",
+  "accountsCardPaymentDayHelper": "El día del mes hasta el que debes pagar",
+  "accountsCardDayInvalid": "Escribe un día del 1 al 31",
+  "accountsCardDaysTogether": "Indica los dos días, o deja los dos vacíos",
+  "accountsCardInitialBalanceHelper": "Lo que ya debes, con signo menos (ej: -200.000). Vacío si empieza en cero",
+  "accountsCardUsedOf": "Usado {used} de {limit}",
+  "@accountsCardUsedOf": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardAvailable": "Disponible {amount}",
+  "@accountsCardAvailable": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardOverLimit": "Te pasaste del cupo por {amount}",
+  "@accountsCardOverLimit": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsCardDates": "Corte {statement} · Pagar antes del {payment}",
+  "@accountsCardDates": {
+    "placeholders": {
+      "statement": {
+        "type": "String"
+      },
+      "payment": {
+        "type": "String"
+      }
+    }
+  }
 }

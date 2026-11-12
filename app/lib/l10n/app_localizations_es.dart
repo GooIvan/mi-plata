@@ -1913,4 +1913,60 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get navTransactions => 'Actividad';
+
+  @override
+  String get accountsCardLimitLabel => 'Cupo (opcional)';
+
+  @override
+  String get accountsCardLimitHelper =>
+      'Lo máximo que te deja gastar el banco con la tarjeta';
+
+  @override
+  String get accountsCardLimitInvalid =>
+      'El cupo tiene que ser un monto mayor que cero';
+
+  @override
+  String get accountsCardStatementDayLabel => 'Día de corte (opcional)';
+
+  @override
+  String get accountsCardStatementDayHelper =>
+      'El día del mes en que cierra tu extracto';
+
+  @override
+  String get accountsCardPaymentDayLabel => 'Día límite de pago (opcional)';
+
+  @override
+  String get accountsCardPaymentDayHelper =>
+      'El día del mes hasta el que debes pagar';
+
+  @override
+  String get accountsCardDayInvalid => 'Escribe un día del 1 al 31';
+
+  @override
+  String get accountsCardDaysTogether =>
+      'Indica los dos días, o deja los dos vacíos';
+
+  @override
+  String get accountsCardInitialBalanceHelper =>
+      'Lo que ya debes, con signo menos (ej: -200.000). Vacío si empieza en cero';
+
+  @override
+  String accountsCardUsedOf(String used, String limit) {
+    return 'Usado $used de $limit';
+  }
+
+  @override
+  String accountsCardAvailable(String amount) {
+    return 'Disponible $amount';
+  }
+
+  @override
+  String accountsCardOverLimit(String amount) {
+    return 'Te pasaste del cupo por $amount';
+  }
+
+  @override
+  String accountsCardDates(String statement, String payment) {
+    return 'Corte $statement · Pagar antes del $payment';
+  }
 }

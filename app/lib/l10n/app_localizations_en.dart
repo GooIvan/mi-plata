@@ -1916,4 +1916,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navTransactions => 'Activity';
+
+  @override
+  String get accountsCardLimitLabel => 'Credit limit (optional)';
+
+  @override
+  String get accountsCardLimitHelper =>
+      'The most the bank lets you spend with the card';
+
+  @override
+  String get accountsCardLimitInvalid =>
+      'The limit has to be an amount above zero';
+
+  @override
+  String get accountsCardStatementDayLabel => 'Statement day (optional)';
+
+  @override
+  String get accountsCardStatementDayHelper =>
+      'The day of the month your statement closes';
+
+  @override
+  String get accountsCardPaymentDayLabel => 'Payment due day (optional)';
+
+  @override
+  String get accountsCardPaymentDayHelper =>
+      'The day of the month you must pay by';
+
+  @override
+  String get accountsCardDayInvalid => 'Enter a day from 1 to 31';
+
+  @override
+  String get accountsCardDaysTogether => 'Give both days, or leave both empty';
+
+  @override
+  String get accountsCardInitialBalanceHelper =>
+      'What you already owe, with a minus sign (e.g. -200,000). Empty if it starts at zero';
+
+  @override
+  String accountsCardUsedOf(String used, String limit) {
+    return 'Used $used of $limit';
+  }
+
+  @override
+  String accountsCardAvailable(String amount) {
+    return '$amount available';
+  }
+
+  @override
+  String accountsCardOverLimit(String amount) {
+    return 'Over the limit by $amount';
+  }
+
+  @override
+  String accountsCardDates(String statement, String payment) {
+    return 'Statement $statement · Pay by $payment';
+  }
 }

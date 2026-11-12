@@ -3198,6 +3198,90 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Actividad'**
   String get navTransactions;
+
+  /// No description provided for @accountsCardLimitLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cupo (opcional)'**
+  String get accountsCardLimitLabel;
+
+  /// No description provided for @accountsCardLimitHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo máximo que te deja gastar el banco con la tarjeta'**
+  String get accountsCardLimitHelper;
+
+  /// No description provided for @accountsCardLimitInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'El cupo tiene que ser un monto mayor que cero'**
+  String get accountsCardLimitInvalid;
+
+  /// No description provided for @accountsCardStatementDayLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Día de corte (opcional)'**
+  String get accountsCardStatementDayLabel;
+
+  /// No description provided for @accountsCardStatementDayHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'El día del mes en que cierra tu extracto'**
+  String get accountsCardStatementDayHelper;
+
+  /// No description provided for @accountsCardPaymentDayLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Día límite de pago (opcional)'**
+  String get accountsCardPaymentDayLabel;
+
+  /// No description provided for @accountsCardPaymentDayHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'El día del mes hasta el que debes pagar'**
+  String get accountsCardPaymentDayHelper;
+
+  /// No description provided for @accountsCardDayInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un día del 1 al 31'**
+  String get accountsCardDayInvalid;
+
+  /// No description provided for @accountsCardDaysTogether.
+  ///
+  /// In es, this message translates to:
+  /// **'Indica los dos días, o deja los dos vacíos'**
+  String get accountsCardDaysTogether;
+
+  /// No description provided for @accountsCardInitialBalanceHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Lo que ya debes, con signo menos (ej: -200.000). Vacío si empieza en cero'**
+  String get accountsCardInitialBalanceHelper;
+
+  /// No description provided for @accountsCardUsedOf.
+  ///
+  /// In es, this message translates to:
+  /// **'Usado {used} de {limit}'**
+  String accountsCardUsedOf(String used, String limit);
+
+  /// No description provided for @accountsCardAvailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Disponible {amount}'**
+  String accountsCardAvailable(String amount);
+
+  /// No description provided for @accountsCardOverLimit.
+  ///
+  /// In es, this message translates to:
+  /// **'Te pasaste del cupo por {amount}'**
+  String accountsCardOverLimit(String amount);
+
+  /// No description provided for @accountsCardDates.
+  ///
+  /// In es, this message translates to:
+  /// **'Corte {statement} · Pagar antes del {payment}'**
+  String accountsCardDates(String statement, String payment);
 }
 
 class _AppLocalizationsDelegate
