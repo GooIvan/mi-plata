@@ -11,12 +11,38 @@ const integrationSkipReason =
 /// Clientes de Supabase para probar contra el servidor local.
 ///
 /// Lee SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY de app/.env. Cada usuario de
-/// prueba es nuevo; se borran con `supabase db reset`.
+/// prueba es nuevo y se borra (con todo lo suyo) al terminar, en [dispose]; si
+/// una corrida se interrumpe, `scripts/limpiar-usuarios-de-prueba.sh` borra los
+/// que queden.
+///
+/// Solo funciona contra un Supabase local: estas pruebas crean usuarios y datos
+/// sin parar, y nunca deben llegar a un proyecto de verdad (ver [assertLocal]).
 class IntegrationHarness {
-  IntegrationHarness() : _env = _readEnv();
+  IntegrationHarness() : _env = _readEnv() {
+    assertLocal(_env['SUPABASE_URL']);
+  }
 
   final Map<String, String> _env;
   final _clients = <SupabaseClient>[];
+  final _emails = <String>[];
+
+  /// El contenedor de la base de datos local; el nombre sale del `project_id`
+  /// de supabase/config.toml. Se puede cambiar con SUPABASE_DB_CONTAINER.
+  static final _dbContainer =
+      Platform.environment['SUPABASE_DB_CONTAINER'] ?? 'supabase_db_mi-plata';
+
+  /// Falla si [url] no es de un Supabase local (127.0.0.1 o localhost): con el
+  /// `.env` de la nube, estas pruebas llenarían de usuarios el proyecto real.
+  static void assertLocal(String? url) {
+    final host = Uri.tryParse(url ?? '')?.host;
+    if (host != '127.0.0.1' && host != 'localhost') {
+      throw StateError(
+        'Las pruebas de integración crean usuarios y datos de prueba: solo '
+        'corren contra Supabase local, y SUPABASE_URL es "${url ?? ''}". '
+        'Usa el .env de desarrollo (127.0.0.1).',
+      );
+    }
+  }
 
   static Map<String, String> _readEnv() {
     final values = <String, String>{};
@@ -46,6 +72,7 @@ class IntegrationHarness {
   Future<SupabaseClient> signedUpClient(String prefix, {String? language}) async {
     final client = newClient();
     final email = '$prefix-${DateTime.now().microsecondsSinceEpoch}@example.com';
+    _emails.add(email);
     final response = await client.auth.signUp(
       email: email,
       password: 'clave-segura-1',
@@ -59,5 +86,36 @@ class IntegrationHarness {
     for (final client in _clients) {
       await client.dispose();
     }
+    await _deleteUsers();
   }
+
+  /// Borra los usuarios de prueba que creó este arnés (y, por las claves
+  /// foráneas, todo lo suyo). Solo los suyos: otros archivos de prueba corren a
+  /// la vez, con sus propios usuarios. Si no se puede (sin Docker, o el
+  /// contenedor tiene otro nombre), avisa y no falla la prueba.
+  Future<void> _deleteUsers() async {
+    if (_emails.isEmpty) return;
+    final list = _emails.map((e) => "'${e.replaceAll("'", "''")}'").join(', ');
+    try {
+      final result = await Process.run('docker', [
+        'exec',
+        _dbContainer,
+        'psql',
+        '-U',
+        'postgres',
+        '-v',
+        'ON_ERROR_STOP=1',
+        '-c',
+        'delete from auth.users where email in ($list)',
+      ]);
+      if (result.exitCode != 0) _warn('${result.stderr}'.trim());
+    } on Object catch (error) {
+      _warn('$error');
+    }
+  }
+
+  static void _warn(String reason) => stderr.writeln(
+    'No se pudieron borrar los usuarios de prueba ($reason). '
+    'Corre scripts/limpiar-usuarios-de-prueba.sh.',
+  );
 }
