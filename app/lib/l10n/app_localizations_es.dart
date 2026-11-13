@@ -2113,4 +2113,16 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get dbErrorInstallmentPurchaseLocked =>
       'Esta compra está diferida en cuotas: para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo';
+
+  @override
+  String get settingsAppearance => 'Apariencia';
+
+  @override
+  String get settingsThemeSystem => 'Tema del teléfono';
+
+  @override
+  String get settingsThemeLight => 'Claro';
+
+  @override
+  String get settingsThemeDark => 'Oscuro';
 }

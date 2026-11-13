@@ -5,13 +5,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/locale_controller.dart';
 import '../../../core/router/app_routes.dart';
+import '../../../core/theme/theme_mode_controller.dart';
 import '../../../l10n/l10n.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../../currency/presentation/currency_providers.dart';
 import '../../currency/presentation/currency_ui.dart';
 import '../../currency/presentation/widgets/base_currency_sheet.dart';
 
-/// Ajustes de la app: el idioma y la sesión.
+/// Ajustes de la app: la apariencia, el idioma, la moneda y la sesión.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -24,6 +25,7 @@ class SettingsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final auth = ref.watch(authRepositoryProvider);
     final selected = ref.watch(localeControllerProvider)?.languageCode;
+    final themeMode = ref.watch(themeModeControllerProvider);
     final base = ref.watch(currencyConverterProvider).value?.base;
 
     return Scaffold(
@@ -33,6 +35,40 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
+            child: Text(
+              l10n.settingsAppearance,
+              style: theme.textTheme.titleMedium,
+            ),
+          ),
+          Card(
+            margin: EdgeInsets.zero,
+            child: RadioGroup<ThemeMode>(
+              groupValue: themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(themeModeControllerProvider.notifier).select(value);
+                }
+              },
+              child: Column(
+                children: [
+                  RadioListTile<ThemeMode>(
+                    value: ThemeMode.system,
+                    title: Text(l10n.settingsThemeSystem),
+                  ),
+                  RadioListTile<ThemeMode>(
+                    value: ThemeMode.light,
+                    title: Text(l10n.settingsThemeLight),
+                  ),
+                  RadioListTile<ThemeMode>(
+                    value: ThemeMode.dark,
+                    title: Text(l10n.settingsThemeDark),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 24, 0, 4),
             child: Text(
               l10n.settingsLanguage,
               style: theme.textTheme.titleMedium,

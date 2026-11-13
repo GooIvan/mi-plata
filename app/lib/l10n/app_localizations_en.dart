@@ -2117,4 +2117,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dbErrorInstallmentPurchaseLocked =>
       'This purchase is split into installments: to change the amount or the card, delete it and enter it again';
+
+  @override
+  String get settingsAppearance => 'Appearance';
+
+  @override
+  String get settingsThemeSystem => 'Phone theme';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeDark => 'Dark';
 }

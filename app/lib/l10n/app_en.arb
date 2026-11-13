@@ -1521,5 +1521,9 @@
   "cardInstallmentsEmpty": "No installment purchases left to charge.",
   "dbErrorInstallmentPurchaseNotCard": "Only a purchase made with a card can be split into installments",
   "dbErrorInstallmentPurchaseAmounts": "The installments don't add up to the purchase price",
-  "dbErrorInstallmentPurchaseLocked": "This purchase is split into installments: to change the amount or the card, delete it and enter it again"
+  "dbErrorInstallmentPurchaseLocked": "This purchase is split into installments: to change the amount or the card, delete it and enter it again",
+  "settingsAppearance": "Appearance",
+  "settingsThemeSystem": "Phone theme",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark"
 }

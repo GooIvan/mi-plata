@@ -34,7 +34,7 @@ Nació para reemplazar el registro manual de gastos y saldos en un chat de Whats
 - **Metas de ahorro** con monto objetivo y fecha límite: cada meta se apoya en una cuenta, y la app sugiere cuánto ahorrar al mes para llegar a tiempo.
 
 **La app en sí**
-- Español e inglés (sigue el idioma del teléfono), modo claro y oscuro, y un diseño pensado para pantallas pequeñas.
+- Español e inglés (sigue el idioma del teléfono) y tema claro u oscuro: en Ajustes eliges entre claro, oscuro o el del teléfono, y el cambio se aplica al instante y se recuerda. Diseño pensado para pantallas pequeñas.
 - Tu sesión es privada: cada usuario solo ve sus propios datos.
 
 **Lo que todavía no hace:** funcionar sin internet, mandar notificaciones fuera de la app, importar extractos bancarios ni tener versión web. Son las ideas que siguen en la lista de [Futuro](#futuro).

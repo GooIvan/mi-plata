@@ -1536,5 +1536,9 @@
   "cardInstallmentsEmpty": "No hay compras en cuotas por cobrar.",
   "dbErrorInstallmentPurchaseNotCard": "Solo una compra hecha con una tarjeta se puede diferir en cuotas",
   "dbErrorInstallmentPurchaseAmounts": "Las cuotas no cuadran con el valor de la compra",
-  "dbErrorInstallmentPurchaseLocked": "Esta compra está diferida en cuotas: para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo"
+  "dbErrorInstallmentPurchaseLocked": "Esta compra está diferida en cuotas: para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo",
+  "settingsAppearance": "Apariencia",
+  "settingsThemeSystem": "Tema del teléfono",
+  "settingsThemeLight": "Claro",
+  "settingsThemeDark": "Oscuro"
 }

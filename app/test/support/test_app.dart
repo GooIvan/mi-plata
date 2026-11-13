@@ -130,9 +130,13 @@ Future<FakeBackend> pumpMiPlata(
   FakeBackend? backend,
   FakeAccountRepository? accountRepository,
   String? language = 'es',
+  String? themeMode,
 }) async {
   final fakes = backend ?? FakeBackend();
-  SharedPreferences.setMockInitialValues({'language': ?language});
+  SharedPreferences.setMockInitialValues({
+    'language': ?language,
+    'themeMode': ?themeMode,
+  });
   final preferences = await SharedPreferences.getInstance();
 
   await tester.pumpWidget(
