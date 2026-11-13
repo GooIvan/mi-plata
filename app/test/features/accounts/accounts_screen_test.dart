@@ -185,8 +185,7 @@ void main() {
       ]);
       await openAccounts(tester, repository);
 
-      await tester.tap(find.text('Bancolombia'));
-      await tester.pumpAndSettle();
+      await openAccountForEdit(tester, find.text('Bancolombia'));
 
       expect(find.text('Editar cuenta'), findsOneWidget);
       expect(find.widgetWithText(TextFormField, 'Bancolombia'), findsOneWidget);

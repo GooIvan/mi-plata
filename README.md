@@ -11,7 +11,7 @@ Nació para reemplazar el registro manual de gastos y saldos en un chat de Whats
 ## ✨ Qué puedes hacer hoy
 
 **Tu dinero**
-- **Cuentas** de banco, efectivo, billeteras digitales y tarjetas de crédito, cada una con su moneda. El panel de inicio muestra tu **dinero total** (con lo que entró y salió este mes) y el saldo de cada cuenta.
+- **Cuentas** de banco, efectivo, billeteras digitales y tarjetas de crédito, cada una con su moneda. Tocar una cuenta abre su **detalle** (saldo, moneda, saldo inicial y, en una tarjeta, su cupo y lo que falta pagar), con botones para *Editar* o *Ver movimientos* (Actividad ya filtrada por esa cuenta). El panel de inicio muestra tu **dinero total** (con lo que entró y salió este mes) y el saldo de cada cuenta.
 - **Movimientos**: ingresos, gastos y transferencias entre cuentas. Se pueden buscar por texto y filtrar por tipo, cuenta, categoría y fechas. Las categorías son tuyas: crearlas, renombrarlas y archivarlas.
 - **Varias monedas**: eliges una moneda base; todo se suma en ella y las transferencias entre monedas dicen cuánto sale y cuánto llega. Las **tasas de cambio se actualizan solas** una vez al día, y si prefieres puedes fijar una a mano.
 - **Avisos que no estorban**: si un gasto deja una cuenta en negativo, la app avisa antes de guardar, pero te deja seguir.

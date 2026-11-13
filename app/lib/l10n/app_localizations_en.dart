@@ -2257,4 +2257,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileDeleteError => 'Couldn\'t delete the account. Try again.';
+
+  @override
+  String get accountsDetailCurrentBalance => 'Current balance';
+
+  @override
+  String get accountsDetailInitialBalance => 'Initial balance';
+
+  @override
+  String get accountsDetailMovements => 'View transactions';
 }
