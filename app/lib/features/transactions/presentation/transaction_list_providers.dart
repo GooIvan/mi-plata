@@ -6,10 +6,12 @@ import '../domain/transaction.dart';
 import '../domain/transaction_filter.dart';
 import 'transactions_providers.dart';
 
-/// El filtro de la pantalla de movimientos. Vive mientras la pantalla está
-/// abierta; como es una pestaña, se conserva al cambiar a otra y volver.
+/// El filtro de la pantalla de movimientos. Como es una pestaña, se conserva al
+/// cambiar a otra y volver. No se descarta solo: otras pantallas lo pueden poner
+/// (el detalle de una cuenta abre Actividad ya filtrada por ella) antes de que
+/// Actividad esté escuchándolo.
 final transactionFilterProvider =
-    NotifierProvider.autoDispose<TransactionFilterNotifier, TransactionFilter>(
+    NotifierProvider<TransactionFilterNotifier, TransactionFilter>(
       TransactionFilterNotifier.new,
     );
 

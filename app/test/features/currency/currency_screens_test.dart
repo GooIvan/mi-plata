@@ -438,8 +438,7 @@ void main() {
       );
       await open(tester, backend, route: AppRoutes.accounts);
 
-      await tester.tap(find.text('Dólares'));
-      await tester.pumpAndSettle();
+      await openAccountForEdit(tester, find.text('Dólares'));
 
       expect(find.text('USD · Dólar estadounidense'), findsOneWidget);
       expect(find.text('La moneda de una cuenta no se puede cambiar.'), findsOneWidget);

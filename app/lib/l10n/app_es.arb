@@ -1573,5 +1573,8 @@
   "profileDeleteBody": "Se borrarán para siempre tu cuenta y todo lo que registraste: cuentas, movimientos, deudas, presupuestos, metas y tu perfil. No se puede deshacer.",
   "profileDeletePasswordLabel": "Tu contraseña",
   "profileDeleteConfirm": "Eliminar para siempre",
-  "profileDeleteError": "No se pudo eliminar la cuenta. Inténtalo de nuevo."
+  "profileDeleteError": "No se pudo eliminar la cuenta. Inténtalo de nuevo.",
+  "accountsDetailCurrentBalance": "Saldo actual",
+  "accountsDetailInitialBalance": "Saldo inicial",
+  "accountsDetailMovements": "Ver movimientos"
 }
