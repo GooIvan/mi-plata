@@ -38,6 +38,13 @@ class CurrencyNotifier extends AsyncNotifier<CurrencyConverter> {
     ref.invalidateSelf();
   }
 
+  /// Hace automática la tasa de [currency]: la próxima actualización la
+  /// reemplaza.
+  Future<void> useAutomaticRate(String currency) async {
+    await _repository.useAutomaticRate(currency);
+    ref.invalidateSelf();
+  }
+
   Future<void> deleteRate(String currency) async {
     await _repository.deleteRate(currency);
     ref.invalidateSelf();

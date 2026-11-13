@@ -13,7 +13,7 @@ Nació para reemplazar el registro manual de gastos y saldos en un chat de Whats
 **Tu dinero**
 - **Cuentas** de banco, efectivo, billeteras digitales y tarjetas de crédito, cada una con su moneda. El panel de inicio muestra tu **dinero total** (con lo que entró y salió este mes) y el saldo de cada cuenta.
 - **Movimientos**: ingresos, gastos y transferencias entre cuentas. Se pueden buscar por texto y filtrar por tipo, cuenta, categoría y fechas. Las categorías son tuyas: crearlas, renombrarlas y archivarlas.
-- **Varias monedas**: eliges una moneda base y defines tú las tasas de cambio; todo se suma en la base y las transferencias entre monedas dicen cuánto sale y cuánto llega.
+- **Varias monedas**: eliges una moneda base; todo se suma en ella y las transferencias entre monedas dicen cuánto sale y cuánto llega. Las **tasas de cambio se actualizan solas** una vez al día, y si prefieres puedes fijar una a mano.
 - **Avisos que no estorban**: si un gasto deja una cuenta en negativo, la app avisa antes de guardar, pero te deja seguir.
 
 **Entender en qué se va la plata**
@@ -128,7 +128,7 @@ Cada módulo dentro de `features/` se organiza en capas:
 | `v_monthly_totals` | Vista con ingresos y gastos por mes, tipo, categoría y moneda (para el resumen) |
 | `v_monthly_account_flows` | Vista con lo que entró y salió de cada cuenta cada mes; con el saldo inicial reconstruye el dinero al cierre de cualquier mes |
 | `user_settings` | Preferencias del usuario: la moneda base (`COP` por defecto, también si no hay fila) |
-| `exchange_rates` | Cuánto vale 1 unidad de cada moneda en la moneda base; una tasa por moneda, sin historial |
+| `exchange_rates` | Cuánto vale 1 unidad de cada moneda en la moneda base; una tasa por moneda, sin historial. `is_manual` dice si la escribió el usuario (manual, no se pisa) o la trajo el servicio de tasas (automática) |
 | `recurring_payments` | Una regla de pago recurrente: nombre, monto, cuenta, categoría, cada cuánto (`every` + `unit`), próxima fecha, fecha final y pausa. No genera movimientos sola. Con `debt_id` es el plan de cuotas de una deuda |
 | `v_recurring_payments` | Vista con los pagos recurrentes más lo que falta de la deuda de un plan de cuotas y cuántas cuotas lleva pagadas |
 | `budgets` | Presupuesto mensual de una categoría de gasto, vigente desde un mes (monto 0 = sin presupuesto); solo se aceptan categorías de gasto |
@@ -302,7 +302,11 @@ La app está en español e inglés. Los textos viven en `app/lib/l10n/app_es.arb
 Cada cuenta (y cada deuda) tiene su moneda, que se elige al crearla y no cambia. Las monedas que ofrece la app son COP, USD, EUR, MXN, ARS, BRL, CLP, PEN, GBP y CAD (la base de datos acepta cualquier código de tres letras).
 
 - **Moneda base** (Ajustes → Moneda): es en la que se suma todo — dinero total, resumen, evolución, presupuestos y deudas. Por defecto, el peso colombiano.
-- **Tasas de cambio** (Ajustes → Tasas de cambio): las defines tú, una por moneda ("1 USD vale $4.000"), con la fecha en que las cambiaste. No dependen de ningún servicio externo. Una moneda sin tasa no se suma y la app lo avisa con un atajo para definirla; nunca inventa un valor.
+- **Tasas de cambio** (Ajustes → Tasas de cambio): una por moneda ("1 USD vale $4.000"), con la fecha en que se actualizó y si es **automática** o **manual**.
+  - **Automáticas**: al abrir la app, y como mucho una vez al día, se traen de [ExchangeRate-API](https://www.exchangerate-api.com) (versión abierta, sin llave; el servicio actualiza sus datos una vez al día, así que no son tasas al segundo). Se actualizan las monedas que usas en cuentas o deudas. El botón de actualizar de esa pantalla las trae en el momento.
+  - **Manuales**: si escribes una tasa tú, queda como manual y **ninguna actualización la cambia**. Puedes devolverla a automática desde su formulario.
+  - Si el servicio falla o no hay internet, se siguen usando las últimas tasas guardadas y la app lo dice al actualizar a mano; **nunca inventa un valor**. Una moneda sin tasa no se suma y la app lo avisa con un atajo para definirla.
+  - La app no lleva ninguna llave del servicio. Si algún día se cambia a un proveedor que la exija, la consulta tendría que hacerse desde una función de Supabase, no desde la app.
 - **Cambiar la base** reexpresa las tasas y los presupuestos en la moneda nueva; pide la tasa de la nueva si hay algo que convertir.
 - **Transferencias entre monedas** guardan dos montos (`amount` sale, `destination_amount` llega) y muestran la tasa que resulta. Entre cuentas de la misma moneda no hay segundo monto.
 - Los totales usan **la tasa de hoy**, también para meses pasados (no hay tasas históricas). Un movimiento siempre se ve en la moneda de su cuenta.

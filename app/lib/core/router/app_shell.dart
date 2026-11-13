@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/currency/presentation/rates_refresh.dart';
 import '../../l10n/l10n.dart';
 
 /// El marco de las pestañas principales: la barra de navegación de abajo y,
 /// encima, la pestaña elegida. Cada pestaña conserva su estado al cambiar.
 ///
 /// El orden de los destinos es el de las ramas del router.
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({
     super.key,
     required this.navigationShell,
@@ -20,8 +22,27 @@ class AppShell extends StatelessWidget {
   final List<GlobalKey<NavigatorState>> tabNavigators;
 
   @override
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  @override
+  void initState() {
+    super.initState();
+    // Al abrir la app con sesión, las tasas automáticas se ponen al día (una
+    // vez al día). Si falla, no pasa nada: quedan las últimas guardadas.
+    if (ref.read(automaticRatesOnOpenProvider)) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => refreshAutomaticRates(ref),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final navigationShell = widget.navigationShell;
+    final tabNavigators = widget.tabNavigators;
 
     return Scaffold(
       body: navigationShell,

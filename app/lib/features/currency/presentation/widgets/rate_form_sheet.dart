@@ -9,6 +9,7 @@ import '../../domain/rate_parser.dart';
 import '../currency_error_message.dart';
 import '../currency_providers.dart';
 import '../currency_ui.dart';
+import '../rates_refresh.dart';
 
 /// Abre la hoja para definir cuánto vale una moneda en la moneda base. Con
 /// [currency] la moneda ya está elegida; sin ella se elige de la lista.
@@ -85,6 +86,15 @@ class _RateFormSheetState extends ConsumerState<RateFormSheet> {
     await _run(() => notifier.setRate(_currency!, rate));
   }
 
+  /// Deja la tasa en automática y la trae del servicio enseguida.
+  Future<void> _useAutomatic() async {
+    final notifier = ref.read(currencyConverterProvider.notifier);
+    await _run(() async {
+      await notifier.useAutomaticRate(_currency!);
+      await refreshAutomaticRates(ref, force: true);
+    });
+  }
+
   Future<void> _remove() async {
     final notifier = ref.read(currencyConverterProvider.notifier);
     await _run(() => notifier.deleteRate(_currency!));
@@ -97,6 +107,7 @@ class _RateFormSheetState extends ConsumerState<RateFormSheet> {
     final converter = ref.watch(currencyConverterProvider).value;
     final base = converter?.base ?? defaultCurrency;
     final hasRate = converter?.rates.containsKey(_currency) ?? false;
+    final isAutomatic = converter?.rates[_currency]?.isManual == false;
     final fixed = widget.currency != null;
 
     return SingleChildScrollView(
@@ -162,6 +173,8 @@ class _RateFormSheetState extends ConsumerState<RateFormSheet> {
               decoration: InputDecoration(
                 labelText: l10n.ratesFormAmountLabel(_currency ?? '…'),
                 hintText: l10n.ratesFormHint,
+                helperText: isAutomatic ? l10n.ratesAutomaticHint : null,
+                helperMaxLines: 2,
                 suffixText: base,
                 border: const OutlineInputBorder(),
               ),
@@ -181,6 +194,13 @@ class _RateFormSheetState extends ConsumerState<RateFormSheet> {
                     )
                   : Text(l10n.commonSave),
             ),
+            if (hasRate && !isAutomatic) ...[
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: _saving ? null : _useAutomatic,
+                child: Text(l10n.ratesUseAutomatic),
+              ),
+            ],
             if (hasRate) ...[
               const SizedBox(height: 8),
               TextButton(

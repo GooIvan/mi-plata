@@ -3515,6 +3515,60 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Oscuro'**
   String get settingsThemeDark;
+
+  /// No description provided for @ratesRefresh.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar tasas'**
+  String get ratesRefresh;
+
+  /// No description provided for @ratesRefreshed.
+  ///
+  /// In es, this message translates to:
+  /// **'Tasas actualizadas'**
+  String get ratesRefreshed;
+
+  /// No description provided for @ratesRefreshFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron actualizar. Se siguen usando las últimas tasas guardadas.'**
+  String get ratesRefreshFailed;
+
+  /// No description provided for @ratesRefreshNothing.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay tasas automáticas que actualizar: tus otras monedas tienen tasa manual.'**
+  String get ratesRefreshNothing;
+
+  /// No description provided for @ratesTagAutomatic.
+  ///
+  /// In es, this message translates to:
+  /// **'Automática'**
+  String get ratesTagAutomatic;
+
+  /// No description provided for @ratesTagManual.
+  ///
+  /// In es, this message translates to:
+  /// **'Manual'**
+  String get ratesTagManual;
+
+  /// No description provided for @ratesSource.
+  ///
+  /// In es, this message translates to:
+  /// **'Las tasas automáticas vienen de ExchangeRate-API (exchangerate-api.com) y se actualizan una vez al día. Una tasa que escribas tú queda como manual y no se cambia sola.'**
+  String get ratesSource;
+
+  /// No description provided for @ratesUseAutomatic.
+  ///
+  /// In es, this message translates to:
+  /// **'Usar la tasa automática'**
+  String get ratesUseAutomatic;
+
+  /// No description provided for @ratesAutomaticHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta tasa se actualiza sola. Si la cambias, pasa a manual.'**
+  String get ratesAutomaticHint;
 }
 
 class _AppLocalizationsDelegate

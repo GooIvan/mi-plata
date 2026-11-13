@@ -2129,4 +2129,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsThemeDark => 'Dark';
+
+  @override
+  String get ratesRefresh => 'Update rates';
+
+  @override
+  String get ratesRefreshed => 'Rates updated';
+
+  @override
+  String get ratesRefreshFailed =>
+      'Couldn\'t update them. The last saved rates are still being used.';
+
+  @override
+  String get ratesRefreshNothing =>
+      'No automatic rates to update: your other currencies have a manual rate.';
+
+  @override
+  String get ratesTagAutomatic => 'Automatic';
+
+  @override
+  String get ratesTagManual => 'Manual';
+
+  @override
+  String get ratesSource =>
+      'Automatic rates come from ExchangeRate-API (exchangerate-api.com) and update once a day. A rate you type yourself stays manual and never changes on its own.';
+
+  @override
+  String get ratesUseAutomatic => 'Use the automatic rate';
+
+  @override
+  String get ratesAutomaticHint =>
+      'This rate updates itself. If you change it, it becomes manual.';
 }

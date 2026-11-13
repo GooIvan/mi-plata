@@ -2125,4 +2125,35 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsThemeDark => 'Oscuro';
+
+  @override
+  String get ratesRefresh => 'Actualizar tasas';
+
+  @override
+  String get ratesRefreshed => 'Tasas actualizadas';
+
+  @override
+  String get ratesRefreshFailed =>
+      'No se pudieron actualizar. Se siguen usando las últimas tasas guardadas.';
+
+  @override
+  String get ratesRefreshNothing =>
+      'No hay tasas automáticas que actualizar: tus otras monedas tienen tasa manual.';
+
+  @override
+  String get ratesTagAutomatic => 'Automática';
+
+  @override
+  String get ratesTagManual => 'Manual';
+
+  @override
+  String get ratesSource =>
+      'Las tasas automáticas vienen de ExchangeRate-API (exchangerate-api.com) y se actualizan una vez al día. Una tasa que escribas tú queda como manual y no se cambia sola.';
+
+  @override
+  String get ratesUseAutomatic => 'Usar la tasa automática';
+
+  @override
+  String get ratesAutomaticHint =>
+      'Esta tasa se actualiza sola. Si la cambias, pasa a manual.';
 }
