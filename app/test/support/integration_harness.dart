@@ -112,6 +112,24 @@ class IntegrationHarness {
     await _deleteUsers();
   }
 
+  /// Corre una consulta en la base local (con `psql`, como administrador) y
+  /// devuelve lo que imprime, para comprobar cosas que ningún usuario puede ver,
+  /// como que una cuenta borrada ya no dejó nada.
+  Future<String> localQuery(String sql) async {
+    final result = await Process.run('docker', [
+      'exec',
+      _dbContainer,
+      'psql',
+      '-U',
+      'postgres',
+      '-At',
+      '-c',
+      sql,
+    ]);
+    if (result.exitCode != 0) throw StateError('${result.stderr}');
+    return '${result.stdout}'.trim();
+  }
+
   /// Borra los usuarios de prueba que creó este arnés (y, por las claves
   /// foráneas, todo lo suyo). Solo los suyos: otros archivos de prueba corren a
   /// la vez, con sus propios usuarios. Si no se puede (sin Docker, o el

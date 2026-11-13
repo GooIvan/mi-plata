@@ -16,6 +16,11 @@ class AuthRepository {
     await _auth.signInWithPassword(email: email, password: password);
   }
 
+  /// Cambia la contraseña de la sesión abierta.
+  Future<void> updatePassword(String newPassword) async {
+    await _auth.updateUser(UserAttributes(password: newPassword));
+  }
+
   /// Devuelve `true` si hay que confirmar el correo antes de poder entrar.
   ///
   /// [language] ("es" o "en") viaja en los metadatos del usuario: la base lo usa

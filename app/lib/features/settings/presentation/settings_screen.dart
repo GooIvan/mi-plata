@@ -8,6 +8,7 @@ import '../../../core/router/app_routes.dart';
 import '../../../core/theme/theme_mode_controller.dart';
 import '../../../l10n/l10n.dart';
 import '../../auth/presentation/auth_providers.dart';
+import '../../profile/presentation/profile_providers.dart';
 import '../../currency/presentation/currency_providers.dart';
 import '../../currency/presentation/currency_ui.dart';
 import '../../currency/presentation/widgets/base_currency_sheet.dart';
@@ -27,14 +28,42 @@ class SettingsScreen extends ConsumerWidget {
     final selected = ref.watch(localeControllerProvider)?.languageCode;
     final themeMode = ref.watch(themeModeControllerProvider);
     final base = ref.watch(currencyConverterProvider).value?.base;
+    // Es un extra: mientras carga o si falla, la tarjeta del perfil no dice más.
+    final profile = ref.watch(profileProvider).value;
+    final name = [profile?.firstName, profile?.lastName]
+        .whereType<String>()
+        .where((part) => part.isNotEmpty)
+        .join(' ');
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
+          Card(
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: theme.colorScheme.primaryContainer,
+                foregroundColor: theme.colorScheme.onPrimaryContainer,
+                child: Text(
+                  (name.isNotEmpty ? name : (auth.currentUser?.email ?? '?'))[0]
+                      .toUpperCase(),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+              title: Text(name.isNotEmpty ? name : l10n.settingsProfile),
+              subtitle: Text(
+                name.isNotEmpty
+                    ? (auth.currentUser?.email ?? l10n.settingsProfile)
+                    : l10n.settingsProfileIncomplete,
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(AppRoutes.profile),
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
+            padding: const EdgeInsets.fromLTRB(0, 24, 0, 4),
             child: Text(
               l10n.settingsAppearance,
               style: theme.textTheme.titleMedium,

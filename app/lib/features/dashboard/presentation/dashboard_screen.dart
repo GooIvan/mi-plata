@@ -20,6 +20,7 @@ import '../../transactions/presentation/transaction_form_screen.dart';
 import '../../transactions/presentation/transactions_providers.dart';
 import '../../transactions/presentation/widgets/transaction_tile.dart';
 import '../../debts/presentation/debts_providers.dart';
+import '../../profile/presentation/profile_providers.dart';
 import 'widgets/accounts_strip.dart';
 import 'widgets/budget_summary_card.dart';
 import 'widgets/card_payments_card.dart';
@@ -57,6 +58,8 @@ class DashboardScreen extends ConsumerWidget {
         : SummaryCalculator.forMonth(monthTotals, thisMonth, rates);
     // Es un extra: mientras carga o si falla, simplemente no aparece.
     final cardDues = ref.watch(cardDuesProvider).value;
+    // Es un extra: sin perfil, la inicial sale del correo.
+    final firstName = ref.watch(profileProvider).value?.firstName;
     final accountNames = ref.watch(accountNamesProvider);
     final accountCurrencies = ref.watch(accountCurrenciesProvider);
     final categoryNames = ref.watch(categoryNamesProvider);
@@ -81,6 +84,7 @@ class DashboardScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(right: 16),
             child: _ProfileButton(
               email: auth.currentUser?.email,
+              name: firstName,
               onTap: () => context.push(AppRoutes.settings),
             ),
           ),
@@ -281,16 +285,24 @@ class _Logo extends StatelessWidget {
 
 /// La inicial del correo, que lleva a los ajustes.
 class _ProfileButton extends StatelessWidget {
-  const _ProfileButton({required this.email, required this.onTap});
+  const _ProfileButton({
+    required this.email,
+    required this.onTap,
+    this.name,
+  });
 
   final String? email;
+
+  /// El nombre del perfil: si lo hay, la inicial sale de él.
+  final String? name;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final initial = (email?.trim().isNotEmpty ?? false)
-        ? email!.trim()[0].toUpperCase()
+    final source = (name?.trim().isNotEmpty ?? false) ? name : email;
+    final initial = (source?.trim().isNotEmpty ?? false)
+        ? source!.trim()[0].toUpperCase()
         : null;
 
     // El correo queda en el tooltip: así se sabe con qué cuenta se entró.

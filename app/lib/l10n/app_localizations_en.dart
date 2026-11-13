@@ -2205,4 +2205,61 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dbErrorProfileBirthDateFuture =>
       'The date of birth can\'t be in the future';
+
+  @override
+  String get settingsProfile => 'My profile';
+
+  @override
+  String get settingsProfileIncomplete => 'Complete your details';
+
+  @override
+  String get profileTitle => 'My profile';
+
+  @override
+  String get profileEmailLocked => 'The email can\'t be changed from here.';
+
+  @override
+  String get profileIncompleteHint =>
+      'You don\'t have your details saved yet. Fill them in whenever you like; it isn\'t required to use the app.';
+
+  @override
+  String get profileSaved => 'Profile saved';
+
+  @override
+  String get profileSaveError =>
+      'Couldn\'t save your profile. Check the details and try again.';
+
+  @override
+  String get profileLoadError => 'Couldn\'t load your profile.';
+
+  @override
+  String get profileSecurity => 'Security';
+
+  @override
+  String get profileChangePassword => 'Change password';
+
+  @override
+  String get profileNewPasswordLabel => 'New password';
+
+  @override
+  String get profilePasswordChanged => 'Password updated';
+
+  @override
+  String get profileDeleteAccount => 'Delete my account and data';
+
+  @override
+  String get profileDeleteTitle => 'Delete your account?';
+
+  @override
+  String get profileDeleteBody =>
+      'Your account and everything you recorded will be erased forever: accounts, transactions, debts, budgets, goals and your profile. This can\'t be undone.';
+
+  @override
+  String get profileDeletePasswordLabel => 'Your password';
+
+  @override
+  String get profileDeleteConfirm => 'Delete forever';
+
+  @override
+  String get profileDeleteError => 'Couldn\'t delete the account. Try again.';
 }

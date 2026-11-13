@@ -23,6 +23,8 @@ import 'package:mi_plata/features/debts/domain/debt_direction.dart';
 import 'package:mi_plata/features/debts/domain/debt_draft.dart';
 import 'package:mi_plata/features/debts/domain/debt_payment.dart';
 import 'package:mi_plata/features/debts/domain/installment_plan_draft.dart';
+import 'package:mi_plata/features/profile/data/profile_repository.dart';
+import 'package:mi_plata/features/profile/domain/profile_data.dart';
 import 'package:mi_plata/features/savings/data/savings_goal_repository.dart';
 import 'package:mi_plata/features/savings/domain/goal_draft.dart';
 import 'package:mi_plata/features/savings/domain/savings_goal.dart';
@@ -1275,6 +1277,43 @@ class FakeSavingsGoalRepository implements SavingsGoalRepository {
   }
 }
 
+/// El perfil del usuario en memoria. Sin perfil (null) imita a un usuario que se
+/// registró antes de que existiera.
+class FakeProfileRepository implements ProfileRepository {
+  FakeProfileRepository([this.profile]);
+
+  ProfileData? profile;
+
+  /// Error que lanzarán las operaciones mientras no sea null.
+  Object? error;
+
+  final saved = <ProfileData>[];
+  var accountDeleted = false;
+  final calls = <String>[];
+
+  @override
+  Future<ProfileData?> fetch() async {
+    calls.add('fetch');
+    if (error != null) throw error!;
+    return profile;
+  }
+
+  @override
+  Future<void> save(ProfileData data) async {
+    calls.add('save');
+    if (error != null) throw error!;
+    saved.add(data);
+    profile = data;
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    calls.add('deleteAccount');
+    if (error != null) throw error!;
+    accountDeleted = true;
+  }
+}
+
 /// Un servicio de tasas de mentira: devuelve lo que se le diga, o falla.
 class FakeExchangeRateApi implements ExchangeRateApi {
   FakeExchangeRateApi({
@@ -1383,6 +1422,7 @@ class FakeBackend {
     List<BudgetRule> budgets = const [],
     List<SavingsGoal> goals = const [],
     List<CardInstallmentPlan> installmentPlans = const [],
+    ProfileData? profile,
     String baseCurrency = 'COP',
     List<ExchangeRate> rates = const [],
   }) {
@@ -1417,6 +1457,7 @@ class FakeBackend {
         rescaleBudgets: budgetsRepository.rescale,
       ),
       FakeCardInstallmentRepository(shared, installmentPlans),
+      FakeProfileRepository(profile),
     );
   }
 
@@ -1431,6 +1472,7 @@ class FakeBackend {
     this.goals,
     this.currency,
     this.installments,
+    this.profile,
   );
 
   final FakeAccountRepository accounts;
@@ -1443,4 +1485,5 @@ class FakeBackend {
   final FakeSavingsGoalRepository goals;
   final FakeCurrencyRepository currency;
   final FakeCardInstallmentRepository installments;
+  final FakeProfileRepository profile;
 }
