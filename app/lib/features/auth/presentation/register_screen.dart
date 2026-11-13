@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/format/formats.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../l10n/l10n.dart';
+import '../../accounts/domain/amount_parser.dart';
+import '../../currency/domain/currency.dart';
+import '../../profile/domain/profile_data.dart';
+import '../../profile/domain/profile_validators.dart';
 import '../domain/auth_validators.dart';
 import 'auth_error_message.dart';
 import 'auth_providers.dart';
@@ -23,17 +28,52 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _confirmation = TextEditingController();
+  final _firstName = TextEditingController();
+  final _lastName = TextEditingController();
+  final _profession = TextEditingController();
+  final _income = TextEditingController();
+  DateTime? _birthDate;
+  String? _birthDateError;
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
     _confirmation.dispose();
+    _firstName.dispose();
+    _lastName.dispose();
+    _profession.dispose();
+    _income.dispose();
     super.dispose();
   }
 
+  Future<void> _pickBirthDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _birthDate ?? DateTime(now.year - 30, now.month, now.day),
+      firstDate: ProfileValidators.earliestBirthDate,
+      lastDate: now,
+      helpText: context.l10n.profileBirthDateLabel,
+    );
+    if (picked != null) {
+      setState(() {
+        _birthDate = picked;
+        _birthDateError = null;
+      });
+    }
+  }
+
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final valid = _formKey.currentState!.validate();
+    final birthDateError = ProfileValidators.birthDate(context.l10n, _birthDate);
+    setState(() => _birthDateError = birthDateError);
+    if (!valid || birthDateError != null) return;
+
+    final formats = context.formats;
+    final income = _income.text.trim().isEmpty
+        ? null
+        : AmountParser.parse(_income.text, formats);
 
     final outcome = await ref
         .read(authControllerProvider.notifier)
@@ -42,6 +82,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           password: _password.text,
           // Las categorías con que empieza se crean en el idioma que se ve.
           language: Localizations.localeOf(context).languageCode,
+          profile: ProfileData(
+            firstName: _firstName.text.trim(),
+            lastName: _lastName.text.trim(),
+            birthDate: _birthDate,
+            profession: _profession.text.trim().isEmpty
+                ? null
+                : _profession.text.trim(),
+            monthlyIncome: income,
+            // Al registrarse todavía no hay moneda base elegida: la de siempre.
+            monthlyIncomeCurrency: income == null ? null : defaultCurrency,
+          ),
         );
     if (!mounted) return;
 
@@ -100,13 +151,110 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   label: context.l10n.authPasswordRepeatLabel,
                   enabled: !isLoading,
                   autofillHints: const [AutofillHints.newPassword],
-                  textInputAction: TextInputAction.done,
+                  textInputAction: TextInputAction.next,
                   validator: (value) => AuthValidators.passwordConfirmation(
                     context.l10n,
                     value,
                     _password.text,
                   ),
+                ),
+                const SizedBox(height: 28),
+                Text(
+                  context.l10n.profileSection,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  context.l10n.profileSectionHelp,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _firstName,
+                  enabled: !isLoading,
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.givenName],
+                  validator: (value) =>
+                      ProfileValidators.firstName(context.l10n, value),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.profileFirstNameLabel,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _lastName,
+                  enabled: !isLoading,
+                  textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.familyName],
+                  validator: (value) =>
+                      ProfileValidators.lastName(context.l10n, value),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.profileLastNameLabel,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: isLoading ? null : _pickBirthDate,
+                  borderRadius: BorderRadius.circular(4),
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: context.l10n.profileBirthDateLabel,
+                      errorText: _birthDateError,
+                      border: const OutlineInputBorder(),
+                      suffixIcon: _birthDate == null
+                          ? const Icon(Icons.calendar_today_outlined)
+                          : IconButton(
+                              tooltip: context.l10n.profileBirthDateClear,
+                              icon: const Icon(Icons.close),
+                              onPressed: isLoading
+                                  ? null
+                                  : () => setState(() => _birthDate = null),
+                            ),
+                    ),
+                    child: Text(
+                      _birthDate == null
+                          ? ''
+                          : context.formats.fullDate(_birthDate!),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _profession,
+                  enabled: !isLoading,
+                  textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.next,
+                  validator: (value) =>
+                      ProfileValidators.profession(context.l10n, value),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.profileProfessionLabel,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _income,
+                  enabled: !isLoading,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  textInputAction: TextInputAction.done,
+                  validator: (value) =>
+                      ProfileValidators.monthlyIncome(context.l10n, value),
                   onFieldSubmitted: (_) => _submit(),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.profileIncomeLabel,
+                    helperText: context.l10n.profileIncomeHelper,
+                    helperMaxLines: 3,
+                    prefixText: '${currencySymbol(defaultCurrency)} ',
+                    border: const OutlineInputBorder(),
+                  ),
                 ),
                 if (error != null) ...[
                   const SizedBox(height: 16),

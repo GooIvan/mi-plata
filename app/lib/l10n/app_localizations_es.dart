@@ -2156,4 +2156,49 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get ratesAutomaticHint =>
       'Esta tasa se actualiza sola. Si la cambias, pasa a manual.';
+
+  @override
+  String get profileSection => 'Sobre ti';
+
+  @override
+  String get profileSectionHelp =>
+      'Estos datos son tuyos: solo tú los ves y puedes cambiarlos o borrarlos después.';
+
+  @override
+  String get profileFirstNameLabel => 'Nombres';
+
+  @override
+  String get profileFirstNameRequired => 'Escribe tus nombres';
+
+  @override
+  String get profileLastNameLabel => 'Apellidos';
+
+  @override
+  String get profileLastNameRequired => 'Escribe tus apellidos';
+
+  @override
+  String get profileBirthDateLabel => 'Fecha de nacimiento (opcional)';
+
+  @override
+  String get profileBirthDateInvalid => 'Elige una fecha que ya pasó';
+
+  @override
+  String get profileBirthDateClear => 'Quitar la fecha';
+
+  @override
+  String get profileProfessionLabel => 'Profesión u ocupación (opcional)';
+
+  @override
+  String get profileIncomeLabel => 'Ingreso mensual (opcional)';
+
+  @override
+  String get profileIncomeHelper =>
+      'Tu sueldo o lo que ganas al mes en promedio. Déjalo vacío si no tienes un ingreso fijo.';
+
+  @override
+  String get profileIncomeInvalid => 'Escribe un monto mayor que cero';
+
+  @override
+  String get dbErrorProfileBirthDateFuture =>
+      'La fecha de nacimiento no puede ser futura';
 }

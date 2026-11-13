@@ -1534,5 +1534,19 @@
   "ratesTagManual": "Manual",
   "ratesSource": "Automatic rates come from ExchangeRate-API (exchangerate-api.com) and update once a day. A rate you type yourself stays manual and never changes on its own.",
   "ratesUseAutomatic": "Use the automatic rate",
-  "ratesAutomaticHint": "This rate updates itself. If you change it, it becomes manual."
+  "ratesAutomaticHint": "This rate updates itself. If you change it, it becomes manual.",
+  "profileSection": "About you",
+  "profileSectionHelp": "This information is yours: only you can see it, and you can change or delete it later.",
+  "profileFirstNameLabel": "First name",
+  "profileFirstNameRequired": "Enter your first name",
+  "profileLastNameLabel": "Last name",
+  "profileLastNameRequired": "Enter your last name",
+  "profileBirthDateLabel": "Date of birth (optional)",
+  "profileBirthDateInvalid": "Pick a date that has already passed",
+  "profileBirthDateClear": "Clear the date",
+  "profileProfessionLabel": "Profession or occupation (optional)",
+  "profileIncomeLabel": "Monthly income (optional)",
+  "profileIncomeHelper": "Your salary or what you earn per month on average. Leave it empty if you don't have a fixed income.",
+  "profileIncomeInvalid": "Enter an amount above zero",
+  "dbErrorProfileBirthDateFuture": "The date of birth can't be in the future"
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:mi_plata/features/auth/data/auth_repository.dart';
+import 'package:mi_plata/features/profile/domain/profile_data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Session fakeSession(String email) => Session(
@@ -35,6 +36,9 @@ class FakeAuthRepository implements AuthRepository {
   /// El idioma con que se registró el último usuario.
   String? signedUpWithLanguage;
 
+  /// Los datos personales con que se registró (null si no se mandaron).
+  ProfileData? signedUpWithProfile;
+
   @override
   Session? get currentSession => _session;
 
@@ -56,9 +60,11 @@ class FakeAuthRepository implements AuthRepository {
     required String email,
     required String password,
     required String language,
+    ProfileData? profile,
   }) async {
     calls.add('signUp:$email');
     signedUpWithLanguage = language;
+    signedUpWithProfile = profile;
     if (error != null) throw error!;
     if (confirmationRequired) return true;
     _open(email);

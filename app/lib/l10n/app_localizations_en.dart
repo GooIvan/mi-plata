@@ -2160,4 +2160,49 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ratesAutomaticHint =>
       'This rate updates itself. If you change it, it becomes manual.';
+
+  @override
+  String get profileSection => 'About you';
+
+  @override
+  String get profileSectionHelp =>
+      'This information is yours: only you can see it, and you can change or delete it later.';
+
+  @override
+  String get profileFirstNameLabel => 'First name';
+
+  @override
+  String get profileFirstNameRequired => 'Enter your first name';
+
+  @override
+  String get profileLastNameLabel => 'Last name';
+
+  @override
+  String get profileLastNameRequired => 'Enter your last name';
+
+  @override
+  String get profileBirthDateLabel => 'Date of birth (optional)';
+
+  @override
+  String get profileBirthDateInvalid => 'Pick a date that has already passed';
+
+  @override
+  String get profileBirthDateClear => 'Clear the date';
+
+  @override
+  String get profileProfessionLabel => 'Profession or occupation (optional)';
+
+  @override
+  String get profileIncomeLabel => 'Monthly income (optional)';
+
+  @override
+  String get profileIncomeHelper =>
+      'Your salary or what you earn per month on average. Leave it empty if you don\'t have a fixed income.';
+
+  @override
+  String get profileIncomeInvalid => 'Enter an amount above zero';
+
+  @override
+  String get dbErrorProfileBirthDateFuture =>
+      'The date of birth can\'t be in the future';
 }

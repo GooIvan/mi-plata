@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../profile/domain/profile_data.dart';
+
 /// Acceso a Supabase Auth. Es lo único que conoce el SDK de autenticación.
 class AuthRepository {
   const AuthRepository(this._auth);
@@ -17,16 +19,19 @@ class AuthRepository {
   /// Devuelve `true` si hay que confirmar el correo antes de poder entrar.
   ///
   /// [language] ("es" o "en") viaja en los metadatos del usuario: la base lo usa
-  /// para crear sus categorías por defecto en ese idioma.
+  /// para crear sus categorías por defecto en ese idioma. [profile] viaja igual:
+  /// la base arma el perfil con esos datos en la misma transacción que la
+  /// cuenta, así que no puede quedar una a medias.
   Future<bool> signUp({
     required String email,
     required String password,
     required String language,
+    ProfileData? profile,
   }) async {
     final response = await _auth.signUp(
       email: email,
       password: password,
-      data: {'language': language},
+      data: {'language': language, ...?profile?.toSignUpMetadata()},
     );
     return response.session == null;
   }
