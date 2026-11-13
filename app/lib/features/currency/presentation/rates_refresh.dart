@@ -40,12 +40,14 @@ const _refreshedOnKey = 'ratesRefreshedOn';
 ///
 /// Se actualizan las monedas que el usuario usa (en cuentas o deudas) y las que
 /// ya tienen una tasa automática. Las de tasa manual no se tocan, y la moneda
-/// base no necesita tasa. Sin [force], se hace una sola vez al día: el servicio
-/// también se actualiza una vez al día. Si algo falla, no se pierde nada: quedan
-/// las últimas tasas guardadas.
+/// base no necesita tasa. [include] suma monedas que el usuario pidió a mano
+/// (por ejemplo, al agregar una tasa) aunque todavía no las use. Sin [force], se
+/// hace una sola vez al día: el servicio también se actualiza una vez al día. Si
+/// algo falla, no se pierde nada: quedan las últimas tasas guardadas.
 Future<RatesRefresh> refreshAutomaticRates(
   WidgetRef ref, {
   bool force = false,
+  Set<String> include = const {},
 }) async {
   final preferences = ref.read(sharedPreferencesProvider);
   final today = toDbDate(DateTime.now());
@@ -65,6 +67,7 @@ Future<RatesRefresh> refreshAutomaticRates(
         if (!debt.isArchived) debt.currency,
       for (final rate in converter.rates.values)
         if (!rate.isManual) rate.currency,
+      ...include,
     }..remove(converter.base);
     wanted.removeWhere((code) => converter.rates[code]?.isManual ?? false);
     if (wanted.isEmpty) return RatesRefresh.nothingToUpdate;

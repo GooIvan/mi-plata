@@ -443,6 +443,83 @@ void main() {
       },
     );
 
+    testWidgets('al agregar una tasa, la opción automática aparece enseguida y la crea', (
+      tester,
+    ) async {
+      tallView(tester);
+      final api = FakeExchangeRateApi();
+      final backend = await pumpMiPlata(
+        tester,
+        backend: backendWith(const []),
+        rateApi: api,
+      );
+      await goTo(tester, AppRoutes.rates);
+
+      await tester.tap(find.widgetWithText(FloatingActionButton, 'Agregar tasa'));
+      await tester.pumpAndSettle();
+      // Sin elegir nada todavía, ya está la opción.
+      expect(find.widgetWithText(TextButton, 'Usar la tasa automática'), findsOneWidget);
+
+      // MXN no está en ninguna cuenta: se crea igual, a pedido.
+      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('MXN').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Usar la tasa automática'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(FilledButton), findsNothing); // se cerró la hoja
+      expect(backend.currency.rates['MXN']!.isManual, isFalse);
+      expect(backend.currency.rates['MXN']!.rate, closeTo(200, 1e-6));
+      expect(api.fetches, 1);
+    });
+
+    testWidgets('sin elegir moneda, la opción automática pide elegirla', (tester) async {
+      tallView(tester);
+      final api = FakeExchangeRateApi();
+      await pumpMiPlata(tester, backend: backendWith(const []), rateApi: api);
+      await goTo(tester, AppRoutes.rates);
+
+      await tester.tap(find.widgetWithText(FloatingActionButton, 'Agregar tasa'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Usar la tasa automática'));
+      await tester.pumpAndSettle();
+
+      expect(api.fetches, 0);
+      expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+    });
+
+    testWidgets('si el servicio no responde al agregar, avisa y no crea nada', (
+      tester,
+    ) async {
+      tallView(tester);
+      final api = FakeExchangeRateApi()
+        ..error = const ExchangeRateApiException('caído');
+      final backend = await pumpMiPlata(
+        tester,
+        backend: backendWith(const []),
+        rateApi: api,
+      );
+      await goTo(tester, AppRoutes.rates);
+
+      await tester.tap(find.widgetWithText(FloatingActionButton, 'Agregar tasa'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('MXN').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Usar la tasa automática'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('Se siguen usando las últimas tasas guardadas'),
+        findsOneWidget,
+      );
+      expect(backend.currency.rates.containsKey('MXN'), isFalse);
+      // La hoja sigue abierta para escribirla a mano.
+      expect(find.widgetWithText(FilledButton, 'Guardar'), findsOneWidget);
+    });
+
     testWidgets('una tasa manual se puede pasar a automática', (tester) async {
       tallView(tester);
       final api = FakeExchangeRateApi();
