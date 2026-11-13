@@ -11,6 +11,7 @@ import 'package:mi_plata/features/accounts/domain/account_type.dart';
 import 'package:mi_plata/features/accounts/domain/card_installment_draft.dart';
 import 'package:mi_plata/features/accounts/domain/card_installment_plan.dart';
 import 'package:mi_plata/features/currency/data/currency_repository.dart';
+import 'package:mi_plata/features/currency/data/exchange_rate_api.dart';
 import 'package:mi_plata/features/currency/domain/exchange_rate.dart';
 import 'package:mi_plata/features/debts/data/debt_repository.dart';
 import 'package:mi_plata/features/recurring/data/recurring_repository.dart';
@@ -1099,6 +1100,40 @@ class FakeCurrencyRepository implements CurrencyRepository {
     );
   }
 
+  /// Imita `set_automatic_rates`: crea las que faltan y actualiza solo las
+  /// automáticas; las manuales y la moneda base no se tocan.
+  @override
+  Future<int> setAutomaticRates(Map<String, String> incoming) async {
+    calls.add('setAutomatic:${(incoming.keys.toList()..sort()).join(',')}');
+    if (error != null) throw error!;
+    var written = 0;
+    for (final MapEntry(key: currency, value: rate) in incoming.entries) {
+      if (currency == base || (rates[currency]?.isManual ?? false)) continue;
+      rates[currency] = ExchangeRate(
+        currency: currency,
+        rate: double.parse(rate),
+        updatedAt: DateTime.now(),
+        isManual: false,
+      );
+      written++;
+    }
+    return written;
+  }
+
+  @override
+  Future<void> useAutomaticRate(String currency) async {
+    calls.add('useAutomatic:$currency');
+    if (error != null) throw error!;
+    final rate = rates[currency];
+    if (rate == null) return;
+    rates[currency] = ExchangeRate(
+      currency: currency,
+      rate: rate.rate,
+      updatedAt: rate.updatedAt,
+      isManual: false,
+    );
+  }
+
   @override
   Future<void> deleteRate(String currency) async {
     calls.add('deleteRate:$currency');
@@ -1130,6 +1165,7 @@ class FakeCurrencyRepository implements CurrencyRepository {
           currency: code,
           rate: r.rate / newRate,
           updatedAt: r.updatedAt,
+          isManual: r.isManual,
         ),
       );
       rates[old] = ExchangeRate(
@@ -1237,6 +1273,31 @@ class FakeSavingsGoalRepository implements SavingsGoalRepository {
       targetDate: goal.targetDate,
     );
   }
+}
+
+/// Un servicio de tasas de mentira: devuelve lo que se le diga, o falla.
+class FakeExchangeRateApi implements ExchangeRateApi {
+  FakeExchangeRateApi({
+    this.perUsd = const {'USD': 1, 'COP': 4000, 'EUR': 0.9, 'MXN': 20},
+  });
+
+  /// Cuántas unidades de cada moneda valen 1 dólar.
+  Map<String, double> perUsd;
+
+  /// Si se asigna, el servicio falla con este error.
+  Object? error;
+
+  var fetches = 0;
+
+  @override
+  Future<ApiRates> fetch() async {
+    fetches++;
+    if (error != null) throw error!;
+    return ApiRates(perUsd: perUsd, updatedAt: DateTime.now());
+  }
+
+  @override
+  void close() {}
 }
 
 /// Imita las compras diferidas en cuotas: al registrar una crea el gasto de la

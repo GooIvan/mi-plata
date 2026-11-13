@@ -36,6 +36,26 @@ class CurrencyRepository {
     );
   }
 
+  /// Guarda las tasas que trajo el servicio ([rates]: moneda -> decimal exacto en
+  /// texto). Crea las que faltan y actualiza solo las automáticas; las manuales
+  /// no se tocan. Devuelve cuántas escribió.
+  Future<int> setAutomaticRates(Map<String, String> rates) async {
+    final written = await _client.rpc<dynamic>(
+      'set_automatic_rates',
+      params: {'p_rates': rates},
+    );
+    return (written as num?)?.toInt() ?? 0;
+  }
+
+  /// Hace automática la tasa de [currency]: deja de ser manual y la próxima
+  /// actualización la reemplaza.
+  Future<void> useAutomaticRate(String currency) async {
+    await _client
+        .from('exchange_rates')
+        .update({'is_manual': false})
+        .eq('currency', currency);
+  }
+
   Future<void> deleteRate(String currency) async {
     await _client.from('exchange_rates').delete().eq('currency', currency);
   }

@@ -10,6 +10,7 @@ import 'core/config/env.dart';
 import 'core/format/formats.dart';
 import 'core/riverpod/no_retry.dart';
 import 'core/storage/preferences_provider.dart';
+import 'features/currency/presentation/rates_refresh.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +26,11 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       retry: noRetry,
-      overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(preferences),
+        // En la app de verdad, las tasas se actualizan solas al abrirla.
+        automaticRatesOnOpenProvider.overrideWithValue(true),
+      ],
       child: const MiPlataApp(),
     ),
   );

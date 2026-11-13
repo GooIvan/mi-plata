@@ -9,6 +9,7 @@ import '../../domain/rate_parser.dart';
 import '../currency_error_message.dart';
 import '../currency_providers.dart';
 import '../currency_ui.dart';
+import '../rates_refresh.dart';
 
 /// Abre la hoja para definir cuánto vale una moneda en la moneda base. Con
 /// [currency] la moneda ya está elegida; sin ella se elige de la lista.
@@ -73,7 +74,9 @@ class _RateFormSheetState extends ConsumerState<RateFormSheet> {
       if (!mounted) return;
       setState(() {
         _saving = false;
-        _error = currencyErrorMessage(context.l10n, error);
+        _error = error is RatesRefreshFailed
+            ? error.message
+            : currencyErrorMessage(context.l10n, error);
       });
     }
   }
@@ -83,6 +86,32 @@ class _RateFormSheetState extends ConsumerState<RateFormSheet> {
     final notifier = ref.read(currencyConverterProvider.notifier);
     final rate = RateParser.parse(_rate.text, context.formats)!;
     await _run(() => notifier.setRate(_currency!, rate));
+  }
+
+  /// Deja la tasa en automática y la trae del servicio enseguida: si la moneda
+  /// no tenía tasa, la crea; si era manual, la cambia a automática. Si el
+  /// servicio no responde, lo dice y el formulario queda abierto.
+  Future<void> _useAutomatic() async {
+    final currency = _currency;
+    if (currency == null) {
+      // Sin moneda elegida, el formulario dice que falta elegirla.
+      _formKey.currentState!.validate();
+      return;
+    }
+    final notifier = ref.read(currencyConverterProvider.notifier);
+    final hadRate =
+        ref.read(currencyConverterProvider).value?.rates.containsKey(currency) ??
+        false;
+    final failed = context.l10n.ratesRefreshFailed;
+    await _run(() async {
+      if (hadRate) await notifier.useAutomaticRate(currency);
+      final result = await refreshAutomaticRates(
+        ref,
+        force: true,
+        include: {currency},
+      );
+      if (result == RatesRefresh.failed) throw RatesRefreshFailed(failed);
+    });
   }
 
   Future<void> _remove() async {
@@ -97,6 +126,7 @@ class _RateFormSheetState extends ConsumerState<RateFormSheet> {
     final converter = ref.watch(currencyConverterProvider).value;
     final base = converter?.base ?? defaultCurrency;
     final hasRate = converter?.rates.containsKey(_currency) ?? false;
+    final isAutomatic = converter?.rates[_currency]?.isManual == false;
     final fixed = widget.currency != null;
 
     return SingleChildScrollView(
@@ -162,6 +192,8 @@ class _RateFormSheetState extends ConsumerState<RateFormSheet> {
               decoration: InputDecoration(
                 labelText: l10n.ratesFormAmountLabel(_currency ?? '…'),
                 hintText: l10n.ratesFormHint,
+                helperText: isAutomatic ? l10n.ratesAutomaticHint : null,
+                helperMaxLines: 2,
                 suffixText: base,
                 border: const OutlineInputBorder(),
               ),
@@ -181,6 +213,13 @@ class _RateFormSheetState extends ConsumerState<RateFormSheet> {
                     )
                   : Text(l10n.commonSave),
             ),
+            if (!isAutomatic) ...[
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: _saving ? null : _useAutomatic,
+                child: Text(l10n.ratesUseAutomatic),
+              ),
+            ],
             if (hasRate) ...[
               const SizedBox(height: 8),
               TextButton(
@@ -196,4 +235,11 @@ class _RateFormSheetState extends ConsumerState<RateFormSheet> {
       ),
     );
   }
+}
+
+/// El servicio de tasas no respondió: el texto ya viene traducido.
+class RatesRefreshFailed implements Exception {
+  const RatesRefreshFailed(this.message);
+
+  final String message;
 }

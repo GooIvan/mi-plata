@@ -1540,5 +1540,14 @@
   "settingsAppearance": "Apariencia",
   "settingsThemeSystem": "Tema del teléfono",
   "settingsThemeLight": "Claro",
-  "settingsThemeDark": "Oscuro"
+  "settingsThemeDark": "Oscuro",
+  "ratesRefresh": "Actualizar tasas",
+  "ratesRefreshed": "Tasas actualizadas",
+  "ratesRefreshFailed": "No se pudieron actualizar. Se siguen usando las últimas tasas guardadas.",
+  "ratesRefreshNothing": "No hay tasas automáticas que actualizar: tus otras monedas tienen tasa manual.",
+  "ratesTagAutomatic": "Automática",
+  "ratesTagManual": "Manual",
+  "ratesSource": "Las tasas automáticas vienen de ExchangeRate-API (exchangerate-api.com) y se actualizan una vez al día. Una tasa que escribas tú queda como manual y no se cambia sola.",
+  "ratesUseAutomatic": "Usar la tasa automática",
+  "ratesAutomaticHint": "Esta tasa se actualiza sola. Si la cambias, pasa a manual."
 }

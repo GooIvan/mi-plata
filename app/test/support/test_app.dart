@@ -14,6 +14,7 @@ import 'package:mi_plata/core/storage/preferences_provider.dart';
 import 'package:mi_plata/features/currency/domain/currency_converter.dart';
 import 'package:mi_plata/features/accounts/presentation/accounts_providers.dart';
 import 'package:mi_plata/features/accounts/presentation/card_providers.dart';
+import 'package:mi_plata/features/currency/presentation/rates_refresh.dart';
 import 'package:mi_plata/features/auth/presentation/auth_providers.dart';
 import 'package:mi_plata/features/budgets/presentation/budgets_providers.dart';
 import 'package:mi_plata/features/categories/presentation/categories_providers.dart';
@@ -131,19 +132,23 @@ Future<FakeBackend> pumpMiPlata(
   FakeAccountRepository? accountRepository,
   String? language = 'es',
   String? themeMode,
+  FakeExchangeRateApi? rateApi,
+  bool automaticRates = false,
+  Map<String, Object> preferences = const {},
 }) async {
   final fakes = backend ?? FakeBackend();
   SharedPreferences.setMockInitialValues({
     'language': ?language,
     'themeMode': ?themeMode,
+    ...preferences,
   });
-  final preferences = await SharedPreferences.getInstance();
+  final prefs = await SharedPreferences.getInstance();
 
   await tester.pumpWidget(
     ProviderScope(
       retry: noRetry,
       overrides: [
-        sharedPreferencesProvider.overrideWithValue(preferences),
+        sharedPreferencesProvider.overrideWithValue(prefs),
         authRepositoryProvider.overrideWithValue(
           auth ?? FakeAuthRepository(signedInAs: 'ana@correo.com'),
         ),
@@ -159,6 +164,10 @@ Future<FakeBackend> pumpMiPlata(
         recurringRepositoryProvider.overrideWithValue(fakes.recurring),
         savingsGoalRepositoryProvider.overrideWithValue(fakes.goals),
         cardInstallmentRepositoryProvider.overrideWithValue(fakes.installments),
+        // Sin salir a internet: un servicio de mentira, y sin actualizar al abrir
+        // salvo que la prueba lo pida.
+        exchangeRateApiProvider.overrideWithValue(rateApi ?? FakeExchangeRateApi()),
+        automaticRatesOnOpenProvider.overrideWithValue(automaticRates),
       ],
       child: const MiPlataApp(),
     ),

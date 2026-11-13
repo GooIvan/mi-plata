@@ -69,6 +69,7 @@ void main() {
       'ratesOneEquals',
       'transactionsImpliedRate',
       'dashboardCardDueOn',
+      'ratesTagManual',
     };
     final untranslated = [
       for (final key in es.keys)

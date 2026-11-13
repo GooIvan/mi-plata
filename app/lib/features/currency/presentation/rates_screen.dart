@@ -12,6 +12,7 @@ import '../domain/currency_converter.dart';
 import 'currency_error_message.dart';
 import 'currency_providers.dart';
 import 'currency_ui.dart';
+import 'rates_refresh.dart';
 import 'widgets/rate_form_sheet.dart';
 
 /// Las tasas de cambio: cuánto vale cada moneda en la moneda base.
@@ -29,7 +30,10 @@ class RatesScreen extends ConsumerWidget {
     final debts = ref.watch(debtsProvider).value;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.ratesTitle)),
+      appBar: AppBar(
+        title: Text(l10n.ratesTitle),
+        actions: const [_RefreshButton()],
+      ),
       body: converter.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => StateMessage(
@@ -86,6 +90,16 @@ class RatesScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
+              // La fuente de las tasas automáticas: el servicio pide citarla.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 16, 4, 0),
+                child: Text(
+                  l10n.ratesSource,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
             ],
           );
         },
@@ -142,10 +156,55 @@ class _RateTile extends StatelessWidget {
             )
           : Text(
               '${l10n.ratesOneEquals(currency, context.formats.money(rate.rate, currency: converter.base))}'
-              ' · ${_updated(context, rate.updatedAt)}',
+              ' · ${_updated(context, rate.updatedAt)}'
+              ' · ${rate.isManual ? l10n.ratesTagManual : l10n.ratesTagAutomatic}',
             ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => showRateForm(context, currency: currency),
+    );
+  }
+}
+
+/// Trae las tasas de hoy del servicio y dice cómo salió.
+class _RefreshButton extends ConsumerStatefulWidget {
+  const _RefreshButton();
+
+  @override
+  ConsumerState<_RefreshButton> createState() => _RefreshButtonState();
+}
+
+class _RefreshButtonState extends ConsumerState<_RefreshButton> {
+  bool _refreshing = false;
+
+  Future<void> _refresh() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    setState(() => _refreshing = true);
+    final result = await refreshAutomaticRates(ref, force: true);
+    if (mounted) setState(() => _refreshing = false);
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(switch (result) {
+          RatesRefresh.updated || RatesRefresh.notNeeded => l10n.ratesRefreshed,
+          RatesRefresh.nothingToUpdate => l10n.ratesRefreshNothing,
+          RatesRefresh.failed => l10n.ratesRefreshFailed,
+        }),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: context.l10n.ratesRefresh,
+      onPressed: _refreshing ? null : _refresh,
+      icon: _refreshing
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.sync),
     );
   }
 }

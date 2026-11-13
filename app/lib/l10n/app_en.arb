@@ -1525,5 +1525,14 @@
   "settingsAppearance": "Appearance",
   "settingsThemeSystem": "Phone theme",
   "settingsThemeLight": "Light",
-  "settingsThemeDark": "Dark"
+  "settingsThemeDark": "Dark",
+  "ratesRefresh": "Update rates",
+  "ratesRefreshed": "Rates updated",
+  "ratesRefreshFailed": "Couldn't update them. The last saved rates are still being used.",
+  "ratesRefreshNothing": "No automatic rates to update: your other currencies have a manual rate.",
+  "ratesTagAutomatic": "Automatic",
+  "ratesTagManual": "Manual",
+  "ratesSource": "Automatic rates come from ExchangeRate-API (exchangerate-api.com) and update once a day. A rate you type yourself stays manual and never changes on its own.",
+  "ratesUseAutomatic": "Use the automatic rate",
+  "ratesAutomaticHint": "This rate updates itself. If you change it, it becomes manual."
 }
