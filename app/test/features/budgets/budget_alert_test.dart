@@ -188,8 +188,7 @@ void main() {
       addTearDown(tester.view.reset);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Mercado').last);
-      await tester.pumpAndSettle();
+      await openMovementForEdit(tester, find.text('Mercado').last);
       await tester.enterText(_amountField(), amount);
       await tester.tap(_submit('Guardar cambios'));
       await tester.pumpAndSettle();
