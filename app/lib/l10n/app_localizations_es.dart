@@ -233,11 +233,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsSession => 'Sesión';
 
   @override
-  String settingsSignedInAs(String email) {
-    return 'Sesión iniciada como $email';
-  }
-
-  @override
   String get settingsSignOut => 'Cerrar sesión';
 
   @override

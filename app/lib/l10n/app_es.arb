@@ -100,14 +100,6 @@
     "description": "El nombre de cada idioma se escribe en ese idioma"
   },
   "settingsSession": "Sesión",
-  "settingsSignedInAs": "Sesión iniciada como {email}",
-  "@settingsSignedInAs": {
-    "placeholders": {
-      "email": {
-        "type": "String"
-      }
-    }
-  },
   "settingsSignOut": "Cerrar sesión",
   "budgetsTitle": "Presupuestos",
   "budgetsStatusOk": "Quedan {amount}",

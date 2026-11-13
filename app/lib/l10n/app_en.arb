@@ -88,14 +88,6 @@
   "settingsLanguageSpanish": "Español",
   "settingsLanguageEnglish": "English",
   "settingsSession": "Session",
-  "settingsSignedInAs": "Signed in as {email}",
-  "@settingsSignedInAs": {
-    "placeholders": {
-      "email": {
-        "type": "String"
-      }
-    }
-  },
   "settingsSignOut": "Sign out",
   "budgetsTitle": "Budgets",
   "budgetsStatusOk": "{amount} left",

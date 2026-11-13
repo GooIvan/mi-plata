@@ -176,11 +176,6 @@ class SettingsScreen extends ConsumerWidget {
             margin: EdgeInsets.zero,
             child: Column(
               children: [
-                if (auth.currentUser?.email case final email?)
-                  ListTile(
-                    leading: const Icon(Icons.person_outline),
-                    title: Text(l10n.settingsSignedInAs(email)),
-                  ),
                 ListTile(
                   leading: const Icon(Icons.logout),
                   title: Text(l10n.settingsSignOut),

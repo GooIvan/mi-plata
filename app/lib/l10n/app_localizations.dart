@@ -500,12 +500,6 @@ abstract class AppLocalizations {
   /// **'Sesión'**
   String get settingsSession;
 
-  /// No description provided for @settingsSignedInAs.
-  ///
-  /// In es, this message translates to:
-  /// **'Sesión iniciada como {email}'**
-  String settingsSignedInAs(String email);
-
   /// No description provided for @settingsSignOut.
   ///
   /// In es, this message translates to:
