@@ -68,18 +68,41 @@ class IntegrationHarness {
   }
 
   /// Un cliente con un usuario nuevo y la sesión ya abierta. [language] es el
-  /// idioma con que se registra (si no se indica, no manda ninguno).
-  Future<SupabaseClient> signedUpClient(String prefix, {String? language}) async {
+  /// idioma con que se registra (si no se indica, no manda ninguno) y
+  /// [metadata] lo demás que viaja en el registro (los datos del perfil).
+  Future<SupabaseClient> signedUpClient(
+    String prefix, {
+    String? language,
+    Map<String, Object?>? metadata,
+  }) async {
     final client = newClient();
-    final email = '$prefix-${DateTime.now().microsecondsSinceEpoch}@example.com';
-    _emails.add(email);
-    final response = await client.auth.signUp(
-      email: email,
-      password: 'clave-segura-1',
-      data: language == null ? null : {'language': language},
+    final response = await signUp(
+      client,
+      prefix,
+      language: language,
+      metadata: metadata,
     );
     expect(response.session, isNotNull, reason: 'el registro abre sesión');
     return client;
+  }
+
+  /// Registra un usuario nuevo con [client] y devuelve la respuesta tal cual
+  /// (también si el registro falla, para probar lo que la base rechaza). El
+  /// correo se anota: se borra en [dispose] aunque el registro no abra sesión.
+  Future<AuthResponse> signUp(
+    SupabaseClient client,
+    String prefix, {
+    String? language,
+    Map<String, Object?>? metadata,
+  }) {
+    final email = '$prefix-${DateTime.now().microsecondsSinceEpoch}@example.com';
+    _emails.add(email);
+    final data = {'language': ?language, ...?metadata};
+    return client.auth.signUp(
+      email: email,
+      password: 'clave-segura-1',
+      data: data.isEmpty ? null : data,
+    );
   }
 
   Future<void> dispose() async {

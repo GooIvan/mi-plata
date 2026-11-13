@@ -1549,5 +1549,19 @@
   "ratesTagManual": "Manual",
   "ratesSource": "Las tasas automáticas vienen de ExchangeRate-API (exchangerate-api.com) y se actualizan una vez al día. Una tasa que escribas tú queda como manual y no se cambia sola.",
   "ratesUseAutomatic": "Usar la tasa automática",
-  "ratesAutomaticHint": "Esta tasa se actualiza sola. Si la cambias, pasa a manual."
+  "ratesAutomaticHint": "Esta tasa se actualiza sola. Si la cambias, pasa a manual.",
+  "profileSection": "Sobre ti",
+  "profileSectionHelp": "Estos datos son tuyos: solo tú los ves y puedes cambiarlos o borrarlos después.",
+  "profileFirstNameLabel": "Nombres",
+  "profileFirstNameRequired": "Escribe tus nombres",
+  "profileLastNameLabel": "Apellidos",
+  "profileLastNameRequired": "Escribe tus apellidos",
+  "profileBirthDateLabel": "Fecha de nacimiento (opcional)",
+  "profileBirthDateInvalid": "Elige una fecha que ya pasó",
+  "profileBirthDateClear": "Quitar la fecha",
+  "profileProfessionLabel": "Profesión u ocupación (opcional)",
+  "profileIncomeLabel": "Ingreso mensual (opcional)",
+  "profileIncomeHelper": "Tu sueldo o lo que ganas al mes en promedio. Déjalo vacío si no tienes un ingreso fijo.",
+  "profileIncomeInvalid": "Escribe un monto mayor que cero",
+  "dbErrorProfileBirthDateFuture": "La fecha de nacimiento no puede ser futura"
 }

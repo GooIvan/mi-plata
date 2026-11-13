@@ -3569,6 +3569,90 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Esta tasa se actualiza sola. Si la cambias, pasa a manual.'**
   String get ratesAutomaticHint;
+
+  /// No description provided for @profileSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobre ti'**
+  String get profileSection;
+
+  /// No description provided for @profileSectionHelp.
+  ///
+  /// In es, this message translates to:
+  /// **'Estos datos son tuyos: solo tú los ves y puedes cambiarlos o borrarlos después.'**
+  String get profileSectionHelp;
+
+  /// No description provided for @profileFirstNameLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nombres'**
+  String get profileFirstNameLabel;
+
+  /// No description provided for @profileFirstNameRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe tus nombres'**
+  String get profileFirstNameRequired;
+
+  /// No description provided for @profileLastNameLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Apellidos'**
+  String get profileLastNameLabel;
+
+  /// No description provided for @profileLastNameRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe tus apellidos'**
+  String get profileLastNameRequired;
+
+  /// No description provided for @profileBirthDateLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha de nacimiento (opcional)'**
+  String get profileBirthDateLabel;
+
+  /// No description provided for @profileBirthDateInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige una fecha que ya pasó'**
+  String get profileBirthDateInvalid;
+
+  /// No description provided for @profileBirthDateClear.
+  ///
+  /// In es, this message translates to:
+  /// **'Quitar la fecha'**
+  String get profileBirthDateClear;
+
+  /// No description provided for @profileProfessionLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Profesión u ocupación (opcional)'**
+  String get profileProfessionLabel;
+
+  /// No description provided for @profileIncomeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingreso mensual (opcional)'**
+  String get profileIncomeLabel;
+
+  /// No description provided for @profileIncomeHelper.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu sueldo o lo que ganas al mes en promedio. Déjalo vacío si no tienes un ingreso fijo.'**
+  String get profileIncomeHelper;
+
+  /// No description provided for @profileIncomeInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un monto mayor que cero'**
+  String get profileIncomeInvalid;
+
+  /// No description provided for @dbErrorProfileBirthDateFuture.
+  ///
+  /// In es, this message translates to:
+  /// **'La fecha de nacimiento no puede ser futura'**
+  String get dbErrorProfileBirthDateFuture;
 }
 
 class _AppLocalizationsDelegate

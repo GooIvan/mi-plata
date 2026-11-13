@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/supabase/supabase_provider.dart';
+import '../../profile/domain/profile_data.dart';
 import '../data/auth_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
@@ -36,6 +37,7 @@ class AuthController extends AsyncNotifier<void> {
     required String email,
     required String password,
     required String language,
+    ProfileData? profile,
   }) async {
     state = const AsyncLoading();
     var confirmationRequired = false;
@@ -44,6 +46,7 @@ class AuthController extends AsyncNotifier<void> {
         email: email,
         password: password,
         language: language,
+        profile: profile,
       );
     });
     if (ref.mounted) state = result;

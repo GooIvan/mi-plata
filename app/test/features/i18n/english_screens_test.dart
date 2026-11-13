@@ -737,6 +737,7 @@ void main() {
 
   group('acceso', () {
     testWidgets('inicio de sesión y registro', (tester) async {
+      tallView(tester);
       await pumpMiPlata(tester, auth: FakeAuthRepository(), language: 'en');
 
       expect(find.text('Sign in to continue'), findsOneWidget);
@@ -752,6 +753,9 @@ void main() {
       await tester.pump();
       expect(find.text('Enter your email'), findsOneWidget);
       expect(find.text('Create a password'), findsOneWidget);
+      // Los datos personales del registro también salen en inglés.
+      expect(find.text('Enter your first name'), findsOneWidget);
+      expect(find.text('Enter your last name'), findsOneWidget);
     });
   });
 

@@ -121,6 +121,8 @@ void main() {
 
   group('registro', () {
     Future<void> openRegister(WidgetTester tester) async {
+      // El registro ahora pide datos personales: una vista alta lo deja a la vista.
+      tallView(tester);
       await tester.tap(find.text('¿No tienes cuenta? Regístrate'));
       await tester.pumpAndSettle();
     }
@@ -130,10 +132,14 @@ void main() {
       String email = 'ana@correo.com',
       String password = 'clave1234',
       String confirmation = 'clave1234',
+      String firstName = 'Ana María',
+      String lastName = 'Pérez Gómez',
     }) async {
       await tester.enterText(field(0), email);
       await tester.enterText(field(1), password);
       await tester.enterText(field(2), confirmation);
+      await tester.enterText(field(3), firstName);
+      await tester.enterText(field(4), lastName);
     }
 
     testWidgets('se llega desde el inicio de sesión y se puede volver', (
@@ -201,6 +207,7 @@ void main() {
     });
 
     testWidgets('y en inglés, el inglés', (tester) async {
+      tallView(tester);
       final repository = FakeAuthRepository();
       await pumpMiPlata(tester, auth: repository, language: 'en');
       await tester.tap(find.text("Don't have an account? Sign up"));

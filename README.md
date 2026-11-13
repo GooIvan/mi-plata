@@ -35,6 +35,7 @@ Nació para reemplazar el registro manual de gastos y saldos en un chat de Whats
 
 **La app en sí**
 - Español e inglés (sigue el idioma del teléfono) y tema claro u oscuro: en Ajustes eliges entre claro, oscuro o el del teléfono, y el cambio se aplica al instante y se recuerda. Diseño pensado para pantallas pequeñas.
+- **Tu perfil**: al registrarte das tus nombres y apellidos (obligatorios) y, si quieres, tu fecha de nacimiento, tu profesión y tu ingreso mensual promedio. Son datos personales: solo tú los ves, y la app no los usa para nada más por ahora. Ver [Datos personales](#datos-personales).
 - Tu sesión es privada: cada usuario solo ve sus propios datos.
 
 **Lo que todavía no hace:** funcionar sin internet, mandar notificaciones fuera de la app, importar extractos bancarios ni tener versión web. Son las ideas que siguen en la lista de [Futuro](#futuro).
@@ -128,6 +129,7 @@ Cada módulo dentro de `features/` se organiza en capas:
 | `v_monthly_totals` | Vista con ingresos y gastos por mes, tipo, categoría y moneda (para el resumen) |
 | `v_monthly_account_flows` | Vista con lo que entró y salió de cada cuenta cada mes; con el saldo inicial reconstruye el dinero al cierre de cualquier mes |
 | `user_settings` | Preferencias del usuario: la moneda base (`COP` por defecto, también si no hay fila) |
+| `profiles` | El perfil de cada usuario (una fila): nombres, apellidos, fecha de nacimiento, profesión e ingreso mensual con su moneda. Nace con la cuenta, en la misma transacción |
 | `exchange_rates` | Cuánto vale 1 unidad de cada moneda en la moneda base; una tasa por moneda, sin historial. `is_manual` dice si la escribió el usuario (manual, no se pisa) o la trajo el servicio de tasas (automática) |
 | `recurring_payments` | Una regla de pago recurrente: nombre, monto, cuenta, categoría, cada cuánto (`every` + `unit`), próxima fecha, fecha final y pausa. No genera movimientos sola. Con `debt_id` es el plan de cuotas de una deuda |
 | `v_recurring_payments` | Vista con los pagos recurrentes más lo que falta de la deuda de un plan de cuotas y cuántas cuotas lleva pagadas |
@@ -282,6 +284,24 @@ Una meta es **una cantidad que quieres juntar en una cuenta**, con una fecha lí
 - **Reglas**: una cuenta tiene **una sola meta activa** (dos metas sobre la misma cuenta serían el mismo dinero) y **una tarjeta no puede ser la cuenta de una meta**. La cuenta de una meta no se cambia después. El monto está en la moneda de la cuenta.
 - **Archivar**: cuando ya no la necesites, archiva la meta; su cuenta queda libre para otra, y las archivadas se consultan con el botón de la lista. Un saldo negativo cuenta como cero ahorrado.
 - **En el panel** salen las tres metas que vencen primero, con su barra de avance; la lista completa está en *Metas de ahorro*.
+
+---
+
+## 🪪 Datos personales
+
+Al registrarte la app pide, además del correo y la contraseña:
+
+| Dato | ¿Obligatorio? | Notas |
+|---|---|---|
+| Nombres y apellidos | Sí | Hasta 60 caracteres cada uno |
+| Fecha de nacimiento | No | Se guarda la fecha, no la edad, para que no se desactualice. No puede ser futura ni anterior a 1900 |
+| Profesión u ocupación | No | Hasta 80 caracteres |
+| Ingreso mensual (promedio o sueldo) | No | Un monto mayor que cero, en pesos al registrarte. Vacío si no tienes un ingreso fijo |
+
+- **Dónde viven**: en la tabla `profiles`, protegida con RLS (solo el dueño la lee o la cambia). La base la crea junto con el usuario, en la misma transacción: si un dato no es válido, el registro entero se rechaza y no queda una cuenta a medias.
+- **Una copia en el registro**: el servicio de autenticación de Supabase conserva en los metadatos del usuario lo que se mandó al registrarse. El perfil es la fuente de verdad; esa copia no se usa ni se actualiza, y se borra junto con la cuenta.
+- **Para qué se usan hoy**: para nada más que mostrarlos. El ingreso mensual todavía no alimenta ningún cálculo. Pedir solo lo que se use es una regla del proyecto.
+- **Pendiente**: ver y editar el perfil desde Ajustes, y borrar la cuenta con todos sus datos.
 
 ---
 
