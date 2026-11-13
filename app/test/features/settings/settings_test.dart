@@ -7,6 +7,8 @@ import '../../support/fake_auth_repository.dart';
 import '../../support/test_app.dart';
 
 Future<void> openSettings(WidgetTester tester) async {
+  // La pantalla creció con la apariencia: una vista alta deja todo en el árbol.
+  tallView(tester);
   await openFromMore(tester, 'Ajustes');
 }
 
@@ -115,6 +117,132 @@ void main() {
 
       expect(find.widgetWithText(AppBar, 'Settings'), findsOneWidget);
       expect(await savedLanguage(), isNull);
+    });
+  });
+
+  group('apariencia', () {
+    Finder themeOption(String label) =>
+        find.widgetWithText(RadioListTile<ThemeMode>, label);
+
+    Future<String?> savedTheme() async =>
+        (await SharedPreferences.getInstance()).getString('themeMode');
+
+    Brightness shown(WidgetTester tester) =>
+        Theme.of(tester.element(find.byType(Scaffold).first)).brightness;
+
+    void phoneIs(WidgetTester tester, Brightness brightness) {
+      tester.platformDispatcher.platformBrightnessTestValue = brightness;
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+    }
+
+    testWidgets('por defecto sigue al teléfono, claro u oscuro', (
+      tester,
+    ) async {
+      phoneIs(tester, Brightness.dark);
+      await pumpMiPlata(tester);
+      expect(shown(tester), Brightness.dark);
+
+      phoneIs(tester, Brightness.light);
+      await tester.pumpAndSettle();
+      expect(shown(tester), Brightness.light);
+    });
+
+    testWidgets('el selector tiene tres opciones y marca "Tema del teléfono"', (
+      tester,
+    ) async {
+      await pumpMiPlata(tester);
+      await openSettings(tester);
+
+      expect(find.text('Apariencia'), findsOneWidget);
+      for (final label in ['Tema del teléfono', 'Claro', 'Oscuro']) {
+        expect(themeOption(label), findsOneWidget, reason: label);
+      }
+      expect(
+        tester
+            .widget<RadioGroup<ThemeMode>>(find.byType(RadioGroup<ThemeMode>))
+            .groupValue,
+        ThemeMode.system,
+      );
+    });
+
+    testWidgets(
+      'elegir Oscuro cambia la app al instante aunque el teléfono sea claro',
+      (tester) async {
+        phoneIs(tester, Brightness.light);
+        await pumpMiPlata(tester);
+        await openSettings(tester);
+        expect(shown(tester), Brightness.light);
+
+        await tester.tap(themeOption('Oscuro'));
+        await tester.pumpAndSettle();
+
+        expect(shown(tester), Brightness.dark);
+        expect(await savedTheme(), 'dark');
+      },
+    );
+
+    testWidgets('elegir Claro cambia la app aunque el teléfono sea oscuro', (
+      tester,
+    ) async {
+      phoneIs(tester, Brightness.dark);
+      await pumpMiPlata(tester);
+      await openSettings(tester);
+
+      await tester.tap(themeOption('Claro'));
+      await tester.pumpAndSettle();
+
+      expect(shown(tester), Brightness.light);
+      expect(await savedTheme(), 'light');
+    });
+
+    testWidgets('la elección guardada se aplica al abrir la app', (
+      tester,
+    ) async {
+      phoneIs(tester, Brightness.light);
+      await pumpMiPlata(tester, themeMode: 'dark');
+      expect(shown(tester), Brightness.dark);
+
+      await openSettings(tester);
+      expect(
+        tester
+            .widget<RadioGroup<ThemeMode>>(find.byType(RadioGroup<ThemeMode>))
+            .groupValue,
+        ThemeMode.dark,
+      );
+    });
+
+    testWidgets('volver a "Tema del teléfono" borra la elección', (
+      tester,
+    ) async {
+      phoneIs(tester, Brightness.light);
+      await pumpMiPlata(tester, themeMode: 'dark');
+      await openSettings(tester);
+
+      await tester.tap(themeOption('Tema del teléfono'));
+      await tester.pumpAndSettle();
+
+      expect(shown(tester), Brightness.light);
+      expect(await savedTheme(), isNull);
+    });
+
+    testWidgets('un valor guardado desconocido cae en "teléfono"', (
+      tester,
+    ) async {
+      phoneIs(tester, Brightness.light);
+      await pumpMiPlata(tester, themeMode: 'morado');
+      expect(shown(tester), Brightness.light);
+    });
+
+    testWidgets('el selector sale en inglés con la app en inglés', (
+      tester,
+    ) async {
+      await pumpMiPlata(tester, language: 'en');
+      await openFromMore(tester, 'Settings', more: 'More');
+
+      expect(find.text('Appearance'), findsOneWidget);
+      for (final label in ['Phone theme', 'Light', 'Dark']) {
+        expect(themeOption(label), findsOneWidget, reason: label);
+      }
     });
   });
 

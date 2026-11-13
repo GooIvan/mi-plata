@@ -3491,6 +3491,30 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Esta compra está diferida en cuotas: para cambiar el monto o la tarjeta, bórrala y regístrala de nuevo'**
   String get dbErrorInstallmentPurchaseLocked;
+
+  /// No description provided for @settingsAppearance.
+  ///
+  /// In es, this message translates to:
+  /// **'Apariencia'**
+  String get settingsAppearance;
+
+  /// No description provided for @settingsThemeSystem.
+  ///
+  /// In es, this message translates to:
+  /// **'Tema del teléfono'**
+  String get settingsThemeSystem;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In es, this message translates to:
+  /// **'Claro'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In es, this message translates to:
+  /// **'Oscuro'**
+  String get settingsThemeDark;
 }
 
 class _AppLocalizationsDelegate

@@ -33,6 +33,7 @@ void main() {
     });
 
     testWidgets('cerrar sesión devuelve al inicio de sesión', (tester) async {
+      tallView(tester);
       final repository = FakeAuthRepository(signedInAs: 'ana@correo.com');
       await pumpApp(tester, repository);
 
