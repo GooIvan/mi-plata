@@ -1558,5 +1558,7 @@
   "profileDeleteBody": "Your account and everything you recorded will be erased forever: accounts, transactions, debts, budgets, goals and your profile. This can't be undone.",
   "profileDeletePasswordLabel": "Your password",
   "profileDeleteConfirm": "Delete forever",
-  "profileDeleteError": "Couldn't delete the account. Try again."
+  "profileDeleteError": "Couldn't delete the account. Try again.",
+  "transactionsDetailDescription": "Description",
+  "transactionsDetailReceived": "Arrives in the destination account"
 }

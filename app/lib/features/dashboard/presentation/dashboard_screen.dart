@@ -18,6 +18,7 @@ import '../../summary/presentation/summary_providers.dart';
 import '../../transactions/presentation/transaction_error_message.dart';
 import '../../transactions/presentation/transaction_form_screen.dart';
 import '../../transactions/presentation/transactions_providers.dart';
+import '../../transactions/presentation/widgets/transaction_detail_sheet.dart';
 import '../../transactions/presentation/widgets/transaction_tile.dart';
 import '../../debts/presentation/debts_providers.dart';
 import '../../profile/presentation/profile_providers.dart';
@@ -197,10 +198,8 @@ class DashboardScreen extends ConsumerWidget {
                             accountNames: accountNames,
                             accountCurrencies: accountCurrencies,
                             categoryNames: categoryNames,
-                            onTap: () => showTransactionForm(
-                              context,
-                              transaction: transaction,
-                            ),
+                            onTap: () =>
+                                showTransactionDetail(context, transaction),
                           ),
                       ],
                     ),

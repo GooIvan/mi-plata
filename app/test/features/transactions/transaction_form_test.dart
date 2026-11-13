@@ -294,8 +294,7 @@ void main() {
 
     Future<void> openFirstMovement(WidgetTester tester) async {
       await goTo(tester, AppRoutes.transactions);
-      await tester.tap(find.text('Compra semanal'));
-      await tester.pumpAndSettle();
+      await openMovementForEdit(tester, find.text('Compra semanal'));
     }
 
     testWidgets('precarga los datos y guarda los cambios', (tester) async {
@@ -343,8 +342,7 @@ void main() {
         ),
       );
       await goTo(tester, AppRoutes.transactions);
-      await tester.tap(find.text('Prueba'));
-      await tester.pumpAndSettle();
+      await openMovementForEdit(tester, find.text('Prueba'));
 
       await tester.tap(segment('Transferencia'));
       await tester.pumpAndSettle();
@@ -572,8 +570,7 @@ void main() {
 
       Future<void> openPurchase(WidgetTester tester) async {
         await goTo(tester, AppRoutes.transactions);
-        await tester.tap(find.text('Compra'));
-        await tester.pumpAndSettle();
+        await openMovementForEdit(tester, find.text('Compra'));
       }
 
       testWidgets('subir el monto más allá del saldo avisa con "Guardar igual"', (
@@ -648,8 +645,7 @@ void main() {
       );
       await pumpMiPlata(tester, backend: backend);
       await goTo(tester, AppRoutes.transactions);
-      await tester.tap(find.text('Sueldo'));
-      await tester.pumpAndSettle();
+      await openMovementForEdit(tester, find.text('Sueldo'));
 
       await tester.tap(find.byTooltip('Eliminar movimiento'));
       await tester.pumpAndSettle();
@@ -677,8 +673,7 @@ void main() {
       );
       await pumpMiPlata(tester, backend: backend);
       await goTo(tester, AppRoutes.transactions);
-      await tester.tap(find.text('Compra'));
-      await tester.pumpAndSettle();
+      await openMovementForEdit(tester, find.text('Compra'));
 
       await tester.tap(find.byTooltip('Eliminar movimiento'));
       await tester.pumpAndSettle();
@@ -729,8 +724,7 @@ void main() {
       final backend = withArchivedCategory();
       await pumpMiPlata(tester, backend: backend);
       await goTo(tester, AppRoutes.transactions);
-      await tester.tap(find.text('Vieja'));
-      await tester.pumpAndSettle();
+      await openMovementForEdit(tester, find.text('Vieja'));
 
       expect(find.text('Vieja (archivada)'), findsOneWidget);
 

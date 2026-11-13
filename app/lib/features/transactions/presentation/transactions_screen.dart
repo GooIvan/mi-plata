@@ -12,6 +12,7 @@ import 'transaction_form_screen.dart';
 import 'transaction_list_providers.dart';
 import 'transaction_type_ui.dart';
 import 'transactions_providers.dart';
+import 'widgets/transaction_detail_sheet.dart';
 import 'widgets/transaction_filter_sheet.dart';
 import 'widgets/transaction_tile.dart';
 
@@ -272,8 +273,7 @@ class _TransactionList extends ConsumerWidget {
               accountNames: accountNames,
               accountCurrencies: accountCurrencies,
               categoryNames: categoryNames,
-              onTap: () =>
-                  showTransactionForm(context, transaction: transaction),
+              onTap: () => showTransactionDetail(context, transaction),
             ),
           ),
         );
