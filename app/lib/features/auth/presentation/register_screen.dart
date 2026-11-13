@@ -9,6 +9,7 @@ import '../../accounts/domain/amount_parser.dart';
 import '../../currency/domain/currency.dart';
 import '../../profile/domain/profile_data.dart';
 import '../../profile/domain/profile_validators.dart';
+import '../../profile/presentation/widgets/birth_date_field.dart';
 import '../domain/auth_validators.dart';
 import 'auth_error_message.dart';
 import 'auth_providers.dart';
@@ -45,23 +46,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _profession.dispose();
     _income.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickBirthDate() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _birthDate ?? DateTime(now.year - 30, now.month, now.day),
-      firstDate: ProfileValidators.earliestBirthDate,
-      lastDate: now,
-      helpText: context.l10n.profileBirthDateLabel,
-    );
-    if (picked != null) {
-      setState(() {
-        _birthDate = picked;
-        _birthDateError = null;
-      });
-    }
   }
 
   Future<void> _submit() async {
@@ -199,30 +183,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                InkWell(
-                  onTap: isLoading ? null : _pickBirthDate,
-                  borderRadius: BorderRadius.circular(4),
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: context.l10n.profileBirthDateLabel,
-                      errorText: _birthDateError,
-                      border: const OutlineInputBorder(),
-                      suffixIcon: _birthDate == null
-                          ? const Icon(Icons.calendar_today_outlined)
-                          : IconButton(
-                              tooltip: context.l10n.profileBirthDateClear,
-                              icon: const Icon(Icons.close),
-                              onPressed: isLoading
-                                  ? null
-                                  : () => setState(() => _birthDate = null),
-                            ),
-                    ),
-                    child: Text(
-                      _birthDate == null
-                          ? ''
-                          : context.formats.fullDate(_birthDate!),
-                    ),
-                  ),
+                BirthDateField(
+                  value: _birthDate,
+                  enabled: !isLoading,
+                  errorText: _birthDateError,
+                  onChanged: (date) => setState(() {
+                    _birthDate = date;
+                    _birthDateError = null;
+                  }),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

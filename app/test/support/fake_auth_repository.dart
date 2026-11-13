@@ -71,6 +71,16 @@ class FakeAuthRepository implements AuthRepository {
     return false;
   }
 
+  /// Las contraseñas nuevas que se pidieron.
+  final updatedPasswords = <String>[];
+
+  @override
+  Future<void> updatePassword(String newPassword) async {
+    calls.add('updatePassword');
+    if (error != null) throw error!;
+    updatedPasswords.add(newPassword);
+  }
+
   @override
   Future<void> signOut() async {
     calls.add('signOut');

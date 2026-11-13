@@ -233,11 +233,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsSession => 'Sesión';
 
   @override
-  String settingsSignedInAs(String email) {
-    return 'Sesión iniciada como $email';
-  }
-
-  @override
   String get settingsSignOut => 'Cerrar sesión';
 
   @override
@@ -2201,4 +2196,62 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get dbErrorProfileBirthDateFuture =>
       'La fecha de nacimiento no puede ser futura';
+
+  @override
+  String get settingsProfile => 'Mi perfil';
+
+  @override
+  String get settingsProfileIncomplete => 'Completa tus datos';
+
+  @override
+  String get profileTitle => 'Mi perfil';
+
+  @override
+  String get profileEmailLocked => 'El correo no se puede cambiar desde aquí.';
+
+  @override
+  String get profileIncompleteHint =>
+      'Aún no tienes tus datos guardados. Complétalos cuando quieras; no es obligatorio para usar la app.';
+
+  @override
+  String get profileSaved => 'Perfil guardado';
+
+  @override
+  String get profileSaveError =>
+      'No se pudo guardar tu perfil. Revisa los datos e inténtalo de nuevo.';
+
+  @override
+  String get profileLoadError => 'No se pudo cargar tu perfil.';
+
+  @override
+  String get profileSecurity => 'Seguridad';
+
+  @override
+  String get profileChangePassword => 'Cambiar contraseña';
+
+  @override
+  String get profileNewPasswordLabel => 'Nueva contraseña';
+
+  @override
+  String get profilePasswordChanged => 'Contraseña actualizada';
+
+  @override
+  String get profileDeleteAccount => 'Eliminar mi cuenta y mis datos';
+
+  @override
+  String get profileDeleteTitle => '¿Eliminar tu cuenta?';
+
+  @override
+  String get profileDeleteBody =>
+      'Se borrarán para siempre tu cuenta y todo lo que registraste: cuentas, movimientos, deudas, presupuestos, metas y tu perfil. No se puede deshacer.';
+
+  @override
+  String get profileDeletePasswordLabel => 'Tu contraseña';
+
+  @override
+  String get profileDeleteConfirm => 'Eliminar para siempre';
+
+  @override
+  String get profileDeleteError =>
+      'No se pudo eliminar la cuenta. Inténtalo de nuevo.';
 }

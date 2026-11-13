@@ -35,7 +35,7 @@ Nació para reemplazar el registro manual de gastos y saldos en un chat de Whats
 
 **La app en sí**
 - Español e inglés (sigue el idioma del teléfono) y tema claro u oscuro: en Ajustes eliges entre claro, oscuro o el del teléfono, y el cambio se aplica al instante y se recuerda. Diseño pensado para pantallas pequeñas.
-- **Tu perfil**: al registrarte das tus nombres y apellidos (obligatorios) y, si quieres, tu fecha de nacimiento, tu profesión y tu ingreso mensual promedio. Son datos personales: solo tú los ves, y la app no los usa para nada más por ahora. Ver [Datos personales](#datos-personales).
+- **Tu perfil**: al registrarte das tus nombres y apellidos (obligatorios) y, si quieres, tu fecha de nacimiento, tu profesión y tu ingreso mensual promedio. Son datos personales: solo tú los ves, y la app no los usa para nada más por ahora. Los ves y cambias en **Ajustes → Mi perfil**, donde también puedes **cambiar tu contraseña** y **eliminar tu cuenta con todos tus datos**. Ver [Datos personales](#datos-personales).
 - Tu sesión es privada: cada usuario solo ve sus propios datos.
 
 **Lo que todavía no hace:** funcionar sin internet, mandar notificaciones fuera de la app, importar extractos bancarios ni tener versión web. Son las ideas que siguen en la lista de [Futuro](#futuro).
@@ -137,7 +137,7 @@ Cada módulo dentro de `features/` se organiza en capas:
 | `card_installment_plans` | Una compra con tarjeta diferida en cuotas: el gasto al que pertenece, lo que costaba sin intereses, cuántas cuotas y de cuánto cada una |
 | `v_card_installment_plans` | Vista con cada plan y los datos de su gasto (tarjeta, fecha, descripción, total) |
 
-Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa. Lo mismo vale para `set_exchange_rate` y `set_base_currency`, que reexpresa las tasas y los presupuestos al cambiar la moneda base, y para `confirm_recurring_payment`, `skip_recurring_payment`, `create_installment_debt` y `create_card_installment_purchase`.
+Crear una deuda y registrar un abono son funciones de Postgres (`create_debt`, `register_debt_payment`) que se ejecutan completas o no se ejecutan: nunca queda dinero movido sin que la deuda lo sepa. Lo mismo vale para `set_exchange_rate` y `set_base_currency`, que reexpresa las tasas y los presupuestos al cambiar la moneda base, y para `confirm_recurring_payment`, `skip_recurring_payment`, `create_installment_debt`, `create_card_installment_purchase`, `set_automatic_rates` y `delete_my_account`.
 
 **Principios de diseño:**
 
@@ -301,7 +301,9 @@ Al registrarte la app pide, además del correo y la contraseña:
 - **Dónde viven**: en la tabla `profiles`, protegida con RLS (solo el dueño la lee o la cambia). La base la crea junto con el usuario, en la misma transacción: si un dato no es válido, el registro entero se rechaza y no queda una cuenta a medias.
 - **Una copia en el registro**: el servicio de autenticación de Supabase conserva en los metadatos del usuario lo que se mandó al registrarse. El perfil es la fuente de verdad; esa copia no se usa ni se actualiza, y se borra junto con la cuenta.
 - **Para qué se usan hoy**: para nada más que mostrarlos. El ingreso mensual todavía no alimenta ningún cálculo. Pedir solo lo que se use es una regla del proyecto.
-- **Pendiente**: ver y editar el perfil desde Ajustes, y borrar la cuenta con todos sus datos.
+- **Verlos y cambiarlos**: Ajustes → Mi perfil. Mismas reglas que el registro (nombres y apellidos siguen siendo obligatorios). Quien se registró antes de que existiera el perfil lo ve vacío y lo completa cuando quiera: no es obligatorio para usar la app. El correo no se cambia desde ahí. En Inicio, la inicial del avatar sale de tu nombre.
+- **Cambiar la contraseña**: desde el mismo perfil, con las mismas reglas que al registrarte.
+- **Eliminar tu cuenta**: pide tu contraseña otra vez y **borra para siempre** tu usuario y todo lo tuyo (cuentas, movimientos, deudas, presupuestos, metas, tasas, tarjetas y perfil); no se puede deshacer. Lo hace la función de base de datos `delete_my_account()`, que solo borra al usuario que la llama. Es el derecho a borrar tus datos.
 
 ---
 

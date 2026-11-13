@@ -27,7 +27,8 @@ void main() {
 
     expect(find.widgetWithText(AppBar, 'Ajustes'), findsOneWidget);
     expect(find.text('Idioma'), findsOneWidget);
-    expect(find.text('Sesión iniciada como ana@correo.com'), findsOneWidget);
+    // Ya no hay una línea "Sesión iniciada como…": el correo está en el perfil.
+    expect(find.textContaining('Sesión iniciada como'), findsNothing);
   });
 
   testWidgets('muestra el idioma elegido', (tester) async {
@@ -53,7 +54,7 @@ void main() {
 
     expect(find.widgetWithText(AppBar, 'Settings'), findsOneWidget);
     expect(find.text('Language'), findsOneWidget);
-    expect(find.text('Signed in as ana@correo.com'), findsOneWidget);
+    expect(find.textContaining('Signed in as'), findsNothing);
     expect(await savedLanguage(), 'en');
 
     // Y las demás pantallas también.

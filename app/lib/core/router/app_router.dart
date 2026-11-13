@@ -17,6 +17,7 @@ import '../../features/more/presentation/more_screen.dart';
 import '../../features/recurring/presentation/recurring_screen.dart';
 import '../../features/savings/presentation/goals_screen.dart';
 import '../../features/debts/presentation/debts_screen.dart';
+import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/summary/presentation/summary_screen.dart';
 import '../../features/transactions/presentation/transactions_screen.dart';
@@ -85,6 +86,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.settings,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => const ProfileScreen(),
       ),
       GoRoute(
         path: AppRoutes.login,

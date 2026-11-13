@@ -500,12 +500,6 @@ abstract class AppLocalizations {
   /// **'Sesión'**
   String get settingsSession;
 
-  /// No description provided for @settingsSignedInAs.
-  ///
-  /// In es, this message translates to:
-  /// **'Sesión iniciada como {email}'**
-  String settingsSignedInAs(String email);
-
   /// No description provided for @settingsSignOut.
   ///
   /// In es, this message translates to:
@@ -3653,6 +3647,114 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'La fecha de nacimiento no puede ser futura'**
   String get dbErrorProfileBirthDateFuture;
+
+  /// No description provided for @settingsProfile.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi perfil'**
+  String get settingsProfile;
+
+  /// No description provided for @settingsProfileIncomplete.
+  ///
+  /// In es, this message translates to:
+  /// **'Completa tus datos'**
+  String get settingsProfileIncomplete;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi perfil'**
+  String get profileTitle;
+
+  /// No description provided for @profileEmailLocked.
+  ///
+  /// In es, this message translates to:
+  /// **'El correo no se puede cambiar desde aquí.'**
+  String get profileEmailLocked;
+
+  /// No description provided for @profileIncompleteHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no tienes tus datos guardados. Complétalos cuando quieras; no es obligatorio para usar la app.'**
+  String get profileIncompleteHint;
+
+  /// No description provided for @profileSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Perfil guardado'**
+  String get profileSaved;
+
+  /// No description provided for @profileSaveError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar tu perfil. Revisa los datos e inténtalo de nuevo.'**
+  String get profileSaveError;
+
+  /// No description provided for @profileLoadError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cargar tu perfil.'**
+  String get profileLoadError;
+
+  /// No description provided for @profileSecurity.
+  ///
+  /// In es, this message translates to:
+  /// **'Seguridad'**
+  String get profileSecurity;
+
+  /// No description provided for @profileChangePassword.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar contraseña'**
+  String get profileChangePassword;
+
+  /// No description provided for @profileNewPasswordLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva contraseña'**
+  String get profileNewPasswordLabel;
+
+  /// No description provided for @profilePasswordChanged.
+  ///
+  /// In es, this message translates to:
+  /// **'Contraseña actualizada'**
+  String get profilePasswordChanged;
+
+  /// No description provided for @profileDeleteAccount.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar mi cuenta y mis datos'**
+  String get profileDeleteAccount;
+
+  /// No description provided for @profileDeleteTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar tu cuenta?'**
+  String get profileDeleteTitle;
+
+  /// No description provided for @profileDeleteBody.
+  ///
+  /// In es, this message translates to:
+  /// **'Se borrarán para siempre tu cuenta y todo lo que registraste: cuentas, movimientos, deudas, presupuestos, metas y tu perfil. No se puede deshacer.'**
+  String get profileDeleteBody;
+
+  /// No description provided for @profileDeletePasswordLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu contraseña'**
+  String get profileDeletePasswordLabel;
+
+  /// No description provided for @profileDeleteConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar para siempre'**
+  String get profileDeleteConfirm;
+
+  /// No description provided for @profileDeleteError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo eliminar la cuenta. Inténtalo de nuevo.'**
+  String get profileDeleteError;
 }
 
 class _AppLocalizationsDelegate

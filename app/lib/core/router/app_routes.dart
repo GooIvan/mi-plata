@@ -11,6 +11,7 @@ class AppRoutes {
   static const debts = '/debts';
   static const budgets = '/budgets';
   static const settings = '/settings';
+  static const profile = '/profile';
   static const rates = '/rates';
   static const recurring = '/recurring';
   static const goals = '/goals';

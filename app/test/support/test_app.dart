@@ -15,6 +15,7 @@ import 'package:mi_plata/features/currency/domain/currency_converter.dart';
 import 'package:mi_plata/features/accounts/presentation/accounts_providers.dart';
 import 'package:mi_plata/features/accounts/presentation/card_providers.dart';
 import 'package:mi_plata/features/currency/presentation/rates_refresh.dart';
+import 'package:mi_plata/features/profile/presentation/profile_providers.dart';
 import 'package:mi_plata/features/auth/presentation/auth_providers.dart';
 import 'package:mi_plata/features/budgets/presentation/budgets_providers.dart';
 import 'package:mi_plata/features/categories/presentation/categories_providers.dart';
@@ -164,6 +165,7 @@ Future<FakeBackend> pumpMiPlata(
         recurringRepositoryProvider.overrideWithValue(fakes.recurring),
         savingsGoalRepositoryProvider.overrideWithValue(fakes.goals),
         cardInstallmentRepositoryProvider.overrideWithValue(fakes.installments),
+        profileRepositoryProvider.overrideWithValue(fakes.profile),
         // Sin salir a internet: un servicio de mentira, y sin actualizar al abrir
         // salvo que la prueba lo pida.
         exchangeRateApiProvider.overrideWithValue(rateApi ?? FakeExchangeRateApi()),
