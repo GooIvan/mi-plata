@@ -216,3 +216,11 @@ Future<void> openMovementForEdit(WidgetTester tester, Finder movement) async {
   await tester.tap(find.widgetWithText(FilledButton, 'Editar'));
   await tester.pumpAndSettle();
 }
+
+/// Toca una cuenta y, en su detalle, "Editar": abre el formulario de edición.
+Future<void> openAccountForEdit(WidgetTester tester, Finder account) async {
+  await tester.tap(account);
+  await tester.pumpAndSettle();
+  await tester.tap(find.widgetWithText(FilledButton, 'Editar'));
+  await tester.pumpAndSettle();
+}

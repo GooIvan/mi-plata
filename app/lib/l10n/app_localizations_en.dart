@@ -2263,4 +2263,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionsDetailReceived => 'Arrives in the destination account';
+
+  @override
+  String get accountsDetailCurrentBalance => 'Current balance';
+
+  @override
+  String get accountsDetailInitialBalance => 'Initial balance';
+
+  @override
+  String get accountsDetailMovements => 'View transactions';
 }

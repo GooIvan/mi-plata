@@ -7,6 +7,7 @@ import '../../currency/presentation/currency_providers.dart';
 import '../domain/account.dart';
 import 'account_error_message.dart';
 import 'accounts_providers.dart';
+import 'widgets/account_detail_sheet.dart';
 import 'widgets/account_form_sheet.dart';
 import 'widgets/account_tile.dart';
 
@@ -125,6 +126,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             account: account,
             baseCurrency: ref.watch(currencyConverterProvider).value?.base,
             onEdit: () => showAccountForm(context, account: account),
+            onShow: () => showAccountDetail(context, account),
             onToggleArchived: () =>
                 _setArchived(account, archived: !account.isArchived),
           ),

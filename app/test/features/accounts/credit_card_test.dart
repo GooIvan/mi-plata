@@ -425,8 +425,7 @@ void main() {
       ]);
       await openAccounts(tester, repository);
 
-      await tester.tap(find.text('Visa'));
-      await tester.pumpAndSettle();
+      await openAccountForEdit(tester, find.text('Visa'));
 
       expect(find.widgetWithText(TextFormField, '3000000'), findsOneWidget);
       expect(find.widgetWithText(TextFormField, '15'), findsOneWidget);
@@ -458,8 +457,7 @@ void main() {
       ]);
       await openAccounts(tester, repository);
 
-      await tester.tap(find.text('Visa'));
-      await tester.pumpAndSettle();
+      await openAccountForEdit(tester, find.text('Visa'));
       await tester.tap(find.widgetWithText(ChoiceChip, 'Banco'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Guardar'));

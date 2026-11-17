@@ -3767,6 +3767,24 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Llega a la cuenta de destino'**
   String get transactionsDetailReceived;
+
+  /// No description provided for @accountsDetailCurrentBalance.
+  ///
+  /// In es, this message translates to:
+  /// **'Saldo actual'**
+  String get accountsDetailCurrentBalance;
+
+  /// No description provided for @accountsDetailInitialBalance.
+  ///
+  /// In es, this message translates to:
+  /// **'Saldo inicial'**
+  String get accountsDetailInitialBalance;
+
+  /// No description provided for @accountsDetailMovements.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver movimientos'**
+  String get accountsDetailMovements;
 }
 
 class _AppLocalizationsDelegate

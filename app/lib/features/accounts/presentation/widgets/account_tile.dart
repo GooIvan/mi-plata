@@ -20,6 +20,7 @@ class AccountTile extends StatelessWidget {
     super.key,
     required this.account,
     required this.onEdit,
+    required this.onShow,
     required this.onToggleArchived,
     this.baseCurrency,
     this.today,
@@ -30,6 +31,10 @@ class AccountTile extends StatelessWidget {
   /// La moneda base: si la cuenta es de otra, se dice cuál.
   final String? baseCurrency;
   final VoidCallback onEdit;
+
+  /// Tocar la cuenta: abre su detalle (la edición está en el menú y en el
+  /// botón *Editar* del detalle).
+  final VoidCallback onShow;
   final VoidCallback onToggleArchived;
 
   /// El día de hoy, para las fechas de una tarjeta; null es el día de verdad.
@@ -94,7 +99,7 @@ class AccountTile extends StatelessWidget {
             ),
           ],
         ),
-        onTap: onEdit,
+        onTap: onShow,
       );
 
     return Opacity(
