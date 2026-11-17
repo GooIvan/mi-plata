@@ -9,6 +9,7 @@ import '../../accounts/presentation/accounts_providers.dart';
 import '../../currency/presentation/currency_providers.dart';
 import '../../transactions/domain/transaction.dart';
 import '../../transactions/domain/transaction_type.dart';
+import '../../transactions/presentation/widgets/transaction_detail_sheet.dart';
 import '../../transactions/presentation/transaction_form_screen.dart';
 import '../../transactions/presentation/transactions_providers.dart';
 import '../domain/goal_movement.dart';
@@ -356,10 +357,7 @@ class _History extends ConsumerWidget {
                       date: formats.fullDate(transaction.date),
                       deltaCents: accountDeltaCents(transaction, accountId),
                       currency: currency,
-                      onTap: () => showTransactionForm(
-                        context,
-                        transaction: transaction,
-                      ),
+                      onTap: () => showTransactionDetail(context, transaction),
                     ),
                 ],
               ),

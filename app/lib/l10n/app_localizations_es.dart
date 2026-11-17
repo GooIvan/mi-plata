@@ -2254,4 +2254,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get profileDeleteError =>
       'No se pudo eliminar la cuenta. Inténtalo de nuevo.';
+
+  @override
+  String get transactionsDetailDescription => 'Descripción';
+
+  @override
+  String get transactionsDetailReceived => 'Llega a la cuenta de destino';
 }
