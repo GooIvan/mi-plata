@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/format/formats.dart';
-import '../../../../core/widgets/error_banner.dart';
+import '../../../../core/widgets/error_alert.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../currency/domain/currency.dart';
 import '../../../currency/presentation/currency_providers.dart';
@@ -234,10 +234,7 @@ class _BudgetFormSheetState extends ConsumerState<BudgetFormSheet> {
                 border: const OutlineInputBorder(),
               ),
             ),
-            if (_error != null) ...[
-              const SizedBox(height: 16),
-              ErrorBanner(_error!),
-            ],
+            if (_error != null) ErrorAlert(_error!),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _saving || (!fixed && options.isEmpty) ? null : _save,

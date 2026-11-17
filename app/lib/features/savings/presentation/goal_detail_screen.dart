@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/format/formats.dart';
 import '../../../core/widgets/state_message.dart';
+import '../../../core/widgets/error_alert.dart';
 import '../../../l10n/l10n.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/accounts_providers.dart';
@@ -39,9 +40,7 @@ class GoalDetailScreen extends ConsumerWidget {
           .read(savingsGoalsProvider.notifier)
           .setArchived(progress.goal.id, isArchived: archived);
     } catch (error) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(goalErrorMessage(l10n, error))),
-      );
+      if (context.mounted) showErrorAlert(context, goalErrorMessage(l10n, error));
       return;
     }
     messenger.showSnackBar(
