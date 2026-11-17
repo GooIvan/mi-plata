@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/finance_colors.dart';
+import '../../../../core/widgets/brand_mark.dart';
 
 /// Marco común de las pantallas de acceso: marca, subtítulo y contenido.
 class AuthLayout extends StatelessWidget {
@@ -23,36 +23,10 @@ class AuthLayout extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: context.finance.heroGradient,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: context.finance.heroGradient.first
-                                .withValues(alpha: 0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.account_balance_wallet_rounded,
-                        size: 36,
-                        color: context.finance.onHero,
-                      ),
-                    ),
-                  ),
+                  const Center(child: BrandMark(height: 84)),
                   const SizedBox(height: 16),
                   Text(
-                    'mi-plata',
+                    BrandMark.appName,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineMedium,
                   ),
