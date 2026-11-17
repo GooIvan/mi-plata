@@ -6,6 +6,7 @@
 Lee `app/assets/branding/originales/` y escribe en `app/assets/branding/`:
 
   simbolo-color / -negro / -blanco.png   billetera con monedas, sin texto, 1024 px
+  simbolo-color-recortado.png            el de color recortado al dibujo (dentro de la app)
   logo-horizontal-* / logo-vertical-*    símbolo + el texto "Mi Plata"
   icono-*.png                            piezas del ícono de Android
 
@@ -166,6 +167,10 @@ def main():
     for nombre, img in (("color", color), ("negro", negro), ("blanco", blanco)):
         centrado(con_altura(img, alto)).save(SALIDA / f"simbolo-{nombre}.png")
 
+    # El símbolo a color recortado al dibujo, para usarlo dentro de la app (el de
+    # 1024 px trae mucho margen). Es el único que se empaqueta en la app.
+    con_ancho(color, 640).save(SALIDA / "simbolo-color-recortado.png")
+
     # Logos con texto, recortados al contenido y con margen.
     variantes = {
         "color-fondo-oscuro": (color, (BLANCO_CALIDO, VERDE_FONDO_OSCURO)),
@@ -179,9 +184,12 @@ def main():
                 SALIDA / f"logo-{orient}-{nombre}.png"
             )
 
-    # Piezas del ícono de Android. Un ícono adaptable solo muestra el centro
-    # (un círculo de 66 de 108 dp): el dibujo tiene que caber ahí.
-    ancho_icono = round(LIENZO * 0.55)
+    # Piezas del ícono de Android. Un ícono adaptable solo muestra el centro (un
+    # círculo de 66 de 108 dp). flutter_launcher_icons encoge además el primer
+    # plano un 16 % por cada lado (inset), es decir, a un 68 % del lienzo: el
+    # dibujo debe llenar la pieza para que, ya encogida, ocupe el 48 % del ícono.
+    INSET = 0.68
+    ancho_icono = round(LIENZO * 0.48 / INSET)
     centrado(con_ancho(color, ancho_icono)).save(SALIDA / "icono-primer-plano.png")
     centrado(con_ancho(negro, round(ancho_icono * 0.90))).save(
         SALIDA / "icono-monocromo.png"

@@ -55,6 +55,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -71,6 +72,8 @@ flutter:
 
   assets:
     - .env
+    # Solo el símbolo que usa la app; el resto de assets/branding/ son fuentes.
+    - assets/branding/simbolo-color-recortado.png
 
   fonts:
     - family: PlusJakartaSans
@@ -113,3 +116,17 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Íconos de Android: se generan con `dart run flutter_launcher_icons` a partir de
+# las piezas de assets/branding/ (que salen de scripts/generar-logos.py).
+flutter_launcher_icons:
+  android: true
+  ios: false
+  # Ícono clásico (Android anterior a 8): cuadrado completo.
+  image_path: "assets/branding/icono-clasico.png"
+  min_sdk_android: 21
+  # Ícono adaptable: el dibujo sobre el azul noche del logo, y la silueta de un
+  # solo color para el ícono temático de Android 13.
+  adaptive_icon_background: "#050D1E"
+  adaptive_icon_foreground: "assets/branding/icono-primer-plano.png"
+  adaptive_icon_monochrome: "assets/branding/icono-monocromo.png"

@@ -201,7 +201,7 @@ void main() {
       (tester) async {
         await pumpMiPlata(tester, backend: withMovements());
 
-        expect(find.text('mi-plata'), findsOneWidget);
+        expect(find.text('Mi Plata'), findsOneWidget);
         expect(find.widgetWithText(CircleAvatar, 'A'), findsOneWidget);
 
         await tester.tap(find.byTooltip('ana@correo.com'));

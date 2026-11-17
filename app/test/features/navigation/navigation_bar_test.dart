@@ -39,7 +39,7 @@ void main() {
       expect(tab(label), findsOneWidget, reason: label);
     }
     expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex, 0);
-    expect(find.text('mi-plata'), findsOneWidget);
+    expect(find.text('Mi Plata'), findsOneWidget);
   });
 
   testWidgets('cada pestaña abre su pantalla y la marca como elegida', (tester) async {
@@ -65,7 +65,7 @@ void main() {
 
     await tester.tap(tab('Inicio'));
     await tester.pumpAndSettle();
-    expect(find.text('mi-plata'), findsOneWidget);
+    expect(find.text('Mi Plata'), findsOneWidget);
   });
 
   testWidgets('las pestañas no tienen flecha de volver', (tester) async {

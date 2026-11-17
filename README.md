@@ -1,6 +1,13 @@
-# 💰 mi-plata
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="app/assets/branding/logo-vertical-color-fondo-oscuro.png">
+    <img src="app/assets/branding/logo-vertical-color-fondo-claro.png" alt="Mi Plata" width="280">
+  </picture>
+</p>
 
-**mi-plata** es una app de finanzas personales para el celular. Sirve para saber cuánto dinero tienes y dónde está, anotar lo que ganas y lo que gastas, llevar tus deudas y tus tarjetas de crédito, y ahorrar para lo que quieres.
+# Mi Plata
+
+**Mi Plata** es una app de finanzas personales para el celular. Sirve para saber cuánto dinero tienes y dónde está, anotar lo que ganas y lo que gastas, llevar tus deudas y tus tarjetas de crédito, y ahorrar para lo que quieres.
 
 Nació para reemplazar el registro manual de gastos y saldos en un chat de WhatsApp por una herramienta ordenada. Está en español e inglés y usa tu propia base de datos: tus datos son tuyos.
 
@@ -334,6 +341,16 @@ Cada cuenta (y cada deuda) tiene su moneda, que se elige al crearla y no cambia.
 - **Transferencias entre monedas** guardan dos montos (`amount` sale, `destination_amount` llega) y muestran la tasa que resulta. Entre cuentas de la misma moneda no hay segundo monto.
 - Los totales usan **la tasa de hoy**, también para meses pasados (no hay tasas históricas). Un movimiento siempre se ve en la moneda de su cuenta.
 - **Límites conocidos**: un abono tiene que salir de una cuenta en la moneda de la deuda, y los presupuestos están en la moneda base (un gasto en otra moneda cuenta con la tasa de hoy).
+
+---
+
+## 🎨 Marca
+
+El nombre es **Mi Plata** (dos palabras, sin guion; el repositorio y el paquete técnico siguen siendo `mi-plata` y `mi_plata`). El logo es una billetera con monedas y una flecha de crecimiento, y el fondo del ícono es el azul noche `#050D1E`.
+
+- Los archivos viven en `app/assets/branding/`: el símbolo sin texto (a color, negro y blanco), los logos con el texto "Mi Plata" (horizontal y vertical, para fondo claro y oscuro) y las piezas del ícono de Android. Todos salen de los originales de `app/assets/branding/originales/` con **un solo script**: `python3 scripts/generar-logos.py` (necesita Pillow y numpy). Si mejoras el logo original, cambia el archivo y vuelve a correrlo.
+- **Dentro de la app** solo se empaqueta el símbolo recortado (`simbolo-color-recortado.png`, widget `BrandMark`); el resto son fuentes y no pesan en el APK. El nombre se escribe como texto con la tipografía de la app, no dentro de la imagen.
+- **Ícono de Android** (adaptable, con versión de un solo color para el ícono temático de Android 13): `cd app && dart run flutter_launcher_icons`. La configuración está en `pubspec.yaml`.
 
 ---
 

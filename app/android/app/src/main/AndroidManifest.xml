@@ -3,7 +3,7 @@
          profile ya lo traen; sin esta línea, un APK de release no se conecta. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="mi_plata"
+        android:label="Mi Plata"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

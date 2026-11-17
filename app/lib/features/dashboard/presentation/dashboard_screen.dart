@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_routes.dart';
-import '../../../core/theme/finance_colors.dart';
+import '../../../core/widgets/brand_mark.dart';
 import '../../../l10n/l10n.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/accounts_providers.dart';
@@ -75,9 +75,9 @@ class DashboardScreen extends ConsumerWidget {
         titleSpacing: 16,
         title: Row(
           children: [
-            const _Logo(),
+            const BrandMark(height: 30),
             const SizedBox(width: 10),
-            const Text('mi-plata'),
+            const Text(BrandMark.appName),
           ],
         ),
         actions: [
@@ -255,32 +255,6 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-/// La marca: un cuadrado con el degradado de la tarjeta principal.
-class _Logo extends StatelessWidget {
-  const _Logo();
-
-  @override
-  Widget build(BuildContext context) {
-    final finance = context.finance;
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: finance.heroGradient,
-        ),
-      ),
-      child: Icon(
-        Icons.account_balance_wallet_rounded,
-        size: 18,
-        color: finance.onHero,
-      ),
-    );
-  }
-}
 
 /// La inicial del correo, que lleva a los ajustes.
 class _ProfileButton extends StatelessWidget {
