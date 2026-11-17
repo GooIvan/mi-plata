@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/widgets/error_banner.dart';
+import '../../../../core/widgets/error_alert.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../auth/domain/auth_validators.dart';
 import '../../../auth/presentation/auth_error_message.dart';
@@ -139,10 +139,7 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
                 ),
                 onFieldSubmitted: (_) => _save(),
               ),
-              if (_error != null) ...[
-                const SizedBox(height: 16),
-                ErrorBanner(_error!),
-              ],
+              if (_error != null) ErrorAlert(_error!),
             ],
           ),
         ),
@@ -247,10 +244,7 @@ class _DeleteAccountDialogState extends ConsumerState<_DeleteAccountDialog> {
                 validator: (value) => AuthValidators.requiredPassword(l10n, value),
                 onFieldSubmitted: (_) => _delete(),
               ),
-              if (_error != null) ...[
-                const SizedBox(height: 16),
-                ErrorBanner(_error!),
-              ],
+              if (_error != null) ErrorAlert(_error!),
             ],
           ),
         ),

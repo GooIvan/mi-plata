@@ -36,6 +36,7 @@ Nació para reemplazar el registro manual de gastos y saldos en un chat de Whats
 **La app en sí**
 - Español e inglés (sigue el idioma del teléfono) y tema claro u oscuro: en Ajustes eliges entre claro, oscuro o el del teléfono, y el cambio se aplica al instante y se recuerda. Diseño pensado para pantallas pequeñas.
 - **Tu perfil**: al registrarte das tus nombres y apellidos (obligatorios) y, si quieres, tu fecha de nacimiento, tu profesión y tu ingreso mensual promedio. Son datos personales: solo tú los ves, y la app no los usa para nada más por ahora. Los ves y cambias en **Ajustes → Mi perfil**, donde también puedes **cambiar tu contraseña** y **eliminar tu cuenta con todos tus datos**. Ver [Datos personales](#datos-personales).
+- Los errores (por ejemplo, sin conexión al iniciar sesión) salen como un aviso que desaparece solo a los 3 segundos.
 - Tu sesión es privada: cada usuario solo ve sus propios datos.
 
 **Lo que todavía no hace:** funcionar sin internet, mandar notificaciones fuera de la app, importar extractos bancarios ni tener versión web. Son las ideas que siguen en la lista de [Futuro](#futuro).
@@ -341,6 +342,7 @@ Cada cuenta (y cada deuda) tiene su moneda, que se elige al crearla y no cambia.
 - **Commits**: [Conventional Commits](https://www.conventionalcommits.org/es/) (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`).
 - **Ramas**: `main` estable; nuevas funcionalidades en `feat/<nombre>`.
 - **Idioma**: el código, las tablas y las columnas van en inglés. Los textos que ve el usuario nunca se escriben en el código: van en `app/lib/l10n/*.arb`, uno por idioma.
+- **Errores**: se muestran como un aviso arriba que desaparece solo a los 3 segundos (`showErrorAlert` o `ErrorAlert`, en `app/lib/core/widgets/error_alert.dart`), por encima de hojas y diálogos. No se usan recuadros fijos ni `SnackBar` para errores. Los fallos de carga con botón de *Reintentar* sí se quedan en pantalla, porque piden una acción.
 - **Colores**: las pantallas no usan colores sueltos: salen del tema (`Theme.of(context).colorScheme` y `context.finance`).
 - **Base de datos**: todo cambio de esquema se hace mediante una migración en `supabase/migrations/`, nunca a mano desde el panel.
 

@@ -7,7 +7,7 @@ import '../../../l10n/l10n.dart';
 import '../domain/auth_validators.dart';
 import 'auth_error_message.dart';
 import 'auth_providers.dart';
-import '../../../core/widgets/error_banner.dart';
+import '../../../core/widgets/error_alert.dart';
 import 'widgets/auth_layout.dart';
 import 'widgets/password_field.dart';
 
@@ -77,10 +77,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       AuthValidators.requiredPassword(context.l10n, value),
                   onFieldSubmitted: (_) => _submit(),
                 ),
-                if (error != null) ...[
-                  const SizedBox(height: 16),
-                  ErrorBanner(error),
-                ],
+                if (error != null) ErrorAlert(error),
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: isLoading ? null : _submit,

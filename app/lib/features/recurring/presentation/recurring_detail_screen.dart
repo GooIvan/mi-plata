@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/format/formats.dart';
 import '../../../core/widgets/state_message.dart';
+import '../../../core/widgets/error_alert.dart';
 import '../../../l10n/l10n.dart';
 import '../../currency/domain/currency.dart';
 import '../../transactions/presentation/transactions_providers.dart';
@@ -35,9 +36,7 @@ class RecurringDetailScreen extends ConsumerWidget {
           .read(recurringPaymentsProvider.notifier)
           .setPaused(payment.id, paused: pause);
     } catch (error) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(recurringErrorMessage(l10n, error))),
-      );
+      if (context.mounted) showErrorAlert(context, recurringErrorMessage(l10n, error));
       return;
     }
     messenger.showSnackBar(
@@ -83,9 +82,7 @@ class RecurringDetailScreen extends ConsumerWidget {
     try {
       await ref.read(recurringPaymentsProvider.notifier).delete(payment.id);
     } catch (error) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(recurringErrorMessage(l10n, error))),
-      );
+      if (context.mounted) showErrorAlert(context, recurringErrorMessage(l10n, error));
       return;
     }
     navigator.pop();

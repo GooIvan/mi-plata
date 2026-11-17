@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/format/formats.dart';
 import '../../../core/widgets/state_message.dart';
+import '../../../core/widgets/error_alert.dart';
 import '../../../l10n/l10n.dart';
 import '../../recurring/domain/recurring_payment.dart';
 import '../../recurring/presentation/recurring_providers.dart';
@@ -39,9 +40,7 @@ class DebtDetailScreen extends ConsumerWidget {
           .read(debtsProvider.notifier)
           .setArchived(debt.id, isArchived: archived);
     } catch (error) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(debtErrorMessage(l10n, error))),
-      );
+      if (context.mounted) showErrorAlert(context, debtErrorMessage(l10n, error));
       return;
     }
 
@@ -351,9 +350,7 @@ class _Payments extends ConsumerWidget {
     try {
       await ref.read(debtsProvider.notifier).deletePayment(payment.transactionId);
     } catch (error) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(debtErrorMessage(l10n, error))),
-      );
+      if (context.mounted) showErrorAlert(context, debtErrorMessage(l10n, error));
       return;
     }
     messenger.showSnackBar(SnackBar(content: Text(l10n.debtsPaymentDeleted)));

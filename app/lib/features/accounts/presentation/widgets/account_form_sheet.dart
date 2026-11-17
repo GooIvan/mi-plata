@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/format/formats.dart';
-import '../../../../core/widgets/error_banner.dart';
+import '../../../../core/widgets/error_alert.dart';
 import '../../../../l10n/l10n.dart';
 import '../../../currency/domain/currency.dart';
 import '../../../currency/domain/rate_parser.dart';
@@ -370,10 +370,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 ),
               ),
             ],
-            if (_error != null) ...[
-              const SizedBox(height: 16),
-              ErrorBanner(_error!),
-            ],
+            if (_error != null) ErrorAlert(_error!),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _saving ? null : _submit,

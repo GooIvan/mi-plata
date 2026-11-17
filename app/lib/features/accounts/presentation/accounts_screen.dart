@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/state_message.dart';
+import '../../../core/widgets/error_alert.dart';
 import '../../../l10n/l10n.dart';
 import '../../currency/presentation/currency_providers.dart';
 import '../domain/account.dart';
@@ -30,9 +31,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           .read(accountsProvider.notifier)
           .setArchived(account.id, isArchived: archived);
     } catch (error) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(accountErrorMessage(l10n, error))),
-      );
+      if (mounted) showErrorAlert(context, accountErrorMessage(l10n, error));
       return;
     }
 

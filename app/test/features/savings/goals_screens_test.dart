@@ -382,7 +382,8 @@ void main() {
       await tester.enterText(field(0), 'Viaje');
       await tester.enterText(field(1), '1000');
       await tester.tap(find.widgetWithText(FilledButton, 'Crear meta'));
-      await tester.pump();
+      // El error sale como aviso, un cuadro después de pulsar.
+      await tester.pumpAndSettle();
 
       expect(find.text('Elige la cuenta de la meta'), findsOneWidget);
       expect(fakes.goals.goals, isEmpty);

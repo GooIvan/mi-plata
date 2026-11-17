@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/format/formats.dart';
 import '../../../core/router/app_routes.dart';
-import '../../../core/widgets/error_banner.dart';
+import '../../../core/widgets/error_alert.dart';
 import '../../../core/widgets/state_message.dart';
 import '../../../l10n/l10n.dart';
 import '../../accounts/domain/account.dart';
@@ -748,10 +748,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 border: const OutlineInputBorder(),
               ),
             ),
-            if (_error != null) ...[
-              const SizedBox(height: 16),
-              ErrorBanner(_error!),
-            ],
+            if (_error != null) ErrorAlert(_error!),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _saving ? null : _submit,

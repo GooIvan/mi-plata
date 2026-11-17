@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/state_message.dart';
+import '../../../core/widgets/error_alert.dart';
 import '../../../l10n/l10n.dart';
 import '../domain/category.dart';
 import '../domain/category_type.dart';
@@ -43,9 +44,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
           .read(categoriesProvider.notifier)
           .setArchived(category.id, isArchived: archived);
     } catch (error) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(categoryErrorMessage(l10n, error))),
-      );
+      if (mounted) showErrorAlert(context, categoryErrorMessage(l10n, error));
       return;
     }
 

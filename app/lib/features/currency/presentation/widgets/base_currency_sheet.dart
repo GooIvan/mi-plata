@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/format/formats.dart';
-import '../../../../core/widgets/error_banner.dart';
+import '../../../../core/widgets/error_alert.dart';
 import '../../../../l10n/l10n.dart';
 import '../../domain/currency.dart';
 import '../../domain/rate_parser.dart';
@@ -155,10 +155,7 @@ class _BaseCurrencySheetState extends ConsumerState<BaseCurrencySheet> {
                 ),
               ),
             ],
-            if (_error != null) ...[
-              const SizedBox(height: 16),
-              ErrorBanner(_error!),
-            ],
+            if (_error != null) ErrorAlert(_error!),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _saving || !changing ? null : _save,
