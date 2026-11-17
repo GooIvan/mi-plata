@@ -1559,6 +1559,8 @@
   "profileDeletePasswordLabel": "Your password",
   "profileDeleteConfirm": "Delete forever",
   "profileDeleteError": "Couldn't delete the account. Try again.",
+  "transactionsDetailDescription": "Description",
+  "transactionsDetailReceived": "Arrives in the destination account",
   "accountsDetailCurrentBalance": "Current balance",
   "accountsDetailInitialBalance": "Initial balance",
   "accountsDetailMovements": "View transactions"

@@ -208,6 +208,15 @@ Future<void> openFromMore(
   await tester.pumpAndSettle();
 }
 
+/// Toca un movimiento y, en su detalle, "Editar": abre el formulario de edición.
+/// (Tocar un movimiento ya no abre la edición de golpe: primero se ve.)
+Future<void> openMovementForEdit(WidgetTester tester, Finder movement) async {
+  await tester.tap(movement);
+  await tester.pumpAndSettle();
+  await tester.tap(find.widgetWithText(FilledButton, 'Editar'));
+  await tester.pumpAndSettle();
+}
+
 /// Toca una cuenta y, en su detalle, "Editar": abre el formulario de edición.
 Future<void> openAccountForEdit(WidgetTester tester, Finder account) async {
   await tester.tap(account);

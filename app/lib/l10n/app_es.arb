@@ -1574,6 +1574,8 @@
   "profileDeletePasswordLabel": "Tu contraseña",
   "profileDeleteConfirm": "Eliminar para siempre",
   "profileDeleteError": "No se pudo eliminar la cuenta. Inténtalo de nuevo.",
+  "transactionsDetailDescription": "Descripción",
+  "transactionsDetailReceived": "Llega a la cuenta de destino",
   "accountsDetailCurrentBalance": "Saldo actual",
   "accountsDetailInitialBalance": "Saldo inicial",
   "accountsDetailMovements": "Ver movimientos"

@@ -2256,6 +2256,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo eliminar la cuenta. Inténtalo de nuevo.';
 
   @override
+  String get transactionsDetailDescription => 'Descripción';
+
+  @override
+  String get transactionsDetailReceived => 'Llega a la cuenta de destino';
+
+  @override
   String get accountsDetailCurrentBalance => 'Saldo actual';
 
   @override

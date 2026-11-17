@@ -317,8 +317,7 @@ void main() {
       tallView(tester);
       await pumpMiPlata(tester, backend: backendWithPurchase());
 
-      await tester.tap(find.text('Televisor').first);
-      await tester.pumpAndSettle();
+      await openMovementForEdit(tester, find.text('Televisor').first);
 
       expect(
         find.textContaining('Compra diferida en 3 cuotas'),

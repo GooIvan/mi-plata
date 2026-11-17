@@ -3756,6 +3756,18 @@ abstract class AppLocalizations {
   /// **'No se pudo eliminar la cuenta. Inténtalo de nuevo.'**
   String get profileDeleteError;
 
+  /// No description provided for @transactionsDetailDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Descripción'**
+  String get transactionsDetailDescription;
+
+  /// No description provided for @transactionsDetailReceived.
+  ///
+  /// In es, this message translates to:
+  /// **'Llega a la cuenta de destino'**
+  String get transactionsDetailReceived;
+
   /// No description provided for @accountsDetailCurrentBalance.
   ///
   /// In es, this message translates to:

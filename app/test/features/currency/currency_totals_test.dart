@@ -271,8 +271,7 @@ void main() {
       );
       await open(tester, backend, route: AppRoutes.transactions);
 
-      await tester.tap(find.textContaining('Pesos → Dólares'));
-      await tester.pumpAndSettle();
+      await openMovementForEdit(tester, find.textContaining('Pesos → Dólares'));
 
       expect(tester.widget<TextFormField>(field(0)).controller?.text, '400000');
       expect(tester.widget<TextFormField>(field(1)).controller?.text, '99,50');
